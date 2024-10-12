@@ -1,3 +1,47 @@
+let font;
+
+function preload() {
+  font = loadFont("/Inter.ttf");
+}
+
+const canvasSize = 1000;
+
+const C = {
+  loaded: false,
+  prop() {
+    return this.height / this.width;
+  },
+  isLandscape() {
+    return window.innerHeight <= window.innerWidth * this.prop();
+  },
+  resize() {
+    if (this.isLandscape()) {
+      console.log("yes");
+      document.getElementById(this.css).style.height = "100%";
+      document.getElementById(this.css).style.removeProperty("width");
+    } else {
+      document.getElementById(this.css).style.removeProperty("height");
+      document.getElementById(this.css).style.width = "100%";
+    }
+  },
+  setSize(w, h, p, css) {
+    (this.width = w), (this.height = h), (this.pD = p), (this.css = css);
+  },
+  createCanvas() {
+    (this.main = createCanvas(this.width, this.height, WEBGL)),
+      pixelDensity(this.pD),
+      this.main.id(this.css),
+      this.resize();
+  },
+};
+C.setSize(canvasSize, canvasSize, 1, "mainCanvas");
+
+function windowResized() {
+  C.resize();
+}
+
+//////////////////////////////////////////////////
+
 function getNiceScale(max) {
   // Round up to a nice number for the scale
   const pow10 = Math.pow(10, Math.floor(Math.log10(max)));
@@ -38,29 +82,26 @@ function drawHistogram(values, numBins, chartWidth, chartHeight) {
   const maxBinCount = Math.max(...bins);
   const niceMaxCount = getNiceScale(maxBinCount);
 
-  // Draw grid lines first (so they appear behind the bars)
-  stroke(200); // Light gray color
-  strokeWeight(1);
+  // Draw grid lines
   const numYTicks = 6; // 0 to 5 ticks
   for (let i = 0; i <= numYTicks - 1; i++) {
     const y = chartHeight - (chartHeight / (numYTicks - 1)) * i;
-    line(0, y, chartWidth, y); // Horizontal grid line
+    brush.line(0, y, chartWidth, y); // Horizontal grid line
   }
 
-  // Draw histogram bars
-  stroke(0);
-  strokeWeight(1);
-  fill(75, 150, 255);
+  // Histogram bars
+  brush.fill(random(palette), random(60, 100));
 
   for (let i = 0; i < numBins; i++) {
+    brush.bleed(random(0.01, 0.05));
+    brush.fillTexture(0.55, 0.8);
     const binHeight = (bins[i] / niceMaxCount) * chartHeight;
-    rect(i * binWidth, chartHeight - binHeight, binWidth - 1, binHeight);
+    brush.rect(i * binWidth, chartHeight - binHeight, binWidth - 1, binHeight);
   }
 
   // Draw axes
-  stroke(0);
-  line(0, chartHeight, chartWidth, chartHeight); // x-axis
-  line(0, 0, 0, chartHeight); // y-axis
+  brush.line(0, chartHeight, chartWidth, chartHeight); // x-axis
+  brush.line(0, 0, 0, chartHeight); // y-axis
 
   // Add labels
   textSize(12);
@@ -96,10 +137,23 @@ function drawHistogram(values, numBins, chartWidth, chartHeight) {
   }
 }
 
+let palette = [
+  "#2c695a",
+  "#4ad6af",
+  "#7facc6",
+  "#4e93cc",
+  "#f6684f",
+  "#ffd300",
+];
+
 function setup() {
-  // Create canvas and put it in the container
-  const canvas = createCanvas(600, 470); // Made slightly taller to accommodate lower labels
-  canvas.parent("canvas-container");
+  C.createCanvas();
+  angleMode(DEGREES);
+  background("#fffceb");
+  fill("gray");
+  textFont(font);
+  textSize(36);
+  text("p5*js", 0, -100);
 
   // Test data: normally distributed random numbers
   let testData = Array.from(
@@ -111,9 +165,12 @@ function setup() {
   );
 
   // Set up margins
-  const margin = 50;
-  translate(margin, margin);
+  let margin = 50;
+  translate(-canvasSize / 2 + 50, -canvasSize / 2 + 50);
 
+  brush.circle(0, 0, 100);
   // Draw histogram with test data
-  drawHistogram(testData, 10, width - margin * 2, height - margin * 2);
+  drawHistogram(testData, 10, 500, 500);
 }
+
+function draw() {}

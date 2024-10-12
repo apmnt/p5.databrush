@@ -4,19 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>P5.js Histogram</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-    <style>
-      #canvas-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
-    </style>
+    <script src="p5.js"></script>
+    <script src="spectral.min.js"></script>
+    <script src="p5.brush.js"></script>
   </head>
   <body>
-    <div id="canvas-container"></div>
-    <script src="brush-histogram.js">
-    </script>
+    <!-- <script src="brush-histogram.js"></script> -->
+    <script src="brush-histogram.js"></script>
+    <!-- <script>
+      let font;
+
+      function preload() {
+        font = loadFont("/Inter.ttf");
+      }
+
+      function setup() {
+        createCanvas(500, 500, WEBGL);
+        fill("deeppink");
+        textFont(font);
+        textSize(36);
+        text("p5*js", -100, -100);
+
+        describe('The text "p5*js" written in pink on a white background.');
+      }
+    </script> -->
   </body>
 </html>
