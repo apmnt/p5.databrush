@@ -156,13 +156,7 @@ function setup() {
   text("p5*js", 0, -100);
 
   // Test data: normally distributed random numbers
-  let testData = Array.from(
-    { length: 1000 },
-    () =>
-      (Array.from({ length: 6 }, () => Math.random()).reduce((a, b) => a + b) /
-        6) *
-      10
-  );
+  let testData = getNormalDistData(1000);
 
   // Set up margins
   let margin = 50;
@@ -171,6 +165,18 @@ function setup() {
   brush.circle(0, 0, 100);
   // Draw histogram with test data
   drawHistogram(testData, 10, 500, 500);
+}
+
+function getNormalDistData(length) {
+  let arr = Array.from(
+    { length: length },
+    () =>
+      (Array.from({ length: 6 }, () => Math.random()).reduce((a, b) => a + b) /
+        6) *
+      10
+  );
+
+  return arr;
 }
 
 function draw() {}
