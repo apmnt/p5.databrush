@@ -190,21 +190,56 @@ function drawHistogram(values, numBins) {
   }
 }
 
-function drawScatterPlot(values) {
+function drawScatterPlot(values, colors = null, plotRange = null) {
   const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
-    getNiceBounds(values);
+    plotRange === null
+      ? getNiceBounds(values.flat())
+      : getNiceBounds(plotRange);
 
   // Plot points
-  for (let i = 0; i < values.length; i++) {
-    const point = values[i];
+
+  if (Array.isArray(values[0])) {
+    // Handle array of arrays
+    for (let j = 0; j < values.length; j++) {
+      const group = values[j];
+      const groupColor = Array.isArray(colors)
+        ? colors[j % colors.length]
+        : colors || random(palette);
+
+      for (let i = 0; i < group.length; i++) {
+        const point = group[i];
+        // Map data coordinates to screen coordinates
+        const x = map(point.x, niceMinX, niceMaxX, 0, plotWidth - 0);
+        const y = map(point.y, niceMinY, niceMaxY, plotHeight - 0, 0);
+
+        brush.fill(groupColor, random(60, 100));
+        brush.bleed(random(0.01, 0.2));
+        brush.fillTexture(0.55, 0.8);
+        // brush.noStroke();
+        brush.circle(x, y, random(10, 20));
+      }
+    }
+  } else {
+    // Handle single array of values
+    if (Array.isArray(colors)) {
+      throw new Error(
+        "Colors should not be an array when values is a single array of points."
+      );
+    }
+    const pointColor = colors || random(palette);
+
+    for (let i = 0; i < values.length; i++) {
+      const point = values[i];
       // Map data coordinates to screen coordinates
-    const x = map(point.x, niceMinX, niceMaxX, 0, plotWidth - 0);
-    const y = map(point.y, niceMinY, niceMaxY, plotHeight - 0, 0);
-    brush.fill(random(palette), random(60, 100));
-    brush.bleed(random(0.01, 0.2));
-    brush.fillTexture(0.55, 0.8);
-    // brush.noStroke();
-    brush.circle(x, y, random(10, 20));
+      const x = map(point.x, niceMinX, niceMaxX, 0, plotWidth - 0);
+      const y = map(point.y, niceMinY, niceMaxY, plotHeight - 0, 0);
+
+      brush.fill(pointColor, random(60, 100));
+      brush.bleed(random(0.01, 0.2));
+      brush.fillTexture(0.55, 0.8);
+      // brush.noStroke();
+      brush.circle(x, y, random(10, 20));
+    }
   }
 }
 
