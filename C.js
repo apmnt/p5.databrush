@@ -1,8 +1,9 @@
+let fontBold;
 let font;
 const canvasSize = 1000;
 const chartWidth = 600;
 const chartHeight = 500;
-const margin = 200;
+const margin = 100;
 
 const padding = 20;
 const plotWidth = chartWidth - 2 * padding;
@@ -18,7 +19,8 @@ const palette = [
 ];
 
 function preload() {
-  font = loadFont("/Inter.ttf");
+  fontBold = loadFont("/Helvetica-bold.ttf");
+  font = loadFont("/Helvetica.ttf");
 }
 
 const C = {
@@ -63,7 +65,7 @@ function commonSetup() {
   fill("gray");
   textFont(font);
   textSize(36);
-  text("p5*js", 0, -100);
+  text("p5*js", 0, 0);
   textSize(12);
   translate(-canvasSize / 2 + margin, -canvasSize / 2 + margin);
 }
@@ -195,7 +197,7 @@ function drawScatterPlot(values) {
   // Plot points
   for (let i = 0; i < values.length; i++) {
     const point = values[i];
-    // Map data coordinates to screen coordinates
+      // Map data coordinates to screen coordinates
     const x = map(point.x, niceMinX, niceMaxX, 0, plotWidth - 0);
     const y = map(point.y, niceMinY, niceMaxY, plotHeight - 0, 0);
     brush.fill(random(palette), random(60, 100));
