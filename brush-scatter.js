@@ -13,34 +13,7 @@ let pointSizes = [];
 let colorValues = [];
 let useGroups = false;
 
-function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
-  textAlign(CENTER, CENTER);
-  textSize(12);
 
-  brush.line(0, plotHeight, plotWidth * 1.05, plotHeight); // x-axis
-
-  const numTicksX = Math.round((niceMaxX - niceMinX) / niceTickX);
-  for (let i = 0; i <= numTicksX; i++) {
-    const value = niceMinX + i * niceTickX;
-    const x = ((value - niceMinX) / (niceMaxX - niceMinX)) * plotWidth;
-    text(value.toFixed(1), x, plotHeight + 10);
-    brush.line(x, -plotHeight * 0.05, x, plotHeight);
-  }
-}
-
-function drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight) {
-  textAlign(RIGHT, CENTER);
-  textSize(12);
-
-  const numTicksY = Math.round((niceMaxY - niceMinY) / niceTickY);
-  for (let i = 0; i <= numTicksY; i++) {
-    const value = niceMinY + i * niceTickY;
-    const y =
-      plotHeight - ((value - niceMinY) / (niceMaxY - niceMinY)) * plotHeight;
-    text(value.toFixed(1), -10, y);
-    brush.line(0, y, plotWidth * 1.05, y);
-  }
-}
 
 function drawGrid(values) {
   // Draw x and y scales
