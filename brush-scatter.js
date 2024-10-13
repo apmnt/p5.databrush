@@ -1,8 +1,7 @@
 function setup() {
   commonSetup();
-  randomizeData();
 
-  let plotData = randomizeData();
+  let plotData = getRandomData(50, 0, 10);
   drawGrid(plotData);
   drawScatterPlot(plotData);
 }

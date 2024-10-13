@@ -2,7 +2,7 @@ let font;
 const canvasSize = 1000;
 const chartWidth = 600;
 const chartHeight = 500;
-const margin = 100;
+const margin = 200;
 
 const padding = 20;
 const plotWidth = chartWidth - 2 * padding;
@@ -65,29 +65,7 @@ function commonSetup() {
   textSize(36);
   text("p5*js", 0, -100);
   textSize(12);
-  // Set up margins
   translate(-canvasSize / 2 + margin, -canvasSize / 2 + margin);
-
-  brush.circle(400, 400, 100);
-}
-
-function getNiceScale(min, max) {
-  const range = max - min;
-  const magnitude = Math.pow(10, Math.floor(Math.log10(range)));
-  const scaledRange = range / magnitude;
-
-  let niceTick;
-  if (scaledRange < 1.5) niceTick = 0.1;
-  else if (scaledRange < 3) niceTick = 0.2;
-  else if (scaledRange < 7) niceTick = 0.5;
-  else niceTick = 1;
-
-  niceTick *= magnitude;
-
-  const niceMin = Math.floor(min / niceTick) * niceTick;
-  const niceMax = Math.ceil(max / niceTick) * niceTick;
-
-  return { min: niceMin, max: niceMax, tick: niceTick };
 }
 
 function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
@@ -126,6 +104,88 @@ function drawGrid(values) {
 
   drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight);
   drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight);
+}
+
+function drawHistogram(values, numBins) {
+  // Find min and max values
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+
+  // Calculate bin width
+  const binWidth = plotWidth / numBins;
+  const valueRange = maxValue - minValue;
+  const binSize = valueRange / numBins;
+
+  // Create bins
+  const bins = new Array(numBins).fill(0);
+
+  // Fill bins
+  values.forEach((value) => {
+    const binIndex = Math.min(
+      Math.floor((value - minValue) / binSize),
+      numBins - 1
+    );
+    bins[binIndex]++;
+  });
+
+  // Find max bin count for scaling and round up to nice number
+  const maxBinCount = Math.max(...bins);
+  const niceMaxCount = getNiceScaleHist(maxBinCount);
+  // const { niceMin, niceMax, niceMaxCount } = getNiceScale(maxBinCount);
+
+  // Draw grid lines
+  const numYTicks = 6; // 0 to 5 ticks
+  for (let i = 0; i <= numYTicks - 1; i++) {
+    const y = plotHeight - (plotHeight / (numYTicks - 1)) * i;
+    brush.line(0, y, plotWidth, y); // Horizontal grid line
+  }
+
+  // Histogram bars
+  brush.fill(random(palette), random(60, 100));
+
+  for (let i = 0; i < numBins; i++) {
+    brush.bleed(random(0.01, 0.05));
+    brush.fillTexture(0.55, 0.8);
+    const binHeight = (bins[i] / niceMaxCount) * plotHeight;
+    brush.rect(i * binWidth, plotHeight - binHeight, binWidth - 1, binHeight);
+  }
+
+  // Draw axes
+  brush.line(0, plotHeight, plotWidth, plotHeight); // x-axis
+  brush.line(0, 0, 0, plotHeight); // y-axis
+
+  // Add labels
+  textSize(12);
+
+  // X-axis labels
+  push(); // Save current transformation matrix
+  textAlign(RIGHT, CENTER);
+
+  for (let i = 0; i <= numBins; i++) {
+    const value = minValue + i * binSize;
+    // Translate to the position where we want to draw the text
+    translate(i * binWidth, plotHeight + 20); // Moved labels down by increasing y offset
+    // Rotate 90 degrees
+    rotate(HALF_PI);
+    // Draw the text at the rotated position
+    text(value.toFixed(1), 0, 0);
+    // Reset the transformation
+    rotate(-HALF_PI);
+    translate(-(i * binWidth), -(plotHeight + 20));
+  }
+
+  pop(); // Restore transformation matrix
+
+  // Y-axis labels
+  textAlign(RIGHT, CENTER);
+  for (let i = 0; i <= numYTicks - 1; i++) {
+    const value = (niceMaxCount / (numYTicks - 1)) * i;
+    text(
+      Math.round(value),
+      -5,
+      plotHeight - (plotHeight / (numYTicks - 1)) * i
+    );
+  }
 }
 
 function drawScatterPlot(values) {
@@ -270,15 +330,6 @@ function calculateQuantile(sortedArr, q) {
 }
 
 // Utility functions
-function getNormalDistData(length) {
-  return Array.from(
-    { length },
-    () =>
-      (Array.from({ length: 6 }, () => Math.random()).reduce((a, b) => a + b) /
-        6) *
-      10
-  );
-}
 
 function getNormalDistData(length, mean, variance) {
   let arr = Array.from({ length: length }, () => {
@@ -289,6 +340,17 @@ function getNormalDistData(length, mean, variance) {
     return normalValue;
   });
   return arr;
+}
+
+function getRandomData(length, min, max) {
+  let d = [];
+  for (let i = 0; i < length; i++) {
+    d.push({
+      x: random(min, max),
+      y: random(min, max),
+    });
+  }
+  return d;
 }
 
 function findMinMaxValues(values) {
@@ -306,6 +368,38 @@ function findMinMaxValues(values) {
       maxY: -Infinity,
     }
   );
+}
+
+function getNiceScale(min, max) {
+  const range = max - min;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(range)));
+  const scaledRange = range / magnitude;
+
+  let niceTick;
+  if (scaledRange < 1.5) niceTick = 0.1;
+  else if (scaledRange < 3) niceTick = 0.2;
+  else if (scaledRange < 7) niceTick = 0.5;
+  else niceTick = 1;
+
+  niceTick *= magnitude;
+
+  const niceMin = Math.floor(min / niceTick) * niceTick;
+  const niceMax = Math.ceil(max / niceTick) * niceTick;
+
+  return { min: niceMin, max: niceMax, tick: niceTick };
+}
+
+function getNiceScaleHist(max) {
+  const pow10 = Math.pow(10, Math.floor(Math.log10(max)));
+  const fraction = max / pow10;
+
+  let niceFraction;
+  if (fraction <= 1) niceFraction = 1;
+  else if (fraction <= 2) niceFraction = 2;
+  else if (fraction <= 5) niceFraction = 5;
+  else niceFraction = 10;
+
+  return niceFraction * pow10;
 }
 
 function getNiceBounds(values) {
@@ -331,34 +425,4 @@ function getNiceBounds(values) {
   } = getNiceScale(paddedMinY, paddedMaxY);
 
   return { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY };
-}
-
-function randomizeData() {
-  let d = [];
-  bound = 10;
-  for (let i = 0; i < 51; i++) {
-    d.push({
-      x: random(-bound, bound),
-      y: random(-bound, bound),
-      //   x: i,
-      //   y: i,
-    });
-  }
-  return d;
-}
-
-function randomizeSizes() {
-  d = [];
-  for (let i = 0; i < plotData.length; i++) {
-    d.push(random(4, 16));
-  }
-  return d;
-}
-
-function randomizeColorValues() {
-  d = [];
-  for (let i = 0; i < plotData.length; i++) {
-    d.push(random(0, 1));
-  }
-  return d;
 }
