@@ -61,7 +61,7 @@ function setup() {
   text("p5*js", 0, -100);
 
   // Set up margins
-  let margin = 50;
+  let margin = 100;
   translate(-canvasSize / 2 + margin, -canvasSize / 2 + margin);
 
   brush.circle(400, 400, 100);
@@ -89,13 +89,35 @@ let pointSizes = [];
 let colorValues = [];
 let useGroups = false;
 
-function drawScatterPlot(chartWidth, chartHeight, values) {
-  const padding = 20;
-  const plotWidth = chartWidth - 2 * padding;
-  const plotHeight = chartHeight - 2 * padding;
+function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
+  textAlign(CENTER, CENTER);
+  textSize(12);
 
-  // Find min/max values using reduce
-  let { minX, maxX, minY, maxY } = values.reduce(
+  const numTicksX = Math.round((niceMaxX - niceMinX) / niceTickX);
+  for (let i = 0; i <= numTicksX; i++) {
+    const value = niceMinX + i * niceTickX;
+    const x = ((value - niceMinX) / (niceMaxX - niceMinX)) * plotWidth;
+    text(value.toFixed(1), x, plotHeight + 10);
+    brush.line(x, -plotHeight * 0.05, x, plotHeight);
+  }
+}
+
+function drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight) {
+  textAlign(RIGHT, CENTER);
+  textSize(12);
+
+  const numTicksY = Math.round((niceMaxY - niceMinY) / niceTickY);
+  for (let i = 0; i <= numTicksY; i++) {
+    const value = niceMinY + i * niceTickY;
+    const y =
+      plotHeight - ((value - niceMinY) / (niceMaxY - niceMinY)) * plotHeight;
+    text(value.toFixed(1), -10, y);
+    brush.line(0, y, plotWidth * 1.05, y);
+  }
+}
+
+function findMinMaxValues(values) {
+  return values.reduce(
     (acc, point) => ({
       minX: Math.min(acc.minX, point.x),
       maxX: Math.max(acc.maxX, point.x),
@@ -109,22 +131,34 @@ function drawScatterPlot(chartWidth, chartHeight, values) {
       maxY: -Infinity,
     }
   );
+}
+
+function drawScatterPlot(chartWidth, chartHeight, values) {
+  const padding = 20;
+  const plotWidth = chartWidth - 2 * padding;
+  const plotHeight = chartHeight - 2 * padding;
+
+  // Find min and max values for x and y
+  let { minX, maxX, minY, maxY } = findMinMaxValues(values);
+
+  // Add padding to min and max values
+  const xPadding = (maxX - minX) * 0.05;
+  const yPadding = (maxY - minY) * 0.05;
+  minX -= xPadding;
+  maxX += xPadding;
+  minY -= yPadding;
+  maxY += yPadding;
 
   // Draw axes
-  stroke(0);
-  strokeWeight(1);
-  line(0, plotHeight, plotWidth * 1.1, plotHeight); // x-axis
-  line(0, -plotHeight * 0.05, 0, plotHeight); // y-axis
+  brush.line(0, plotHeight, plotWidth * 1.05, plotHeight); // x-axis
+  brush.line(0, -plotHeight * 0.05, 0, plotHeight); // y-axis
 
-  // Use nice scale for the y-axis
+  // Use nice scale
   const {
     min: niceMinY,
     max: niceMaxY,
     tick: niceTickY,
   } = getNiceScale(minY, maxY);
-
-  console.log(minY);
-  console.log(minX);
 
   const {
     min: niceMinX,
@@ -132,45 +166,33 @@ function drawScatterPlot(chartWidth, chartHeight, values) {
     tick: niceTickX,
   } = getNiceScale(minX, maxX);
 
-  // Draw axis labels and ticks
-  textAlign(CENTER, CENTER);
-  textSize(12);
+  // Draw x and y scales
+  drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight);
+  drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight);
 
-  // Draw x-axis labels
-  const numTicksX = Math.round((niceMaxX - niceMinX) / niceTickX);
-  for (let i = 0; i <= numTicksX; i++) {
-    const value = niceMinX + i * niceTickX;
-    const x = padding + ((value - minX) / (maxX - minX)) * plotWidth;
-    text(value.toFixed(1), x, plotHeight + 10);
-    brush.line(x, -plotHeight * 0.05, x, plotHeight);
-  }
-
-  // Draw y-axis labels
-  textAlign(RIGHT, CENTER);
-  const numTicksY = Math.round((niceMaxY - niceMinY) / niceTickY);
-  for (let i = 0; i <= numTicksY; i++) {
-    const value = niceMinY + i * niceTickY;
-    const y = plotHeight - ((value - minY) / (maxY - minY)) * plotHeight;
-    text(value.toFixed(1), -10, y);
-    brush.line(0, y, plotWidth * 1.1, y);
-  }
-
+  // Plot points
   for (let i = 0; i < values.length; i++) {
     const point = values[i];
     // Map data coordinates to screen coordinates
-    const x = map(point.x, minX, maxX, padding, plotWidth - padding);
-    const y = map(point.y, minY, maxY, plotHeight - padding, padding);
-    fill(100);
+    const x = map(point.x, niceMinX, niceMaxX, 0, plotWidth - 0);
+    const y = map(point.y, niceMinY, niceMaxY, plotHeight - 0, 0);
+    brush.fill(random(palette), random(60, 100));
+    brush.bleed(random(0.01, 0.2));
+    brush.fillTexture(0.55, 0.8);
+    // brush.noStroke();
     brush.circle(x, y, random(10, 20));
   }
 }
 
 function randomizeData() {
   plotData = [];
-  for (let i = 0; i < 50; i++) {
+  bound = 10;
+  for (let i = 0; i < 51; i++) {
     plotData.push({
-      x: random(-10, 10),
-      y: random(-10, 10),
+      x: random(-bound, bound),
+      y: random(-bound, bound),
+      //   x: i,
+      //   y: i,
     });
   }
   pointSizes = [];
