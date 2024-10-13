@@ -119,6 +119,33 @@ function drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight) {
   }
 }
 
+function drawGrid(values) {
+  // Draw x and y scales
+  const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
+    getNiceBounds(values);
+
+  drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight);
+  drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight);
+}
+
+function drawScatterPlot(values) {
+  const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
+    getNiceBounds(values);
+
+  // Plot points
+  for (let i = 0; i < values.length; i++) {
+    const point = values[i];
+    // Map data coordinates to screen coordinates
+    const x = map(point.x, niceMinX, niceMaxX, 0, plotWidth - 0);
+    const y = map(point.y, niceMinY, niceMaxY, plotHeight - 0, 0);
+    brush.fill(random(palette), random(60, 100));
+    brush.bleed(random(0.01, 0.2));
+    brush.fillTexture(0.55, 0.8);
+    // brush.noStroke();
+    brush.circle(x, y, random(10, 20));
+  }
+}
+
 function drawBoxPlot(data) {
   // Find global min and max for scaling
   let allValues = data.flat();
@@ -304,4 +331,34 @@ function getNiceBounds(values) {
   } = getNiceScale(paddedMinY, paddedMaxY);
 
   return { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY };
+}
+
+function randomizeData() {
+  let d = [];
+  bound = 10;
+  for (let i = 0; i < 51; i++) {
+    d.push({
+      x: random(-bound, bound),
+      y: random(-bound, bound),
+      //   x: i,
+      //   y: i,
+    });
+  }
+  return d;
+}
+
+function randomizeSizes() {
+  d = [];
+  for (let i = 0; i < plotData.length; i++) {
+    d.push(random(4, 16));
+  }
+  return d;
+}
+
+function randomizeColorValues() {
+  d = [];
+  for (let i = 0; i < plotData.length; i++) {
+    d.push(random(0, 1));
+  }
+  return d;
 }
