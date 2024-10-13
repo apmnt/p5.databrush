@@ -4,6 +4,10 @@ const chartWidth = 600;
 const chartHeight = 500;
 const margin = 100;
 
+const padding = 20;
+const plotWidth = chartWidth - 2 * padding;
+const plotHeight = chartHeight - 2 * padding;
+
 const palette = [
   "#2c695a",
   "#4ad6af",
@@ -84,4 +88,57 @@ function getNiceScale(min, max) {
   const niceMax = Math.ceil(max / niceTick) * niceTick;
 
   return { min: niceMin, max: niceMax, tick: niceTick };
+}
+
+// Utility functions
+function getNormalDistData(length) {
+  return Array.from(
+    { length },
+    () =>
+      (Array.from({ length: 6 }, () => Math.random()).reduce((a, b) => a + b) /
+        6) *
+      10
+  );
+}
+
+function findMinMaxValues(values) {
+  return values.reduce(
+    (acc, point) => ({
+      minX: Math.min(acc.minX, point.x),
+      maxX: Math.max(acc.maxX, point.x),
+      minY: Math.min(acc.minY, point.y),
+      maxY: Math.max(acc.maxY, point.y),
+    }),
+    {
+      minX: Infinity,
+      maxX: -Infinity,
+      minY: Infinity,
+      maxY: -Infinity,
+    }
+  );
+}
+
+function getNiceBounds(values) {
+  const { minX, maxX, minY, maxY } = findMinMaxValues(values);
+
+  const xPadding = (maxX - minX) * 0.05;
+  const yPadding = (maxY - minY) * 0.05;
+
+  const paddedMinX = minX - xPadding;
+  const paddedMaxX = maxX + xPadding;
+  const paddedMinY = minY - yPadding;
+  const paddedMaxY = maxY + yPadding;
+
+  const {
+    min: niceMinX,
+    max: niceMaxX,
+    tick: niceTickX,
+  } = getNiceScale(paddedMinX, paddedMaxX);
+  const {
+    min: niceMinY,
+    max: niceMaxY,
+    tick: niceTickY,
+  } = getNiceScale(paddedMinY, paddedMaxY);
+
+  return { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY };
 }

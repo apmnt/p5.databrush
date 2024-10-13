@@ -1,19 +1,9 @@
 function setup() {
   commonSetup();
   randomizeData();
-  drawScatterPlot(chartWidth, chartHeight, plotData);
-}
 
-function getNormalDistData(length) {
-  let arr = Array.from(
-    { length: length },
-    () =>
-      (Array.from({ length: 6 }, () => Math.random()).reduce((a, b) => a + b) /
-        6) *
-      10
-  );
-
-  return arr;
+  drawGrid(plotData);
+  drawScatterPlot(plotData);
 }
 
 function draw() {}
@@ -52,57 +42,18 @@ function drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight) {
   }
 }
 
-function findMinMaxValues(values) {
-  return values.reduce(
-    (acc, point) => ({
-      minX: Math.min(acc.minX, point.x),
-      maxX: Math.max(acc.maxX, point.x),
-      minY: Math.min(acc.minY, point.y),
-      maxY: Math.max(acc.maxY, point.y),
-    }),
-    {
-      minX: Infinity,
-      maxX: -Infinity,
-      minY: Infinity,
-      maxY: -Infinity,
-    }
-  );
-}
-
-function drawScatterPlot(chartWidth, chartHeight, values) {
-  const padding = 20;
-  const plotWidth = chartWidth - 2 * padding;
-  const plotHeight = chartHeight - 2 * padding;
-
-  // Find min and max values for x and y
-  let { minX, maxX, minY, maxY } = findMinMaxValues(values);
-
-  // Add padding to min and max values
-  const xPadding = (maxX - minX) * 0.05;
-  const yPadding = (maxY - minY) * 0.05;
-  minX -= xPadding;
-  maxX += xPadding;
-  minY -= yPadding;
-  maxY += yPadding;
-
-  // Draw axes
-
-  // Use nice scale
-  const {
-    min: niceMinY,
-    max: niceMaxY,
-    tick: niceTickY,
-  } = getNiceScale(minY, maxY);
-
-  const {
-    min: niceMinX,
-    max: niceMaxX,
-    tick: niceTickX,
-  } = getNiceScale(minX, maxX);
-
+function drawGrid(values) {
   // Draw x and y scales
+  const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
+    getNiceBounds(values);
+
   drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight);
   drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight);
+}
+
+function drawScatterPlot(values) {
+  const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
+    getNiceBounds(values);
 
   // Plot points
   for (let i = 0; i < values.length; i++) {
