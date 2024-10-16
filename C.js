@@ -1,7 +1,7 @@
 let fontBold;
 let font;
 const canvasSize = 1000;
-const chartWidth = 600;
+const chartWidth = 500;
 const chartHeight = 500;
 const margin = 100;
 
@@ -20,7 +20,7 @@ const palette = [
 
 function preload() {
   fontBold = loadFont("/Helvetica-bold.ttf");
-  font = loadFont("/Helvetica.ttf");
+  font = loadFont("/Helvetica-bold.ttf");
 }
 
 const C = {
@@ -45,7 +45,7 @@ const C = {
     (this.width = w), (this.height = h), (this.pD = p), (this.css = css);
   },
   createCanvas() {
-    (this.main = createCanvas(this.width, this.height, WEBGL)),
+    (this.main = createCanvas(canvasSize, canvasSize, WEBGL)),
       pixelDensity(this.pD),
       this.main.id(this.css),
       this.resize();
@@ -65,7 +65,7 @@ function commonSetup() {
   fill("gray");
   textFont(font);
   textSize(36);
-  text("p5*js", 0, 0);
+  text("*p5.databrush", -200, -10);
   textSize(12);
   translate(-canvasSize / 2 + margin, -canvasSize / 2 + margin);
 }
@@ -74,14 +74,15 @@ function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
   textAlign(CENTER, CENTER);
   textSize(12);
 
-  brush.line(0, plotHeight, plotWidth * 1.05, plotHeight); // x-axis
+  brush.line(0, 0, plotWidth, 0); // x-axis bottom
+  brush.line(0, plotHeight, plotWidth, plotHeight); // x-axis top
 
   const numTicksX = Math.round((niceMaxX - niceMinX) / niceTickX);
-  for (let i = 0; i <= numTicksX; i++) {
+  for (let i = 1; i < numTicksX; i++) {
     const value = niceMinX + i * niceTickX;
     const x = ((value - niceMinX) / (niceMaxX - niceMinX)) * plotWidth;
     text(value.toFixed(1), x, plotHeight + 10);
-    brush.line(x, -plotHeight * 0.05, x, plotHeight);
+    brush.line(x, 0, x, plotHeight);
   }
 }
 
@@ -89,13 +90,16 @@ function drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight) {
   textAlign(RIGHT, CENTER);
   textSize(12);
 
+  brush.line(0, 0, 0, plotHeight); // y-axis left
+  brush.line(plotWidth, 0, plotWidth, plotHeight); // y-axis right
+
   const numTicksY = Math.round((niceMaxY - niceMinY) / niceTickY);
-  for (let i = 0; i <= numTicksY; i++) {
+  for (let i = 1; i < numTicksY; i++) {
     const value = niceMinY + i * niceTickY;
     const y =
       plotHeight - ((value - niceMinY) / (niceMaxY - niceMinY)) * plotHeight;
     text(value.toFixed(1), -10, y);
-    brush.line(0, y, plotWidth * 1.05, y);
+    brush.line(0, y, plotWidth, y);
   }
 }
 
@@ -106,6 +110,116 @@ function drawGrid(values) {
 
   drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight);
   drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight);
+}
+
+function drawLinePlot(
+  yValues,
+  xValues = null,
+  drawDots = true,
+  colors = null,
+  plotRange = null,
+  fillValues = null
+) {
+  // Check if yValues is an array of arrays
+  const isMultipleLines = Array.isArray(yValues[0]);
+
+  // If xValues is not provided, generate default values
+  if (xValues === null) {
+    xValues = isMultipleLines
+      ? yValues.map((_, i) => range(1, yValues[i].length + 1))
+      : range(1, yValues.length + 1);
+  }
+
+  // Check if xValues is an array of arrays
+  const isMultipleXValues = Array.isArray(xValues[0]);
+
+  // Check for array mismatches
+  if (
+    isMultipleLines &&
+    !isMultipleXValues &&
+    xValues.length !== yValues[0].length
+  ) {
+    throw new Error(
+      "Length of xValues does not match the length of each array in yValues."
+    );
+  }
+  if (!isMultipleLines && isMultipleXValues) {
+    throw new Error("yValues is not an array of arrays, but xValues is.");
+  }
+  if (
+    isMultipleLines &&
+    isMultipleXValues &&
+    xValues.length !== yValues.length
+  ) {
+    throw new Error(
+      "Number of arrays in xValues does not match the number of arrays in yValues."
+    );
+  }
+
+  const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
+    plotRange === null
+      ? getNiceBoundsSeparate(
+          isMultipleXValues ? xValues.flat() : xValues,
+          yValues.flat()
+        )
+      : getNiceBounds(plotRange);
+
+  // Set random colors if not provided
+  const lineColors =
+    colors || shuffle(palette).slice(0, isMultipleLines ? yValues.length : 1);
+
+  // Iterate over each array in yValues
+  for (let i = 0; i < (isMultipleLines ? yValues.length : 1); i++) {
+    const yVals = isMultipleLines ? yValues[i] : yValues;
+    const xVals = isMultipleXValues ? xValues[i] : xValues;
+
+    // Draw fill if fillValues is provided
+    if (fillValues !== null && fillValues[i] !== undefined) {
+      brush.noStroke();
+      brush.bleed(0);
+
+      brush.fill(lineColors[i], 100);
+      brush.beginShape();
+      for (let j = 0; j < xVals.length; j++) {
+        const x = map(xVals[j], niceMinX, niceMaxX, 0, plotWidth);
+        const y1 = map(fillValues[i][0][j], niceMinY, niceMaxY, plotHeight, 0);
+        brush.vertex(x, y1);
+      }
+      for (let j = xVals.length - 1; j >= 0; j--) {
+        const x = map(xVals[j], niceMinX, niceMaxX, 0, plotWidth);
+        const y2 = map(fillValues[i][1][j], niceMinY, niceMaxY, plotHeight, 0);
+        brush.vertex(x, y2);
+      }
+      brush.endShape(CLOSE);
+    }
+
+    // Plot line
+    brush.stroke(lineColors[i]);
+    brush.strokeWeight(2);
+
+    for (let j = 0; j < yVals.length - 1; j++) {
+      const x1 = map(xVals[j], niceMinX, niceMaxX, 0, plotWidth);
+      const y1 = map(yVals[j], niceMinY, niceMaxY, plotHeight, 0);
+      const x2 = map(xVals[j + 1], niceMinX, niceMaxX, 0, plotWidth);
+      const y2 = map(yVals[j + 1], niceMinY, niceMaxY, plotHeight, 0);
+
+      brush.line(x1, y1, x2, y2);
+    }
+
+    // Plot dots if drawDots is true
+    if (drawDots) {
+      brush.fill(lineColors[i], random(60, 100));
+
+      for (let j = 0; j < yVals.length; j++) {
+        const x = map(xVals[j], niceMinX, niceMaxX, 0, plotWidth);
+        const y = map(yVals[j], niceMinY, niceMaxY, plotHeight, 0);
+
+        brush.bleed(random(0.01, 0.2));
+        brush.fillTexture(0.55, 0.8);
+        brush.circle(x, y, random(6, 12));
+      }
+    }
+  }
 }
 
 function drawHistogram(values, numBins) {
@@ -437,6 +551,34 @@ function getNiceScaleHist(max) {
   else niceFraction = 10;
 
   return niceFraction * pow10;
+}
+
+function getNiceBoundsSeparate(xValues, yValues) {
+  const minX = Math.min(...xValues);
+  const maxX = Math.max(...xValues);
+  const minY = Math.min(...yValues);
+  const maxY = Math.max(...yValues);
+
+  const xPadding = (maxX - minX) * 0.05;
+  const yPadding = (maxY - minY) * 0.05;
+
+  const paddedMinX = minX - xPadding;
+  const paddedMaxX = maxX + xPadding;
+  const paddedMinY = minY - yPadding;
+  const paddedMaxY = maxY + yPadding;
+
+  const {
+    min: niceMinX,
+    max: niceMaxX,
+    tick: niceTickX,
+  } = getNiceScale(paddedMinX, paddedMaxX);
+  const {
+    min: niceMinY,
+    max: niceMaxY,
+    tick: niceTickY,
+  } = getNiceScale(paddedMinY, paddedMaxY);
+
+  return { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY };
 }
 
 function getNiceBounds(values) {
