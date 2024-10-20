@@ -173,9 +173,12 @@ export function drawLinePlot(
     plotRange === null
       ? getNiceBoundsSeparate(
           isMultipleXValues ? xValues.flat() : xValues,
-          yValues.flat()
+          [yValues, fillValues].flat(Infinity)
         )
       : getNiceBounds(plotRange);
+
+  drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight);
+  drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight);
 
   // Set random colors if not provided
   const lineColors =
