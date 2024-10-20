@@ -16,9 +16,9 @@ const config = {
       browser: true,
     }),
     // terser(),
-    cleanup({
-      comments: "none",
-    }),
+    // cleanup({
+    //   comments: "none",
+    // }),
   ],
 };
 
