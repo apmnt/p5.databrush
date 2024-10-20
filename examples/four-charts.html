@@ -16,37 +16,28 @@
       }
       function setup() {
         databrush.commonSetup();
+
+        // PLOT 1
         // Test data: normally distributed random numbers
         let testDataHist = databrush.getNormalDistData(1000, 100, 40);
 
-        console.log("hist data:", testDataHist);
-
         // Draw histogram with test data
         databrush.drawHistogram(testDataHist, 10);
-        // PLOT 1
 
         // PLOT 2
         translate(500, 0);
         let plotData1 = databrush.getRandomData(50, 0, 10);
-        databrush.drawGrid(plotData1);
-        databrush.drawScatterPlot(plotData1, (colors = "#7facc6"));
+        let plotData2 = databrush.getRandomData(30, 2, 6);
+        databrush.drawScatterPlot(
+          [plotData1, plotData2],
+          ["#7facc6", "#7f4cc6"]
+        );
 
         // PLOT 3
         translate(-500, 500);
         let yvals = generateYValuesWithNoise(10, 1, 11);
         let yvals2 = generateYValuesWithNoise(10, 3, 7);
-        let xvals = range(1, 11);
-        const plotRangeLine = [
-          { x: 1, y: 1 },
-          { x: 4, y: 4 },
-        ];
 
-        // Create array of arrays
-        let combinedYVals = yvals.map((val, index) => [val, yvals2[index]]);
-        console.log(combinedYVals);
-
-        databrush.drawGrid(plotRangeLine, true);
-        console.log(yvals);
         const yValues = [
           [1, 2, 3, 4],
           [2, 3, 4, 5],
