@@ -323,8 +323,10 @@ export function drawScatterPlot(values, colors = null, plotRange = null) {
       ? getNiceBounds(values.flat())
       : getNiceBounds(plotRange);
 
-  // Plot points
+  // Draw grid
+  drawGrid(values.flat());
 
+  // Plot points
   if (Array.isArray(values[0])) {
     // Handle array of arrays
     for (let j = 0; j < values.length; j++) {
