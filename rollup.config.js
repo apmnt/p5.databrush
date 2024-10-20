@@ -15,7 +15,7 @@ const config = {
     resolve({
       browser: true,
     }),
-    terser(),
+    // terser(),
     cleanup({
       comments: "none",
     }),
