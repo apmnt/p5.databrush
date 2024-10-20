@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Boxplot</title>
+    <script src="../p5.js"></script>
+    <script src="../spectral.min.js"></script>
+    <script src="../p5.brush.js"></script>
+  </head>
+  <body>
+    <script src="../dist/p5.databrush.js"></script>
+    <script>
+      function preload() {
+        databrush.preload("Helvetica-bold.ttf");
+      }
+      function setup() {
+        databrush.commonSetup();
+        // Test data: normally distributed random numbers
+        let testDataHist = databrush.getNormalDistData(1000, 100, 40);
+
+        console.log("hist data:", testDataHist);
+
+        // Draw histogram with test data
+        databrush.drawHistogram(testDataHist, 10);
+        // PLOT 1
+
+        // PLOT 2
+        translate(500, 0);
+        let plotData1 = databrush.getRandomData(50, 0, 10);
+        databrush.drawGrid(plotData1);
+        databrush.drawScatterPlot(plotData1, (colors = "#7facc6"));
+
+        // PLOT 3
+        translate(-500, 500);
+        let yvals = generateYValuesWithNoise(10, 1, 11);
+        let yvals2 = generateYValuesWithNoise(10, 3, 7);
+        let xvals = range(1, 11);
+        const plotRangeLine = [
+          { x: 1, y: 1 },
+          { x: 4, y: 4 },
+        ];
+
+        // Create array of arrays
+        let combinedYVals = yvals.map((val, index) => [val, yvals2[index]]);
+        console.log(combinedYVals);
+
+        databrush.drawGrid(plotRangeLine, true);
+        console.log(yvals);
+        const yValues = [
+          [1, 2, 3, 4],
+          [2, 3, 4, 5],
+        ];
+        const fillValues = [
+          [
+            [2, 3, 4, 5],
+            [1, 2, 3, 4],
+          ],
+          [
+            [
+              2 + random(0, 2),
+              3 + random(0, 2),
+              4 + random(0, 2),
+              5 + random(0, 2),
+            ],
+            [2, 3, 4, 5],
+          ],
+        ];
+        databrush.drawLinePlot(yValues, null, true, null, null, fillValues);
+
+        // PLOT 4
+        translate(500, 0);
+
+        const testDataLength = 1000;
+        const testData = [
+          databrush.getNormalDistData(
+            testDataLength,
+            random(1, 3),
+            random(2, 5)
+          ),
+          databrush.getNormalDistData(
+            testDataLength,
+            random(1, 3),
+            random(2, 5)
+          ),
+          databrush.getNormalDistData(
+            testDataLength,
+            random(1, 3),
+            random(2, 5)
+          ),
+          databrush.getNormalDistData(
+            testDataLength,
+            random(1, 3),
+            random(2, 5)
+          ),
+        ];
+
+        databrush.drawBoxPlot(testData);
+      }
+
+      // Function to generate a range of numbers
+      function range(start, end) {
+        const length = end - start;
+        return Array.from({ length }, (_, i) => start + i);
+      }
+      // Function to generate y values with noise
+      function generateYValuesWithNoise(numValues, minValue, maxValue) {
+        const yvals = [];
+        for (let i = 0; i < numValues; i++) {
+          const value =
+            minValue + (i * (maxValue - minValue)) / (numValues - 1);
+          const noise = random(-0.5, 0.5); // Adjust noise range as needed
+          yvals.push(value + noise);
+        }
+        return yvals;
+      }
+    </script>
+  </body>
+</html>
