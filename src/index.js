@@ -1,9 +1,10 @@
 let fontBold;
 let font;
+
 const canvasSize = 1000;
-const chartWidth = 500;
-const chartHeight = 500;
-const margin = 100;
+const chartWidth = 400;
+const chartHeight = 400;
+const margin = 60;
 
 const padding = 20;
 const plotWidth = chartWidth - 2 * padding;
@@ -18,9 +19,9 @@ const palette = [
   "#ffd300",
 ];
 
-function preload() {
-  fontBold = loadFont("/Helvetica-bold.ttf");
-  font = loadFont("/Helvetica-bold.ttf");
+export function preload(fontPath) {
+  fontBold = loadFont(fontPath);
+  font = loadFont(fontPath);
 }
 
 const C = {
@@ -54,7 +55,7 @@ const C = {
 
 C.setSize(canvasSize, canvasSize, 1, "mainCanvas");
 
-function windowResized() {
+export function windowResized() {
   C.resize();
 }
 
@@ -124,7 +125,7 @@ export function drawGrid(values) {
   drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight);
 }
 
-function drawLinePlot(
+export function drawLinePlot(
   yValues,
   xValues = null,
   drawDots = true,
@@ -289,7 +290,7 @@ export function drawHistogram(values, numBins) {
   push(); // Save current transformation matrix
   textAlign(RIGHT, CENTER);
 
-  for (let i = 0; i <= numBins; i++) {
+  for (let i = 1; i <= numBins; i++) {
     const value = minValue + i * binSize;
     // Translate to the position where we want to draw the text
     translate(i * binWidth, plotHeight + 20); // Moved labels down by increasing y offset
@@ -316,7 +317,7 @@ export function drawHistogram(values, numBins) {
   }
 }
 
-function drawScatterPlot(values, colors = null, plotRange = null) {
+export function drawScatterPlot(values, colors = null, plotRange = null) {
   const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
     plotRange === null
       ? getNiceBounds(values.flat())
@@ -369,7 +370,8 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
   }
 }
 
-function drawBoxPlot(data) {
+export function drawBoxPlot(data) {
+  brush.stroke("gray");
   // Find global min and max for scaling
   let allValues = data.flat();
   let minVal = Math.min(...allValues);
@@ -480,7 +482,7 @@ function drawBoxPlot(data) {
   pop();
 }
 
-function calculateQuantile(sortedArr, q) {
+export function calculateQuantile(sortedArr, q) {
   const pos = (sortedArr.length - 1) * q;
   const base = Math.floor(pos);
   const rest = pos - base;
@@ -492,9 +494,9 @@ function calculateQuantile(sortedArr, q) {
   }
 }
 
-// Utility functions
+// Utility export functions
 
-function getNormalDistData(length, mean, variance) {
+export function getNormalDistData(length, mean, variance) {
   let arr = Array.from({ length: length }, () => {
     let sum = Array.from({ length: 6 }, () => Math.random()).reduce(
       (a, b) => a + b
@@ -505,7 +507,7 @@ function getNormalDistData(length, mean, variance) {
   return arr;
 }
 
-function getRandomData(length, min, max) {
+export function getRandomData(length, min, max) {
   let d = [];
   for (let i = 0; i < length; i++) {
     d.push({
@@ -516,7 +518,7 @@ function getRandomData(length, min, max) {
   return d;
 }
 
-function findMinMaxValues(values) {
+export function findMinMaxValues(values) {
   return values.reduce(
     (acc, point) => ({
       minX: Math.min(acc.minX, point.x),
@@ -533,7 +535,7 @@ function findMinMaxValues(values) {
   );
 }
 
-function getNiceScale(min, max) {
+export function getNiceScale(min, max) {
   const range = max - min;
   const magnitude = Math.pow(10, Math.floor(Math.log10(range)));
   const scaledRange = range / magnitude;
@@ -552,7 +554,7 @@ function getNiceScale(min, max) {
   return { min: niceMin, max: niceMax, tick: niceTick };
 }
 
-function getNiceScaleHist(max) {
+export function getNiceScaleHist(max) {
   const pow10 = Math.pow(10, Math.floor(Math.log10(max)));
   const fraction = max / pow10;
 
@@ -565,7 +567,7 @@ function getNiceScaleHist(max) {
   return niceFraction * pow10;
 }
 
-function getNiceBoundsSeparate(xValues, yValues) {
+export function getNiceBoundsSeparate(xValues, yValues) {
   const minX = Math.min(...xValues);
   const maxX = Math.max(...xValues);
   const minY = Math.min(...yValues);
@@ -593,7 +595,7 @@ function getNiceBoundsSeparate(xValues, yValues) {
   return { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY };
 }
 
-function getNiceBounds(values) {
+export function getNiceBounds(values) {
   const { minX, maxX, minY, maxY } = findMinMaxValues(values);
 
   const xPadding = (maxX - minX) * 0.05;
