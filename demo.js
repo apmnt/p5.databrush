@@ -40,7 +40,7 @@ function lightSetup() {
   translate(-canvasSize / 2 + margin, -canvasSize / 2 + margin);
   textSize(36);
   textFont(fontBold);
-  text("*p5.databrush", 400, -60);
+  text("*p5.databrush", 350, -60);
   textFont(font);
   textSize(12);
 }
