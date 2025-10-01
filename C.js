@@ -1,22 +1,15 @@
 let fontBold;
 let font;
-const canvasSize = 1000;
-const chartWidth = 500;
-const chartHeight = 500;
-const margin = 100;
-
-const padding = 20;
-const plotWidth = chartWidth - 2 * padding;
-const plotHeight = chartHeight - 2 * padding;
-
-const palette = [
-  "#2c695a",
-  "#4ad6af",
-  "#7facc6",
-  "#4e93cc",
-  "#f6684f",
-  "#ffd300",
-];
+const config = {
+  canvasSize: 1000,
+  chartWidth: 500,
+  chartHeight: 500,
+  margin: 100,
+  padding: 20,
+  plotWidth: 500 - 2 * 20,
+  plotHeight: 500 - 2 * 20,
+  palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
+};
 
 function preload() {
   fontBold = loadFont("/Helvetica-bold.ttf");
@@ -44,15 +37,20 @@ const C = {
   setSize(w, h, p, css) {
     (this.width = w), (this.height = h), (this.pD = p), (this.css = css);
   },
+  setConfig(newConfig) {
+    Object.assign(config, newConfig);
+    config.plotWidth = config.chartWidth - 2 * config.padding;
+    config.plotHeight = config.chartHeight - 2 * config.padding;
+  },
   createCanvas() {
-    (this.main = createCanvas(canvasSize, canvasSize, WEBGL)),
+    (this.main = createCanvas(config.canvasSize, config.canvasSize, WEBGL)),
       pixelDensity(this.pD),
       this.main.id(this.css),
       this.resize();
   },
 };
 
-C.setSize(canvasSize, canvasSize, 1, "mainCanvas");
+C.setSize(config.canvasSize, config.canvasSize, 1, "mainCanvas");
 
 function windowResized() {
   C.resize();
@@ -67,7 +65,10 @@ function commonSetup() {
   textSize(36);
   text("*p5.databrush", -200, -10);
   textSize(12);
-  translate(-canvasSize / 2 + margin, -canvasSize / 2 + margin);
+  translate(
+    -config.canvasSize / 2 + config.margin,
+    -config.canvasSize / 2 + config.margin
+  );
 }
 
 function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
@@ -108,8 +109,20 @@ function drawGrid(values) {
   const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
     getNiceBounds(values);
 
-  drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight);
-  drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight);
+  drawXScale(
+    niceMinX,
+    niceMaxX,
+    niceTickX,
+    config.plotWidth,
+    config.plotHeight
+  );
+  drawYScale(
+    niceMinY,
+    niceMaxY,
+    niceTickY,
+    config.plotWidth,
+    config.plotHeight
+  );
 }
 
 function drawLinePlot(
@@ -181,13 +194,25 @@ function drawLinePlot(
       brush.fill(lineColors[i], 100);
       brush.beginShape();
       for (let j = 0; j < xVals.length; j++) {
-        const x = map(xVals[j], niceMinX, niceMaxX, 0, plotWidth);
-        const y1 = map(fillValues[i][0][j], niceMinY, niceMaxY, plotHeight, 0);
+        const x = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
+        const y1 = map(
+          fillValues[i][0][j],
+          niceMinY,
+          niceMaxY,
+          config.plotHeight,
+          0
+        );
         brush.vertex(x, y1);
       }
       for (let j = xVals.length - 1; j >= 0; j--) {
-        const x = map(xVals[j], niceMinX, niceMaxX, 0, plotWidth);
-        const y2 = map(fillValues[i][1][j], niceMinY, niceMaxY, plotHeight, 0);
+        const x = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
+        const y2 = map(
+          fillValues[i][1][j],
+          niceMinY,
+          niceMaxY,
+          config.plotHeight,
+          0
+        );
         brush.vertex(x, y2);
       }
       brush.endShape(CLOSE);
@@ -198,10 +223,10 @@ function drawLinePlot(
     brush.strokeWeight(2);
 
     for (let j = 0; j < yVals.length - 1; j++) {
-      const x1 = map(xVals[j], niceMinX, niceMaxX, 0, plotWidth);
-      const y1 = map(yVals[j], niceMinY, niceMaxY, plotHeight, 0);
-      const x2 = map(xVals[j + 1], niceMinX, niceMaxX, 0, plotWidth);
-      const y2 = map(yVals[j + 1], niceMinY, niceMaxY, plotHeight, 0);
+      const x1 = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
+      const y1 = map(yVals[j], niceMinY, niceMaxY, config.plotHeight, 0);
+      const x2 = map(xVals[j + 1], niceMinX, niceMaxX, 0, config.plotWidth);
+      const y2 = map(yVals[j + 1], niceMinY, niceMaxY, config.plotHeight, 0);
 
       brush.line(x1, y1, x2, y2);
     }
@@ -211,8 +236,8 @@ function drawLinePlot(
       brush.fill(lineColors[i], random(60, 100));
 
       for (let j = 0; j < yVals.length; j++) {
-        const x = map(xVals[j], niceMinX, niceMaxX, 0, plotWidth);
-        const y = map(yVals[j], niceMinY, niceMaxY, plotHeight, 0);
+        const x = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
+        const y = map(yVals[j], niceMinY, niceMaxY, config.plotHeight, 0);
 
         brush.bleed(random(0.01, 0.2));
         brush.fillTexture(0.55, 0.8);
@@ -228,7 +253,7 @@ function drawHistogram(values, numBins) {
   const maxValue = Math.max(...values);
 
   // Calculate bin width
-  const binWidth = plotWidth / numBins;
+  const binWidth = config.plotWidth / numBins;
   const valueRange = maxValue - minValue;
   const binSize = valueRange / numBins;
 
@@ -252,23 +277,28 @@ function drawHistogram(values, numBins) {
   // Draw grid lines
   const numYTicks = 6; // 0 to 5 ticks
   for (let i = 0; i <= numYTicks - 1; i++) {
-    const y = plotHeight - (plotHeight / (numYTicks - 1)) * i;
-    brush.line(0, y, plotWidth, y); // Horizontal grid line
+    const y = config.plotHeight - (config.plotHeight / (numYTicks - 1)) * i;
+    brush.line(0, y, config.plotWidth, y); // Horizontal grid line
   }
 
   // Histogram bars
-  brush.fill(random(palette), random(60, 100));
+  brush.fill(random(config.palette), random(60, 100));
 
   for (let i = 0; i < numBins; i++) {
     brush.bleed(random(0.01, 0.05));
     brush.fillTexture(0.55, 0.8);
-    const binHeight = (bins[i] / niceMaxCount) * plotHeight;
-    brush.rect(i * binWidth, plotHeight - binHeight, binWidth - 1, binHeight);
+    const binHeight = (bins[i] / niceMaxCount) * config.plotHeight;
+    brush.rect(
+      i * binWidth,
+      config.plotHeight - binHeight,
+      binWidth - 1,
+      binHeight
+    );
   }
 
   // Draw axes
-  brush.line(0, plotHeight, plotWidth, plotHeight); // x-axis
-  brush.line(0, 0, 0, plotHeight); // y-axis
+  brush.line(0, config.plotHeight, config.plotWidth, config.plotHeight); // x-axis
+  brush.line(0, 0, 0, config.plotHeight); // y-axis
 
   // Add labels
   textSize(12);
@@ -280,14 +310,14 @@ function drawHistogram(values, numBins) {
   for (let i = 0; i <= numBins; i++) {
     const value = minValue + i * binSize;
     // Translate to the position where we want to draw the text
-    translate(i * binWidth, plotHeight + 20); // Moved labels down by increasing y offset
+    translate(i * binWidth, config.plotHeight + 20); // Moved labels down by increasing y offset
     // Rotate 90 degrees
     rotate(HALF_PI);
     // Draw the text at the rotated position
     text(value.toFixed(1), 0, 0);
     // Reset the transformation
     rotate(-HALF_PI);
-    translate(-(i * binWidth), -(plotHeight + 20));
+    translate(-(i * binWidth), -(config.plotHeight + 20));
   }
 
   pop(); // Restore transformation matrix
@@ -299,7 +329,7 @@ function drawHistogram(values, numBins) {
     text(
       Math.round(value),
       -5,
-      plotHeight - (plotHeight / (numYTicks - 1)) * i
+      config.plotHeight - (config.plotHeight / (numYTicks - 1)) * i
     );
   }
 }

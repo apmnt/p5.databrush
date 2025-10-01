@@ -47,6 +47,18 @@
       <span x-show="!isValidData" style="color: red; margin-left: 10px"
         >Please enter valid JSON array</span
       >
+
+      <h3>Chart Configuration</h3>
+      <label>Canvas size: <input type="number" x-model="canvasSize" /></label
+      ><br />
+      <label>Chart Width: <input type="number" x-model="chartWidth" /></label
+      ><br />
+      <label>Chart Height: <input type="number" x-model="chartHeight" /></label
+      ><br />
+      <label>Margin: <input type="number" x-model="margin" /></label><br />
+      <label>Padding: <input type="number" x-model="padding" /></label><br />
+      <label>Number of Bins: <input type="number" x-model="numBins" /></label
+      ><br />
     </div>
     <script src="C.js"></script>
     <script>
@@ -59,9 +71,16 @@
             89, 94, 106, 82,
           ],
           isValidData: true,
+          canvasSize: 1000,
+          chartWidth: 500,
+          chartHeight: 500,
+          margin: 100,
+          padding: 20,
+          numBins: 10,
 
           updateChart() {
             try {
+              debugger;
               const parsed = JSON.parse(this.dataInput);
               if (
                 Array.isArray(parsed) &&
@@ -69,16 +88,26 @@
               ) {
                 this.parsedData = parsed;
                 this.isValidData = true;
+                // Set config
+                C.setConfig({
+                  canvasSize: this.canvasSize,
+                  chartWidth: this.chartWidth,
+                  chartHeight: this.chartHeight,
+                  margin: this.margin,
+                  padding: this.padding,
+                });
+                // Resize canvas if needed
+                resizeCanvas(this.canvasSize, this.canvasSize);
                 // Clear and redraw the canvas
                 clear();
                 background("#fffceb");
-                translate(-canvasSize / 2 + margin, -canvasSize / 2 + margin);
+                translate(config.margin, config.margin);
                 textSize(36);
                 textFont(fontBold);
-                text("*p5.databrush", 350, -60);
+                text("*p5.databrush", 350, 50);
                 textFont(font);
                 textSize(12);
-                drawHistogram(this.parsedData, 10);
+                drawHistogram(this.parsedData, this.numBins);
               } else {
                 this.isValidData = false;
               }
