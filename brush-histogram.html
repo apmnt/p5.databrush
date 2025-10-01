@@ -7,17 +7,96 @@
     <script src="p5.js"></script>
     <script src="spectral.min.js"></script>
     <script src="p5.brush.js"></script>
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .data-input {
+        width: 100%;
+        height: 100px;
+        margin: 10px 0;
+        font-family: monospace;
+      }
+      .controls {
+        margin-bottom: 20px;
+      }
+      #mainCanvas {
+        border: 1px solid #ccc;
+      }
+    </style>
   </head>
-  <body>
+  <body x-data="chartData()">
+    <div class="controls">
+      <h3>Histogram Data Input</h3>
+      <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
+      <textarea
+        x-model="dataInput"
+        class="data-input"
+        placeholder="Enter data as JSON array..."
+      ></textarea>
+      <br />
+      <button
+        @click="updateChart()"
+        x-text="isValidData ? 'Update Chart' : 'Invalid Data Format'"
+      ></button>
+      <span x-show="!isValidData" style="color: red; margin-left: 10px"
+        >Please enter valid JSON array</span
+      >
+    </div>
     <script src="C.js"></script>
     <script>
+      function chartData() {
+        return {
+          dataInput:
+            "[85, 92, 78, 105, 88, 112, 95, 87, 103, 99, 76, 108, 91, 84, 97, 101, 89, 94, 106, 82]",
+          parsedData: [
+            85, 92, 78, 105, 88, 112, 95, 87, 103, 99, 76, 108, 91, 84, 97, 101,
+            89, 94, 106, 82,
+          ],
+          isValidData: true,
+
+          updateChart() {
+            try {
+              const parsed = JSON.parse(this.dataInput);
+              if (
+                Array.isArray(parsed) &&
+                parsed.every((x) => typeof x === "number")
+              ) {
+                this.parsedData = parsed;
+                this.isValidData = true;
+                // Clear and redraw the canvas
+                clear();
+                background("#fffceb");
+                translate(-canvasSize / 2 + margin, -canvasSize / 2 + margin);
+                textSize(36);
+                textFont(fontBold);
+                text("*p5.databrush", 350, -60);
+                textFont(font);
+                textSize(12);
+                drawHistogram(this.parsedData, 10);
+              } else {
+                this.isValidData = false;
+              }
+            } catch (e) {
+              this.isValidData = false;
+            }
+          },
+        };
+      }
+
       function setup() {
         commonSetup();
-        // Test data: normally distributed random numbers
-        let testData = getNormalDistData(1000, 100, 40);
-        console.log(testData);
-        // Draw histogram with test data
-        drawHistogram(testData, 10);
+        // Initial chart render
+        const data = [
+          85, 92, 78, 105, 88, 112, 95, 87, 103, 99, 76, 108, 91, 84, 97, 101,
+          89, 94, 106, 82,
+        ];
+        drawHistogram(data, 10);
       }
 
       function draw() {}
