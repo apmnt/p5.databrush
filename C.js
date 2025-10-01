@@ -58,6 +58,11 @@ function windowResized() {
 
 function commonSetup() {
   C.createCanvas();
+  // setup the rest
+  setupRest();
+}
+
+function setupRest() {
   angleMode(DEGREES);
   background("#fffceb");
   fill("gray");
