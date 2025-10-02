@@ -200,24 +200,49 @@
                 return;
               }
 
-              canvas.toBlob(async (blob) => {
-                try {
-                  await navigator.clipboard.write([
-                    new ClipboardItem({ "image/png": blob }),
-                  ]);
-                  this.copyStatus = "Copied to clipboard!";
-                  setTimeout(() => (this.copyStatus = ""), 2000);
-                } catch (err) {
-                  console.error("Failed to copy to clipboard:", err);
-                  this.copyStatus = "Failed to copy";
-                  setTimeout(() => (this.copyStatus = ""), 2000);
-                }
-              });
+              // Check if Clipboard API is available
+              if (navigator.clipboard && navigator.clipboard.write) {
+                canvas.toBlob(async (blob) => {
+                  try {
+                    await navigator.clipboard.write([
+                      new ClipboardItem({ "image/png": blob }),
+                    ]);
+                    this.copyStatus = "Copied to clipboard!";
+                    setTimeout(() => (this.copyStatus = ""), 2000);
+                  } catch (err) {
+                    console.error("Failed to copy to clipboard:", err);
+                    // Fallback to download on mobile if clipboard fails
+                    this.downloadChart(blob);
+                  }
+                });
+              } else {
+                // Fallback for browsers that don't support clipboard API
+                canvas.toBlob((blob) => {
+                  this.downloadChart(blob);
+                });
+              }
             } catch (err) {
               console.error("Error copying chart:", err);
               this.copyStatus = "Failed to copy";
               setTimeout(() => (this.copyStatus = ""), 2000);
             }
+          },
+
+          downloadChart(blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            const timestamp = new Date()
+              .toISOString()
+              .replace(/[:.]/g, "-")
+              .slice(0, -5);
+            link.href = url;
+            link.download = `p5-databrush-${timestamp}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            this.copyStatus = "Downloaded!";
+            setTimeout(() => (this.copyStatus = ""), 2000);
           },
         };
       }
