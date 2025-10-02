@@ -42,6 +42,53 @@
         margin-bottom: 20px;
       }
 
+      .collapsible-section {
+        margin-bottom: 10px;
+      }
+
+      .collapsible-header {
+        background-color: #f0f0f0;
+        padding: 10px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+      }
+
+      .collapsible-header:hover {
+        background-color: #e8e8e8;
+      }
+
+      .collapsible-content {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+      }
+
+      .collapsible-content label {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .collapsible-content input[type="number"],
+      .collapsible-content input[type="text"],
+      .collapsible-content input[type="color"] {
+        width: 100px;
+        margin-left: 10px;
+      }
+
+      .arrow {
+        transition: transform 0.3s;
+      }
+
+      .arrow.open {
+        transform: rotate(90deg);
+      }
+
       #chartContainer {
         flex: 1;
         min-width: 0;
@@ -103,14 +150,88 @@
       >
 
       <h3>Chart Configuration</h3>
-      <label>Canvas Width: <input type="number" x-model="canvasWidth" /></label
-      ><br />
-      <label
-        >Canvas Height: <input type="number" x-model="canvasHeight" /></label
-      ><br />
-      <label>Padding: <input type="number" x-model="padding" /></label><br />
-      <label>Number of Bins: <input type="number" x-model="numBins" /></label
-      ><br /><br />
+
+      <!-- Canvas Dimensions Section -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" @click="toggleSection('dimensions')">
+          <span>Canvas Dimensions</span>
+          <span class="arrow" :class="{ open: openSections.dimensions }"
+            >►</span
+          >
+        </div>
+        <div class="collapsible-content" x-show="openSections.dimensions">
+          <label
+            >Canvas Width: <input type="number" x-model="canvasWidth"
+          /></label>
+          <label
+            >Canvas Height: <input type="number" x-model="canvasHeight"
+          /></label>
+          <label>Padding: <input type="number" x-model="padding" /></label>
+        </div>
+      </div>
+
+      <!-- Chart Options Section -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" @click="toggleSection('chartOptions')">
+          <span>Chart Options</span>
+          <span class="arrow" :class="{ open: openSections.chartOptions }"
+            >►</span
+          >
+        </div>
+        <div class="collapsible-content" x-show="openSections.chartOptions">
+          <label
+            >Number of Bins: <input type="number" x-model="numBins"
+          /></label>
+        </div>
+      </div>
+
+      <!-- Style Options Section -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" @click="toggleSection('style')">
+          <span>Style Options</span>
+          <span class="arrow" :class="{ open: openSections.style }">►</span>
+        </div>
+        <div class="collapsible-content" x-show="openSections.style">
+          <label
+            >Background Color: <input type="color" x-model="backgroundColor"
+          /></label>
+          <label>Line Color: <input type="color" x-model="lineColor" /></label>
+          <label
+            >Line Width:
+            <input
+              type="number"
+              x-model="lineWidth"
+              min="0.5"
+              max="10"
+              step="0.5"
+          /></label>
+          <label
+            >Axis Label Color: <input type="color" x-model="axisLabelColor"
+          /></label>
+        </div>
+      </div>
+
+      <!-- Typography Section -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" @click="toggleSection('typography')">
+          <span>Typography</span>
+          <span class="arrow" :class="{ open: openSections.typography }"
+            >►</span
+          >
+        </div>
+        <div class="collapsible-content" x-show="openSections.typography">
+          <label
+            >Label Font Size:
+            <input type="number" x-model="fontSize" min="8" max="24"
+          /></label>
+          <label
+            >Title Font Size:
+            <input type="number" x-model="titleFontSize" min="12" max="72"
+          /></label>
+        </div>
+      </div>
+
+      <br />
       <button @click="saveChart()">Copy chart to clipboard</button>
       <span
         x-show="copyStatus"
@@ -136,6 +257,24 @@
           numBins: 10,
           previousCanvasWidth: config.canvasWidth || 1000,
           previousCanvasHeight: config.canvasHeight || 1000,
+          // Style options
+          backgroundColor: config.backgroundColor || "#fffceb",
+          lineWidth: config.lineWidth || 2,
+          lineColor: config.lineColor || "#000000",
+          fontSize: config.fontSize || 12,
+          titleFontSize: config.titleFontSize || 36,
+          axisLabelColor: config.axisLabelColor || "#000000",
+          // Collapsible sections state
+          openSections: {
+            dimensions: true,
+            chartOptions: false,
+            style: false,
+            typography: false,
+          },
+
+          toggleSection(section) {
+            this.openSections[section] = !this.openSections[section];
+          },
 
           updateChart() {
             const newW = Number(this.canvasWidth);
@@ -157,6 +296,12 @@
                 padding: newPad,
                 previousCanvasWidth: this.previousCanvasWidth,
                 previousCanvasHeight: this.previousCanvasHeight,
+                backgroundColor: this.backgroundColor,
+                lineWidth: Number(this.lineWidth),
+                lineColor: this.lineColor,
+                fontSize: Number(this.fontSize),
+                titleFontSize: Number(this.titleFontSize),
+                axisLabelColor: this.axisLabelColor,
               });
 
               return;
@@ -177,6 +322,12 @@
                   padding: newPad,
                   previousCanvasWidth: this.previousCanvasWidth,
                   previousCanvasHeight: this.previousCanvasHeight,
+                  backgroundColor: this.backgroundColor,
+                  lineWidth: Number(this.lineWidth),
+                  lineColor: this.lineColor,
+                  fontSize: Number(this.fontSize),
+                  titleFontSize: Number(this.titleFontSize),
+                  axisLabelColor: this.axisLabelColor,
                 });
 
                 setupRest();

@@ -11,6 +11,13 @@ const config = {
   previousPlotWidth: 1000 - 2 * 50,
   previousPlotHeight: 1000 - 2 * 50,
   palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
+  // Style options
+  backgroundColor: "#fffceb",
+  lineWidth: 2,
+  lineColor: "#000000",
+  fontSize: 12,
+  titleFontSize: 36,
+  axisLabelColor: "#000000",
 };
 
 // Check for pending config from page reload
@@ -100,19 +107,22 @@ function commonSetup() {
 
 function setupRest() {
   angleMode(DEGREES);
-  background("#fffceb");
-  fill("gray");
+  background(config.backgroundColor);
+  fill(config.axisLabelColor);
   textFont(font);
-  textSize(36);
+  textSize(config.titleFontSize);
   text("*p5.databrush", -200, -10);
-  textSize(12);
+  textSize(config.fontSize);
   translate(-config.plotWidth / 2, -config.plotHeight / 2);
 }
 
 function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
   textAlign(CENTER, CENTER);
-  textSize(12);
+  textSize(config.fontSize);
+  fill(config.axisLabelColor);
 
+  brush.stroke(config.lineColor);
+  brush.strokeWeight(config.lineWidth);
   brush.line(0, 0, plotWidth, 0); // x-axis bottom
   brush.line(0, plotHeight, plotWidth, plotHeight); // x-axis top
 
@@ -127,8 +137,11 @@ function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
 
 function drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight) {
   textAlign(RIGHT, CENTER);
-  textSize(12);
+  textSize(config.fontSize);
+  fill(config.axisLabelColor);
 
+  brush.stroke(config.lineColor);
+  brush.strokeWeight(config.lineWidth);
   brush.line(0, 0, 0, plotHeight); // y-axis left
   brush.line(plotWidth, 0, plotWidth, plotHeight); // y-axis right
 
@@ -258,7 +271,7 @@ function drawLinePlot(
 
     // Plot line
     brush.stroke(lineColors[i]);
-    brush.strokeWeight(2);
+    brush.strokeWeight(config.lineWidth);
 
     for (let j = 0; j < yVals.length - 1; j++) {
       const x1 = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
@@ -321,6 +334,8 @@ function drawHistogram(values, numBins) {
 
   // Draw grid lines
   const numYTicks = 6; // 0 to 5 ticks
+  brush.stroke(config.lineColor);
+  brush.strokeWeight(config.lineWidth);
   for (let i = 0; i <= numYTicks - 1; i++) {
     const y = config.plotHeight - (config.plotHeight / (numYTicks - 1)) * i;
     brush.line(0, y, config.plotWidth, y); // Horizontal grid line
@@ -342,11 +357,14 @@ function drawHistogram(values, numBins) {
   }
 
   // Draw axes
+  brush.stroke(config.lineColor);
+  brush.strokeWeight(config.lineWidth);
   brush.line(0, config.plotHeight, config.plotWidth, config.plotHeight); // x-axis
   brush.line(0, 0, 0, config.plotHeight); // y-axis
 
   // Add labels
-  textSize(12);
+  textSize(config.fontSize);
+  fill(config.axisLabelColor);
 
   // X-axis labels
   push(); // Save current transformation matrix
@@ -455,6 +473,8 @@ function drawBoxPlot(data) {
   push();
 
   // Draw axes
+  brush.stroke(config.lineColor);
+  brush.strokeWeight(config.lineWidth);
   brush.line(0, plotHeight, plotWidth, plotHeight); // x-axis line
   drawYScale(niceMin, niceMax, niceTick, plotWidth, plotHeight);
 
@@ -502,6 +522,8 @@ function drawBoxPlot(data) {
     );
 
     // Draw median line
+    brush.stroke(config.lineColor);
+    brush.strokeWeight(config.lineWidth);
     brush.line(
       groupX - boxWidth / 2,
       scaleY(median),
@@ -510,7 +532,7 @@ function drawBoxPlot(data) {
     );
 
     // Draw whiskers
-    strokeWeight(1);
+    strokeWeight(config.lineWidth);
     if (upperWhisker !== null) {
       brush.line(groupX, scaleY(q3), groupX, scaleY(upperWhisker)); // Upper whisker
       brush.line(
@@ -537,6 +559,8 @@ function drawBoxPlot(data) {
 
     // Draw group labels
     textAlign(CENTER, TOP);
+    textSize(config.fontSize);
+    fill(config.axisLabelColor);
     text(`Group ${index + 1}`, groupX, plotHeight + 10);
   });
 
