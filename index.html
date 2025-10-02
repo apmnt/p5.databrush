@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>P5.js Histogram</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap"
+      rel="stylesheet"
+    />
     <script src="p5.js"></script>
     <script src="spectral.min.js"></script>
     <script src="p5.brush.js"></script>
@@ -17,7 +23,8 @@
       }
 
       body {
-        font-family: Arial, sans-serif;
+        font-family: "IBM Plex Serif", sans-serif;
+        font-size: 14px;
         margin: 0;
         padding: 0;
         display: flex;
@@ -27,6 +34,7 @@
         min-height: 100vh;
         overflow-x: hidden;
         background-color: #fffefb;
+        position: relative;
       }
 
       .data-input {
@@ -55,20 +63,23 @@
       .controls {
         width: 300px;
         flex-shrink: 0;
-        margin-bottom: 20px;
+        position: relative;
+        min-height: 100vh;
       }
 
       .collapsible-section {
-        margin-bottom: 10px;
+        border-top: 1px solid #ccc;
       }
 
       .collapsible-header {
-        padding: 10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
         cursor: pointer;
         display: flex;
         justify-content: space-between;
         align-items: center;
         user-select: none;
+        font-weight: bold;
       }
 
       .collapsible-header:hover {
@@ -76,8 +87,9 @@
       }
 
       .collapsible-content {
-        padding: 10px;
         border-top: none;
+        padding-bottom: 15px;
+        padding-top: 10px;
       }
 
       .collapsible-content label {
@@ -145,12 +157,34 @@
           margin-bottom: 20px;
         }
       }
+
+      input,
+      textarea {
+        font-size: 14px;
+      }
+
+      .footer {
+        margin-top: 50px;
+        padding: 10px 0px 10px 0px;
+        font-size: 12px;
+        color: #666;
+        text-align: left;
+      }
+
+      .footer a {
+        color: #666;
+      }
     </style>
   </head>
   <body x-data="chartData()">
     <div id="chartContainer"></div>
     <div class="controls">
-
+      <h1>*p5.databrush</h1>
+      <p>
+        Visualize your data on a watercolor canvas. Plot histograms, scatter
+        plots, box plots, and more. Customize the settings and use your own
+        data, or try randomized plots with sample datasets and palettes.
+      </p>
       <!-- Canvas Dimensions Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('dimensions')">
@@ -254,6 +288,9 @@
       <span x-show="!isValidData" style="color: red; margin-left: 10px"
         >Please enter valid JSON array</span
       >
+      <div class="footer">
+        Tool by <a href="https://github.com/aapo/p5.databrush">Aapo Montin</a>
+      </div>
     </div>
     <script src="C.js"></script>
     <script>
