@@ -16,18 +16,18 @@
         box-sizing: border-box;
       }
 
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          display: flex;
-          gap: 20px;
-          align-items: center;
-          justify-content: center;
-          min-height: 100vh;
-          overflow-x: hidden;
-          background-color: #fffefb;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        overflow-x: hidden;
+        background-color: #fffefb;
+      }
 
       .data-input {
         width: 100%;
@@ -48,9 +48,11 @@
         max-width: fit-content;
         border: 1px solid #ccc;
         overflow: auto;
-        display: flex;
+        display: inline-flex;
         align-items: flex-start;
         justify-content: center;
+        align-self: center;
+        max-height: fit-content;
       }
 
       #chartContainer canvas {
