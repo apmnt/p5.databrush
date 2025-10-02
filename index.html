@@ -49,13 +49,11 @@
       >
 
       <h3>Chart Configuration</h3>
-      <label>Canvas size: <input type="number" x-model="canvasSize" /></label
+      <label>Canvas Width: <input type="number" x-model="canvasWidth" /></label
       ><br />
-      <label>Chart Width: <input type="number" x-model="chartWidth" /></label
+      <label
+        >Canvas Height: <input type="number" x-model="canvasHeight" /></label
       ><br />
-      <label>Chart Height: <input type="number" x-model="chartHeight" /></label
-      ><br />
-      <label>Margin: <input type="number" x-model="margin" /></label><br />
       <label>Padding: <input type="number" x-model="padding" /></label><br />
       <label>Number of Bins: <input type="number" x-model="numBins" /></label
       ><br />
@@ -71,10 +69,8 @@
             89, 94, 106, 82,
           ],
           isValidData: true,
-          canvasSize: 1000,
-          chartWidth: 500,
-          chartHeight: 500,
-          margin: 100,
+          canvasWidth: 1000,
+          canvasHeight: 1000,
           padding: 20,
           numBins: 10,
 
@@ -89,10 +85,8 @@
                 this.isValidData = true;
                 // Set config
                 C.setConfig({
-                  canvasSize: this.canvasSize,
-                  chartWidth: this.chartWidth,
-                  chartHeight: this.chartHeight,
-                  margin: this.margin,
+                  canvasWidth: this.canvasWidth,
+                  canvasHeight: this.canvasHeight,
                   padding: this.padding,
                 });
                 // Resize canvas and setup

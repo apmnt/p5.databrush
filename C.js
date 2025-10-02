@@ -1,13 +1,11 @@
 let fontBold;
 let font;
 const config = {
-  canvasSize: 1000,
-  chartWidth: 500,
-  chartHeight: 500,
-  margin: 100,
-  padding: 20,
-  plotWidth: 500 - 2 * 20,
-  plotHeight: 500 - 2 * 20,
+  canvasWidth: 1000,
+  canvasHeight: 1000,
+  padding: 50,
+  plotWidth: 1000 - 2 * 20,
+  plotHeight: 1000 - 2 * 20,
   palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
 };
 
@@ -39,18 +37,18 @@ const C = {
   },
   setConfig(newConfig) {
     Object.assign(config, newConfig);
-    config.plotWidth = config.chartWidth - 2 * config.padding;
-    config.plotHeight = config.chartHeight - 2 * config.padding;
+    config.plotWidth = config.canvasWidth - 2 * config.padding;
+    config.plotHeight = config.canvasHeight - 2 * config.padding;
   },
   createCanvas() {
-    (this.main = createCanvas(config.canvasSize, config.canvasSize, WEBGL)),
+    (this.main = createCanvas(config.canvasWidth, config.canvasHeight, WEBGL)),
       pixelDensity(this.pD),
       this.main.id(this.css),
       this.resize();
   },
 };
 
-C.setSize(config.canvasSize, config.canvasSize, 1, "mainCanvas");
+C.setSize(config.canvasWidth, config.canvasHeight, 1, "mainCanvas");
 
 function windowResized() {
   C.resize();
@@ -70,10 +68,7 @@ function setupRest() {
   textSize(36);
   text("*p5.databrush", -200, -10);
   textSize(12);
-  translate(
-    -config.canvasSize / 2 + config.margin,
-    -config.canvasSize / 2 + config.margin
-  );
+  translate(-config.plotWidth / 2, -config.plotHeight / 2);
 }
 
 function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
