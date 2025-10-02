@@ -1,20 +1,21 @@
 let fontBold;
 let font;
+let initialSize = 1000;
 const config = {
-  canvasWidth: 1000,
-  canvasHeight: 1000,
-  previousCanvasWidth: 1000,
-  previousCanvasHeight: 1000,
+  canvasWidth: initialSize,
+  canvasHeight: initialSize,
+  previousCanvasWidth: initialSize,
+  previousCanvasHeight: initialSize,
   padding: 50,
-  plotWidth: 1000 - 2 * 50,
-  plotHeight: 1000 - 2 * 50,
-  previousPlotWidth: 1000 - 2 * 50,
-  previousPlotHeight: 1000 - 2 * 50,
+  plotWidth: initialSize - 2 * 50,
+  plotHeight: initialSize - 2 * 50,
+  previousPlotWidth: initialSize - 2 * 50,
+  previousPlotHeight: initialSize - 2 * 50,
   palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
   // Style options
   backgroundColor: "#fffceb",
-  lineWidth: 1,
-  lineColor: "#4b4b4bff",
+  lineWidth: 1.5,
+  lineColor: "#000000ff",
   fontSize: 20,
   titleFontSize: 36,
   axisLabelColor: "#4b4b4bff",
