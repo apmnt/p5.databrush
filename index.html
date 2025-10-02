@@ -28,7 +28,6 @@
         margin: 0;
         padding: 0;
         display: flex;
-        gap: 20px;
         align-items: flex-start;
         justify-content: center;
         min-height: 100vh;
@@ -65,10 +64,12 @@
         flex-shrink: 0;
         position: relative;
         min-height: 100vh;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
       }
 
       .collapsible-section {
-        border-top: 1px solid #ccc;
+        border-top: 1px solid #000000;
       }
 
       .collapsible-header {
@@ -80,10 +81,6 @@
         align-items: center;
         user-select: none;
         font-weight: bold;
-      }
-
-      .collapsible-header:hover {
-        background-color: #e8e8e8;
       }
 
       .collapsible-content {
@@ -120,9 +117,11 @@
         border: 1px solid #ccc;
         display: inline-flex;
         justify-content: center;
-
+        align-items: center;
         margin: 0;
         padding: 0;
+        position: sticky;
+        top: 0;
       }
 
       #chartContainer canvas {
@@ -139,11 +138,10 @@
       @media (max-width: 800px) {
         body {
           flex-direction: column;
-          padding: 20px;
         }
 
         #chartContainer {
-          margin: 20px 0;
+          margin: 0;
         }
 
         #chartcontainer canvas {
@@ -151,6 +149,9 @@
         }
 
         .controls {
+          margin: 0;
+          padding-left: 10px;
+          padding-right: 10px;
           width: 100%;
           max-width: 800px;
           order: 2;
