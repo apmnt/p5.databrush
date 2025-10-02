@@ -150,23 +150,6 @@
   <body x-data="chartData()">
     <div id="chartContainer"></div>
     <div class="controls">
-      <h3>Histogram Data Input</h3>
-      <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
-      <textarea
-        x-model="dataInput"
-        class="data-input"
-        placeholder="Enter data as JSON array..."
-      ></textarea>
-      <br />
-      <button
-        @click="updateChart()"
-        x-text="isValidData ? 'Update Chart' : 'Invalid Data Format'"
-      ></button>
-      <span x-show="!isValidData" style="color: red; margin-left: 10px"
-        >Please enter valid JSON array</span
-      >
-
-      <h3>Chart Configuration</h3>
 
       <!-- Canvas Dimensions Section -->
       <div class="collapsible-section">
@@ -255,6 +238,22 @@
         style="margin-left: 10px; color: #2c695a"
         x-text="copyStatus"
       ></span>
+
+      <h3>Histogram Data Input</h3>
+      <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
+      <textarea
+        x-model="dataInput"
+        class="data-input"
+        placeholder="Enter data as JSON array..."
+      ></textarea>
+      <br />
+      <button
+        @click="updateChart()"
+        x-text="isValidData ? 'Update Chart' : 'Invalid Data Format'"
+      ></button>
+      <span x-show="!isValidData" style="color: red; margin-left: 10px"
+        >Please enter valid JSON array</span
+      >
     </div>
     <script src="C.js"></script>
     <script>
