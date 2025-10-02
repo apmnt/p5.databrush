@@ -41,16 +41,6 @@ const C = {
   isLandscape() {
     return window.innerHeight <= window.innerWidth * this.prop();
   },
-  resize() {
-    if (this.isLandscape()) {
-      console.log("yes");
-      document.getElementById(this.css).style.height = "100%";
-      document.getElementById(this.css).style.removeProperty("width");
-    } else {
-      document.getElementById(this.css).style.removeProperty("height");
-      document.getElementById(this.css).style.width = "100%";
-    }
-  },
   setSize(w, h, p, css) {
     (this.width = w), (this.height = h), (this.pD = p), (this.css = css);
   },
@@ -78,7 +68,6 @@ const C = {
       pixelDensity(this.pD);
       this.main.id(this.css);
       this.main.parent("chartContainer");
-      this.resize();
       console.log("WebGL canvas created successfully");
     } catch (e) {
       console.error("Failed to create WebGL canvas:", e);
@@ -89,9 +78,7 @@ const C = {
 
 C.setSize(config.canvasWidth, config.canvasHeight, 1, "mainCanvas");
 
-function windowResized() {
-  C.resize();
-}
+function windowResized() {}
 
 function reloadWithNewDimensions(newWidth, newHeight) {
   sessionStorage.setItem(
