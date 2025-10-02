@@ -13,11 +13,11 @@ const config = {
   palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
   // Style options
   backgroundColor: "#fffceb",
-  lineWidth: 2,
-  lineColor: "#000000",
-  fontSize: 12,
+  lineWidth: 1,
+  lineColor: "#4b4b4bff",
+  fontSize: 20,
   titleFontSize: 36,
-  axisLabelColor: "#000000",
+  axisLabelColor: "#4b4b4bff",
 };
 
 // Check for pending config from page reload
@@ -367,20 +367,21 @@ function drawHistogram(values, numBins) {
   fill(config.axisLabelColor);
 
   // X-axis labels
+  let yOffset = config.fontSize + 5;
   push(); // Save current transformation matrix
-  textAlign(RIGHT, CENTER);
+  textAlign(CENTER);
 
   for (let i = 0; i <= numBins; i++) {
     const value = minValue + i * binSize;
     // Translate to the position where we want to draw the text
-    translate(i * binWidth, config.plotHeight + 20); // Moved labels down by increasing y offset
+    translate(i * binWidth, config.plotHeight + yOffset); // Moved labels down by increasing y offset
     // Rotate 90 degrees
-    rotate(HALF_PI);
+    // rotate(HALF_PI);
     // Draw the text at the rotated position
     text(value.toFixed(1), 0, 0);
     // Reset the transformation
-    rotate(-HALF_PI);
-    translate(-(i * binWidth), -(config.plotHeight + 20));
+    // rotate(-HALF_PI);
+    translate(-(i * binWidth), -(config.plotHeight + yOffset));
   }
 
   pop(); // Restore transformation matrix
