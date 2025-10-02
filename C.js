@@ -390,6 +390,7 @@ function drawHistogram(values, numBins) {
   // Y-axis labels
   textAlign(RIGHT, CENTER);
   for (let i = 0; i <= numYTicks - 1; i++) {
+    if (i === 0) continue; // Skip the zero label
     const value = (niceMaxCount / (numYTicks - 1)) * i;
     text(
       Math.round(value),
