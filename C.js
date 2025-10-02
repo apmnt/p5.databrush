@@ -4,8 +4,8 @@ const config = {
   canvasWidth: 1000,
   canvasHeight: 1000,
   padding: 50,
-  plotWidth: 1000 - 2 * 20,
-  plotHeight: 1000 - 2 * 20,
+  plotWidth: 1000 - 2 * 50,
+  plotHeight: 1000 - 2 * 50,
   palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
 };
 
@@ -41,10 +41,28 @@ const C = {
     config.plotHeight = config.canvasHeight - 2 * config.padding;
   },
   createCanvas() {
-    (this.main = createCanvas(config.canvasWidth, config.canvasHeight, WEBGL)),
-      pixelDensity(this.pD),
-      this.main.id(this.css),
+    try {
+      // Add WebGL context attributes for better compatibility
+      setAttributes({
+        alpha: true,
+        depth: true,
+        stencil: true,
+        antialias: true,
+        premultipliedAlpha: false,
+        preserveDrawingBuffer: true,
+        failIfMajorPerformanceCaveat: false,
+      });
+
+      this.main = createCanvas(config.canvasWidth, config.canvasHeight, WEBGL);
+      pixelDensity(this.pD);
+      this.main.id(this.css);
       this.resize();
+      console.log("WebGL canvas created successfully");
+    } catch (e) {
+      console.error("Failed to create WebGL canvas:", e);
+      alert("WebGL initialization failed. Check console for details.");
+      throw e;
+    }
   },
 };
 
