@@ -3,11 +3,30 @@ let font;
 const config = {
   canvasWidth: 1000,
   canvasHeight: 1000,
+  previousCanvasWidth: 1000,
+  previousCanvasHeight: 1000,
   padding: 50,
   plotWidth: 1000 - 2 * 50,
   plotHeight: 1000 - 2 * 50,
+  previousPlotWidth: 1000 - 2 * 50,
+  previousPlotHeight: 1000 - 2 * 50,
   palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
 };
+
+// Check for pending config from page reload
+if (sessionStorage.getItem("pendingCanvasConfig")) {
+  try {
+    const pendingConfig = JSON.parse(
+      sessionStorage.getItem("pendingCanvasConfig")
+    );
+    Object.assign(config, pendingConfig);
+    config.plotWidth = config.canvasWidth - 2 * config.padding;
+    config.plotHeight = config.canvasHeight - 2 * config.padding;
+    sessionStorage.removeItem("pendingCanvasConfig");
+  } catch (e) {
+    console.error("Failed to load pending config:", e);
+  }
+}
 
 function preload() {
   fontBold = loadFont("/Helvetica-bold.ttf");
@@ -36,31 +55,33 @@ const C = {
     (this.width = w), (this.height = h), (this.pD = p), (this.css = css);
   },
   setConfig(newConfig) {
+    let dimensionsChanged =
+      newConfig.canvasWidth !== config.canvasWidth ||
+      newConfig.canvasHeight !== config.canvasHeight;
     Object.assign(config, newConfig);
     config.plotWidth = config.canvasWidth - 2 * config.padding;
     config.plotHeight = config.canvasHeight - 2 * config.padding;
+    if (dimensionsChanged) {
+      reloadWithNewDimensions(config.canvasWidth, config.canvasHeight);
+    }
   },
   createCanvas() {
     try {
-      // Add WebGL context attributes for better compatibility
-      setAttributes({
-        alpha: true,
-        depth: true,
-        stencil: true,
-        antialias: true,
-        premultipliedAlpha: false,
-        preserveDrawingBuffer: true,
-        failIfMajorPerformanceCaveat: false,
-      });
+      // In global mode, p5.js functions are available globally after setup runs
+      // Check if createCanvas is available
+      if (typeof createCanvas !== "function") {
+        console.error("p5.js is not loaded or createCanvas is not available");
+        return;
+      }
 
       this.main = createCanvas(config.canvasWidth, config.canvasHeight, WEBGL);
       pixelDensity(this.pD);
       this.main.id(this.css);
+      this.main.parent("chartContainer");
       this.resize();
       console.log("WebGL canvas created successfully");
     } catch (e) {
       console.error("Failed to create WebGL canvas:", e);
-      alert("WebGL initialization failed. Check console for details.");
       throw e;
     }
   },
@@ -70,6 +91,18 @@ C.setSize(config.canvasWidth, config.canvasHeight, 1, "mainCanvas");
 
 function windowResized() {
   C.resize();
+}
+
+function reloadWithNewDimensions(newWidth, newHeight) {
+  sessionStorage.setItem(
+    "pendingCanvasConfig",
+    JSON.stringify({
+      canvasWidth: newWidth,
+      canvasHeight: newHeight,
+      padding: config.padding,
+    })
+  );
+  location.reload();
 }
 
 function commonSetup() {
@@ -266,6 +299,13 @@ function drawLinePlot(
 }
 
 function drawHistogram(values, numBins) {
+  // debugger;
+  let cw = config.canvasWidth;
+  let ch = config.canvasHeight;
+  let pw = config.plotWidth;
+  let ph = config.plotHeight;
+  let padding = config.padding;
+  let palette = config.palette;
   // Find min and max values
   const minValue = Math.min(...values);
   const maxValue = Math.max(...values);

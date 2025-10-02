@@ -31,6 +31,7 @@
     </style>
   </head>
   <body x-data="chartData()">
+    <div id="chartContainer"></div>
     <div class="controls">
       <h3>Histogram Data Input</h3>
       <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
@@ -69,12 +70,38 @@
             89, 94, 106, 82,
           ],
           isValidData: true,
-          canvasWidth: 1000,
-          canvasHeight: 1000,
-          padding: 50,
+          canvasWidth: config.canvasWidth || 1000,
+          canvasHeight: config.canvasHeight || 1000,
+          padding: config.padding || 50,
           numBins: 10,
+          previousCanvasWidth: config.canvasWidth || 1000,
+          previousCanvasHeight: config.canvasHeight || 1000,
 
           updateChart() {
+            const newW = Number(this.canvasWidth);
+            const newH = Number(this.canvasHeight);
+            const newPad = Number(this.padding);
+            const bins = Number(this.numBins);
+
+            const sizeChanged =
+              newW !== this.previousCanvasWidth ||
+              newH !== this.previousCanvasHeight;
+
+            if (sizeChanged) {
+              this.previousCanvasWidth = newW;
+              this.previousCanvasHeight = newH;
+
+              C.setConfig({
+                canvasWidth: newW,
+                canvasHeight: newH,
+                padding: newPad,
+                previousCanvasWidth: this.previousCanvasWidth,
+                previousCanvasHeight: this.previousCanvasHeight,
+              });
+
+              return;
+            }
+
             try {
               const parsed = JSON.parse(this.dataInput);
               if (
@@ -83,20 +110,23 @@
               ) {
                 this.parsedData = parsed;
                 this.isValidData = true;
-                // Set config
+
                 C.setConfig({
-                  canvasWidth: this.canvasWidth,
-                  canvasHeight: this.canvasHeight,
-                  padding: this.padding,
+                  canvasWidth: newW,
+                  canvasHeight: newH,
+                  padding: newPad,
+                  previousCanvasWidth: this.previousCanvasWidth,
+                  previousCanvasHeight: this.previousCanvasHeight,
                 });
-                // Resize canvas and setup
+
                 setupRest();
-                drawHistogram(this.parsedData, this.numBins);
+                drawHistogram(this.parsedData, bins);
               } else {
                 this.isValidData = false;
               }
             } catch (e) {
               this.isValidData = false;
+              console.error("Update chart error:", e);
             }
           },
         };
@@ -104,7 +134,7 @@
 
       function setup() {
         commonSetup();
-        // Initial chart render
+        // // Initial chart render
         const data = [
           85, 92, 78, 105, 88, 112, 95, 87, 103, 99, 76, 108, 91, 84, 97, 101,
           89, 94, 106, 82,
