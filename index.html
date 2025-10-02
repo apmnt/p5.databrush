@@ -202,19 +202,26 @@
 
               // Check if Clipboard API is available
               if (navigator.clipboard && navigator.clipboard.write) {
-                canvas.toBlob(async (blob) => {
-                  try {
-                    await navigator.clipboard.write([
-                      new ClipboardItem({ "image/png": blob }),
-                    ]);
-                    this.copyStatus = "Copied to clipboard!";
-                    setTimeout(() => (this.copyStatus = ""), 2000);
-                  } catch (err) {
-                    console.error("Failed to copy to clipboard:", err);
-                    // Fallback to download on mobile if clipboard fails
+                try {
+                  // Create a promise-based blob to maintain user activation
+                  const blobPromise = new Promise((resolve) => {
+                    canvas.toBlob(resolve, "image/png");
+                  });
+
+                  // Write to clipboard immediately while user activation is still active
+                  await navigator.clipboard.write([
+                    new ClipboardItem({ "image/png": blobPromise }),
+                  ]);
+
+                  this.copyStatus = "Copied to clipboard!";
+                  setTimeout(() => (this.copyStatus = ""), 2000);
+                } catch (err) {
+                  console.error("Failed to copy to clipboard:", err);
+                  // Fallback to download on mobile if clipboard fails
+                  canvas.toBlob((blob) => {
                     this.downloadChart(blob);
-                  }
-                });
+                  });
+                }
               } else {
                 // Fallback for browsers that don't support clipboard API
                 canvas.toBlob((blob) => {
