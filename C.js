@@ -21,7 +21,7 @@ const config = {
   axisLabelColor: "#4b4b4bff",
   bleedMin: 0.01,
   bleedMax: 0.03,
-  brushType: "charcoal",
+  brushType: "rotring",
   gridBrushType: "pen",
   gridLineColor: "#000000ff",
   gridLineWidth: 1,
@@ -49,6 +49,7 @@ function preload() {
 
 const C = {
   loaded: false,
+  config: config,
   prop() {
     return this.height / this.width;
   },
