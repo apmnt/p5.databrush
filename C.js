@@ -12,7 +12,6 @@ const config = {
   previousPlotWidth: initialSize - 2 * 50,
   previousPlotHeight: initialSize - 2 * 50,
   palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
-  // Style options
   backgroundColor: "#fffceb",
   lineWidth: 3,
   lineColor: "#000000ff",
@@ -490,9 +489,18 @@ function drawBoxPlot(data) {
   minVal = niceMin;
   maxVal = niceMax;
 
-  // Drawing settings
-  const boxWidth = 50;
-  const groupSpacing = config.plotWidth / (data.length + 1);
+  const totalGroups = data.length;
+  const availableWidth = config.plotWidth / (totalGroups + 1);
+
+  // Box width should be 60% of available space, leaving 40% for gaps
+  // But constrain it to reasonable limits
+  const maxBoxWidth = Math.min(config.plotWidth * 0.15, 200);
+  const minBoxWidth = 30; // Minimum readable width
+
+  let boxWidth = availableWidth * 0.6;
+  boxWidth = Math.max(minBoxWidth, Math.min(maxBoxWidth, boxWidth));
+
+  const groupSpacing = config.plotWidth / (totalGroups + 1);
 
   // Move to the plotting area
   push();
