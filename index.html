@@ -224,6 +224,16 @@
         font-size: 12px;
         margin-left: 10px;
       }
+
+      .dropdown {
+        width: 100px;
+        margin-left: 10px;
+        float: right;
+        border-radius: 0;
+        border: 1px solid #000;
+        background-color: #ffffff;
+        padding: 0;
+      }
     </style>
   </head>
   <body x-data="chartData()">
@@ -267,17 +277,9 @@
           <label>
             Chart Type:
             <select
+              class="dropdown"
               x-model="chartType"
               @change="onChartTypeChange()"
-              style="
-                width: 100px;
-                margin-left: 10px;
-                float: right;
-                border-radius: 0;
-                border: 1px solid #000;
-                background-color: #ffffff;
-                padding: 2px;
-              "
             >
               <option value="histogram">Histogram</option>
               <option value="scatter">Scatter Plot</option>
@@ -319,18 +321,7 @@
           /></label>
           <label>
             Brush Type:
-            <select
-              x-model="brushType"
-              style="
-                width: 100px;
-                margin-left: 10px;
-                float: right;
-                border-radius: 0;
-                border: 1px solid #000;
-                background-color: #ffffff;
-                padding: 2px;
-              "
-            >
+            <select class="dropdown" x-model="brushType">
               <option value="pen">Pen</option>
               <option value="rotring">Rotring</option>
               <option value="2B">2B Pencil</option>
@@ -363,18 +354,7 @@
           /></label>
           <label>
             Grid Brush Type:
-            <select
-              x-model="gridBrushType"
-              style="
-                width: 100px;
-                margin-left: 10px;
-                float: right;
-                border-radius: 0;
-                border: 1px solid #000;
-                background-color: #ffffff;
-                padding: 2px;
-              "
-            >
+            <select class="dropdown" x-model="gridBrushType">
               <option value="pen">Pen</option>
               <option value="rotring">Rotring</option>
               <option value="2B">2B Pencil</option>
