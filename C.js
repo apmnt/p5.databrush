@@ -21,6 +21,10 @@ const config = {
   axisLabelColor: "#4b4b4bff",
   bleedMin: 0.01,
   bleedMax: 0.03,
+  brushType: "charcoal",
+  gridBrushType: "pen",
+  gridLineColor: "#000000ff",
+  gridLineWidth: 1,
 };
 
 // Check for pending config from page reload
@@ -109,6 +113,7 @@ function commonSetup() {
 }
 
 function setupRest() {
+  brush.pick(config.brushType);
   angleMode(DEGREES);
   background(config.backgroundColor);
   fill(config.axisLabelColor);
@@ -120,12 +125,13 @@ function setupRest() {
 }
 
 function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
+  brush.pick(config.gridBrushType);
   textAlign(CENTER, CENTER);
   textSize(config.fontSize);
   fill(config.axisLabelColor);
 
-  brush.stroke(config.lineColor);
-  brush.strokeWeight(config.lineWidth);
+  brush.stroke(config.gridLineColor);
+  brush.strokeWeight(config.gridLineWidth);
   brush.line(0, 0, plotWidth, 0); // x-axis bottom
   brush.line(0, plotHeight, plotWidth, plotHeight); // x-axis top
 
@@ -139,12 +145,13 @@ function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
 }
 
 function drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight) {
+  brush.pick(config.gridBrushType);
   textAlign(RIGHT, CENTER);
   textSize(config.fontSize);
   fill(config.axisLabelColor);
 
-  brush.stroke(config.lineColor);
-  brush.strokeWeight(config.lineWidth);
+  brush.stroke(config.gridLineColor);
+  brush.strokeWeight(config.gridLineWidth);
   brush.line(0, 0, 0, plotHeight); // y-axis left
   brush.line(plotWidth, 0, plotWidth, plotHeight); // y-axis right
 
@@ -187,6 +194,7 @@ function drawLinePlot(
   plotRange = null,
   fillValues = null
 ) {
+  brush.pick(config.brushType);
   // Check if yValues is an array of arrays
   const isMultipleLines = Array.isArray(yValues[0]);
 
@@ -303,6 +311,7 @@ function drawLinePlot(
 }
 
 function drawHistogram(values, numBins) {
+  brush.pick(config.brushType);
   // debugger;
   let cw = config.canvasWidth;
   let ch = config.canvasHeight;
@@ -338,14 +347,16 @@ function drawHistogram(values, numBins) {
 
   // Draw grid lines
   const numYTicks = 6; // 0 to 5 ticks
-  brush.stroke(config.lineColor);
-  brush.strokeWeight(config.lineWidth);
+  brush.pick(config.gridBrushType);
+  brush.stroke(config.gridLineColor);
+  brush.strokeWeight(config.gridLineWidth);
   for (let i = 0; i <= numYTicks - 1; i++) {
     const y = config.plotHeight - (config.plotHeight / (numYTicks - 1)) * i;
     brush.line(0, y, config.plotWidth, y); // Horizontal grid line
   }
 
   // Histogram bars
+  brush.pick(config.brushType);
   brush.fill(random(config.palette), random(60, 100));
 
   for (let i = 0; i < numBins; i++) {
@@ -361,6 +372,7 @@ function drawHistogram(values, numBins) {
   }
 
   // Draw axes
+  brush.pick(config.gridBrushType);
   brush.stroke(config.lineColor);
   brush.strokeWeight(config.lineWidth);
   brush.line(0, config.plotHeight, config.plotWidth, config.plotHeight); // x-axis
@@ -404,6 +416,7 @@ function drawHistogram(values, numBins) {
 }
 
 function drawScatterPlot(values, colors = null, plotRange = null) {
+  brush.pick(config.brushType);
   const { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY } =
     plotRange === null
       ? getNiceBounds(values.flat())
@@ -457,6 +470,7 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
 }
 
 function drawBoxPlot(data) {
+  brush.pick(config.brushType);
   // Find global min and max for scaling
   let allValues = data.flat();
   let minVal = Math.min(...allValues);
@@ -479,12 +493,14 @@ function drawBoxPlot(data) {
   push();
 
   // Draw axes
-  brush.stroke(config.lineColor);
-  brush.strokeWeight(config.lineWidth);
+  brush.pick(config.gridBrushType);
+  brush.stroke(config.gridLineColor);
+  brush.strokeWeight(config.gridLineWidth);
   brush.line(0, config.plotHeight, config.plotWidth, config.plotHeight); // x-axis line
   drawYScale(niceMin, niceMax, niceTick, config.plotWidth, config.plotHeight);
 
   // Draw box plots
+  brush.pick(config.brushType);
   data.forEach((group, index) => {
     const groupX = (index + 1) * groupSpacing;
 
@@ -531,8 +547,9 @@ function drawBoxPlot(data) {
     );
 
     // Draw median line
-    brush.stroke(config.lineColor);
-    brush.strokeWeight(config.lineWidth);
+    brush.pick(config.gridBrushType);
+    brush.stroke(config.gridLineColor);
+    brush.strokeWeight(config.gridLineWidth);
     brush.line(
       groupX - boxWidth / 2,
       scaleY(median),
@@ -541,7 +558,7 @@ function drawBoxPlot(data) {
     );
 
     // Draw whiskers
-    strokeWeight(config.lineWidth);
+    strokeWeight(config.gridLineWidth);
     if (upperWhisker !== null) {
       brush.line(groupX, scaleY(q3), groupX, scaleY(upperWhisker)); // Upper whisker
       brush.line(

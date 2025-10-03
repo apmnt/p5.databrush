@@ -314,6 +314,35 @@
           <label
             >Background Color: <input type="color" x-model="backgroundColor"
           /></label>
+          <label
+            >Axis Label Color: <input type="color" x-model="axisLabelColor"
+          /></label>
+          <label>
+            Brush Type:
+            <select
+              x-model="brushType"
+              style="
+                width: 100px;
+                margin-left: 10px;
+                float: right;
+                border-radius: 0;
+                border: 1px solid #000;
+                background-color: #ffffff;
+                padding: 2px;
+              "
+            >
+              <option value="pen">Pen</option>
+              <option value="rotring">Rotring</option>
+              <option value="2B">2B Pencil</option>
+              <option value="HB">HB Pencil</option>
+              <option value="2H">2H Pencil</option>
+              <option value="cpencil">Color Pencil</option>
+              <option value="charcoal">Charcoal</option>
+              <option value="hatch_brush">Hatch Brush</option>
+              <option value="marker">Marker</option>
+              <option value="marker2">Marker 2</option>
+            </select>
+          </label>
           <label>Line Color: <input type="color" x-model="lineColor" /></label>
           <label
             >Line Width:
@@ -325,15 +354,50 @@
               step="0.5"
           /></label>
           <label
-            >Axis Label Color: <input type="color" x-model="axisLabelColor"
-          /></label>
-          <label
             >Bleed Min:
             <input type="number" x-model="bleedMin" min="0" max="1" step="0.01"
           /></label>
           <label
             >Bleed Max:
             <input type="number" x-model="bleedMax" min="0" max="1" step="0.01"
+          /></label>
+          <label>
+            Grid Brush Type:
+            <select
+              x-model="gridBrushType"
+              style="
+                width: 100px;
+                margin-left: 10px;
+                float: right;
+                border-radius: 0;
+                border: 1px solid #000;
+                background-color: #ffffff;
+                padding: 2px;
+              "
+            >
+              <option value="pen">Pen</option>
+              <option value="rotring">Rotring</option>
+              <option value="2B">2B Pencil</option>
+              <option value="HB">HB Pencil</option>
+              <option value="2H">2H Pencil</option>
+              <option value="cpencil">Color Pencil</option>
+              <option value="charcoal">Charcoal</option>
+              <option value="hatch_brush">Hatch Brush</option>
+              <option value="marker">Marker</option>
+              <option value="marker2">Marker 2</option>
+            </select>
+          </label>
+          <label
+            >Grid Line Color: <input type="color" x-model="gridLineColor"
+          /></label>
+          <label
+            >Grid Line Width:
+            <input
+              type="number"
+              x-model="gridLineWidth"
+              min="0.5"
+              max="10"
+              step="0.5"
           /></label>
         </div>
       </div>
@@ -449,6 +513,10 @@
           axisLabelColor: config.axisLabelColor || "#000000",
           bleedMin: config.bleedMin || 0.01,
           bleedMax: config.bleedMax || 0.03,
+          brushType: config.brushType || "charcoal",
+          gridBrushType: config.gridBrushType || "pen",
+          gridLineColor: config.gridLineColor || "#000000",
+          gridLineWidth: config.gridLineWidth || 1,
           // Collapsible sections state
           openSections: {
             dimensions: true,
@@ -604,6 +672,10 @@
                 axisLabelColor: this.axisLabelColor,
                 bleedMin: Number(this.bleedMin),
                 bleedMax: Number(this.bleedMax),
+                brushType: this.brushType,
+                gridBrushType: this.gridBrushType,
+                gridLineColor: this.gridLineColor,
+                gridLineWidth: Number(this.gridLineWidth),
               });
 
               return;
@@ -623,6 +695,10 @@
               axisLabelColor: this.axisLabelColor,
               bleedMin: Number(this.bleedMin),
               bleedMax: Number(this.bleedMax),
+              brushType: this.brushType,
+              gridBrushType: this.gridBrushType,
+              gridLineColor: this.gridLineColor,
+              gridLineWidth: Number(this.gridLineWidth),
             });
 
             this.renderChart();
