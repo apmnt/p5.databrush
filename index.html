@@ -68,7 +68,7 @@
         flex-shrink: 0;
         position: relative;
         min-height: 100vh;
-        padding-left: 10px;
+        padding-left: 20px;
         padding-right: 10px;
         overflow: hidden;
         z-index: 999;
@@ -183,6 +183,8 @@
           max-width: 800px;
           order: 2;
           margin-bottom: 20px;
+          padding-left: 10px;
+          padding-right: 10px;
         }
       }
 
@@ -229,9 +231,10 @@
     <div class="controls">
       <h1>*p5.databrush</h1>
       <p>
-        Visualize your data on a watercolor canvas. Plot histograms, scatter
-        plots, box plots, and more. Customize the settings and use your own
-        data, or try randomized plots with sample datasets and palettes.
+        Visualize your data on a watercolor canvas. Choose from histograms,
+        scatter plots, box plots, and line plots. Customize the settings and use
+        your own data, or try randomized plots with sample datasets and
+        palettes.
       </p>
       <!-- Canvas Dimensions Section -->
       <div class="collapsible-section">
@@ -261,9 +264,43 @@
           >
         </div>
         <div class="collapsible-content" x-show="openSections.chartOptions">
-          <label
-            >Number of Bins: <input type="number" x-model="numBins"
-          /></label>
+          <label>
+            Chart Type:
+            <select
+              x-model="chartType"
+              @change="onChartTypeChange()"
+              style="
+                width: 100px;
+                margin-left: 10px;
+                float: right;
+                border-radius: 0;
+                border: 1px solid #000;
+                background-color: #ffffff;
+                padding: 2px;
+              "
+            >
+              <option value="histogram">Histogram</option>
+              <option value="scatter">Scatter Plot</option>
+              <option value="boxplot">Box Plot</option>
+              <option value="line">Line Plot</option>
+            </select>
+          </label>
+          <br /><br />
+          <div x-show="chartType === 'histogram'">
+            <label
+              >Number of Bins: <input type="number" x-model="numBins"
+            /></label>
+          </div>
+          <div x-show="chartType === 'line'">
+            <label>
+              <input
+                type="checkbox"
+                x-model="showDots"
+                style="width: auto; margin-left: 0; float: none"
+              />
+              Show Dots
+            </label>
+          </div>
         </div>
       </div>
 
@@ -289,6 +326,14 @@
           /></label>
           <label
             >Axis Label Color: <input type="color" x-model="axisLabelColor"
+          /></label>
+          <label
+            >Bleed Min:
+            <input type="number" x-model="bleedMin" min="0" max="1" step="0.01"
+          /></label>
+          <label
+            >Bleed Max:
+            <input type="number" x-model="bleedMax" min="0" max="1" step="0.01"
           /></label>
         </div>
       </div>
@@ -321,20 +366,50 @@
         x-text="copyStatus"
       ></span>
       <br />
-      <button
-        @click="updateChart()"
-        x-text="'Update Chart'"
-      ></button>
+      <button @click="updateChart()" x-text="'Update Chart'"></button>
       <span class="button-message" x-show="!isValidData"
         >Please enter valid JSON array</span
       >
-      <h3>Histogram Data Input</h3>
-      <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
-      <textarea
-        x-model="dataInput"
-        class="data-input"
-        placeholder="Enter data as JSON array..."
-      ></textarea>
+      <div x-show="chartType === 'histogram'">
+        <h3>Histogram Data Input</h3>
+        <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
+        <textarea
+          x-model="dataInput"
+          class="data-input"
+          placeholder="Enter data as JSON array..."
+        ></textarea>
+      </div>
+      <div x-show="chartType === 'scatter'">
+        <h3>Scatter Plot Data Input</h3>
+        <p>Enter your data as an array of {x, y} objects or array of arrays:</p>
+        <textarea
+          x-model="dataInput"
+          class="data-input"
+          placeholder="[{x: 1, y: 2}, {x: 3, y: 4}] or [[{x: 1, y: 2}], [{x: 3, y: 4}]]"
+        ></textarea>
+      </div>
+      <div x-show="chartType === 'boxplot'">
+        <h3>Box Plot Data Input</h3>
+        <p>
+          Enter your data as an array of arrays (each inner array is a group):
+        </p>
+        <textarea
+          x-model="dataInput"
+          class="data-input"
+          placeholder="[[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]"
+        ></textarea>
+      </div>
+      <div x-show="chartType === 'line'">
+        <h3>Line Plot Data Input</h3>
+        <p>
+          Enter Y values as an array or array of arrays. X values are optional:
+        </p>
+        <textarea
+          x-model="dataInput"
+          class="data-input"
+          placeholder="[1, 2, 3, 4, 5] or [[1, 2, 3], [4, 5, 6]]"
+        ></textarea>
+      </div>
       <br />
 
       <div class="footer">
@@ -349,6 +424,7 @@
     <script>
       function chartData() {
         return {
+          chartType: "histogram",
           dataInput:
             "[85, 92, 78, 105, 88, 112, 95, 87, 103, 99, 76, 108, 91, 84, 97, 101, 89, 94, 106, 82]",
           parsedData: [
@@ -361,6 +437,7 @@
           canvasHeight: config.canvasHeight || 1000,
           padding: config.padding || 50,
           numBins: 10,
+          showDots: true,
           previousCanvasWidth: config.canvasWidth || 1000,
           previousCanvasHeight: config.canvasHeight || 1000,
           // Style options
@@ -370,10 +447,12 @@
           fontSize: config.fontSize || 12,
           titleFontSize: config.titleFontSize || 36,
           axisLabelColor: config.axisLabelColor || "#000000",
+          bleedMin: config.bleedMin || 0.01,
+          bleedMax: config.bleedMax || 0.03,
           // Collapsible sections state
           openSections: {
             dimensions: true,
-            chartOptions: false,
+            chartOptions: true,
             style: false,
             typography: false,
           },
@@ -382,11 +461,126 @@
             this.openSections[section] = !this.openSections[section];
           },
 
+          onChartTypeChange() {
+            // Update example data based on chart type
+            switch (this.chartType) {
+              case "histogram":
+                this.dataInput =
+                  "[85, 92, 78, 105, 88, 112, 95, 87, 103, 99, 76, 108, 91, 84, 97, 101, 89, 94, 106, 82]";
+                break;
+              case "scatter":
+                this.dataInput =
+                  '[{"x": 1, "y": 2}, {"x": 3, "y": 4.5}, {"x": 5, "y": 3}, {"x": 7, "y": 8}, {"x": 9, "y": 6}]';
+                break;
+              case "boxplot":
+                this.dataInput =
+                  "[[1, 2, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7, 8], [3, 4, 5, 6, 7, 8, 9]]";
+                break;
+              case "line":
+                this.dataInput = "[1, 2, 4, 3, 5, 7, 6, 8, 9, 8]";
+                break;
+            }
+            this.updateChart();
+          },
+
+          renderChart() {
+            setupRest();
+
+            try {
+              const parsed = JSON.parse(this.dataInput);
+
+              switch (this.chartType) {
+                case "histogram":
+                  if (
+                    Array.isArray(parsed) &&
+                    parsed.every((x) => typeof x === "number")
+                  ) {
+                    drawHistogram(parsed, this.numBins);
+                  } else {
+                    this.isValidData = false;
+                    return;
+                  }
+                  break;
+
+                case "scatter":
+                  // Validate scatter plot data
+                  const isValidScatter =
+                    Array.isArray(parsed) &&
+                    // Single array of points
+                    ((parsed.length > 0 &&
+                      parsed[0].hasOwnProperty("x") &&
+                      parsed[0].hasOwnProperty("y")) ||
+                      // Array of arrays of points
+                      (Array.isArray(parsed[0]) &&
+                        parsed[0].length > 0 &&
+                        parsed[0][0].hasOwnProperty("x")));
+
+                  if (isValidScatter) {
+                    drawGrid(Array.isArray(parsed[0]) ? parsed[0] : parsed);
+                    drawScatterPlot(parsed);
+                  } else {
+                    this.isValidData = false;
+                    return;
+                  }
+                  break;
+
+                case "boxplot":
+                  // Validate box plot data (array of arrays)
+                  const isValidBoxplot =
+                    Array.isArray(parsed) &&
+                    parsed.length > 0 &&
+                    Array.isArray(parsed[0]) &&
+                    parsed.every(
+                      (arr) =>
+                        Array.isArray(arr) &&
+                        arr.every((x) => typeof x === "number")
+                    );
+
+                  if (isValidBoxplot) {
+                    drawBoxPlot(parsed);
+                  } else {
+                    this.isValidData = false;
+                    return;
+                  }
+                  break;
+
+                case "line":
+                  // Validate line plot data (array or array of arrays)
+                  const isValidLine =
+                    Array.isArray(parsed) &&
+                    (parsed.every((x) => typeof x === "number") ||
+                      (Array.isArray(parsed[0]) &&
+                        parsed.every(
+                          (arr) =>
+                            Array.isArray(arr) &&
+                            arr.every((x) => typeof x === "number")
+                        )));
+
+                  if (isValidLine) {
+                    drawGrid(
+                      Array.isArray(parsed[0])
+                        ? parsed[0].map((val, idx) => ({ x: idx + 1, y: val }))
+                        : parsed.map((val, idx) => ({ x: idx + 1, y: val }))
+                    );
+                    drawLinePlot(parsed, null, this.showDots);
+                  } else {
+                    this.isValidData = false;
+                    return;
+                  }
+                  break;
+              }
+
+              this.isValidData = true;
+            } catch (e) {
+              this.isValidData = false;
+              console.error("Chart rendering error:", e);
+            }
+          },
+
           updateChart() {
             const newW = Number(this.canvasWidth);
             const newH = Number(this.canvasHeight);
             const newPad = Number(this.padding);
-            const bins = Number(this.numBins);
 
             const sizeChanged =
               newW !== this.previousCanvasWidth ||
@@ -408,43 +602,30 @@
                 fontSize: Number(this.fontSize),
                 titleFontSize: Number(this.titleFontSize),
                 axisLabelColor: this.axisLabelColor,
+                bleedMin: Number(this.bleedMin),
+                bleedMax: Number(this.bleedMax),
               });
 
               return;
             }
 
-            try {
-              const parsed = JSON.parse(this.dataInput);
-              if (
-                Array.isArray(parsed) &&
-                parsed.every((x) => typeof x === "number")
-              ) {
-                this.parsedData = parsed;
-                this.isValidData = true;
+            C.setConfig({
+              canvasWidth: newW,
+              canvasHeight: newH,
+              padding: newPad,
+              previousCanvasWidth: this.previousCanvasWidth,
+              previousCanvasHeight: this.previousCanvasHeight,
+              backgroundColor: this.backgroundColor,
+              lineWidth: Number(this.lineWidth),
+              lineColor: this.lineColor,
+              fontSize: Number(this.fontSize),
+              titleFontSize: Number(this.titleFontSize),
+              axisLabelColor: this.axisLabelColor,
+              bleedMin: Number(this.bleedMin),
+              bleedMax: Number(this.bleedMax),
+            });
 
-                C.setConfig({
-                  canvasWidth: newW,
-                  canvasHeight: newH,
-                  padding: newPad,
-                  previousCanvasWidth: this.previousCanvasWidth,
-                  previousCanvasHeight: this.previousCanvasHeight,
-                  backgroundColor: this.backgroundColor,
-                  lineWidth: Number(this.lineWidth),
-                  lineColor: this.lineColor,
-                  fontSize: Number(this.fontSize),
-                  titleFontSize: Number(this.titleFontSize),
-                  axisLabelColor: this.axisLabelColor,
-                });
-
-                setupRest();
-                drawHistogram(this.parsedData, bins);
-              } else {
-                this.isValidData = false;
-              }
-            } catch (e) {
-              this.isValidData = false;
-              console.error("Update chart error:", e);
-            }
+            this.renderChart();
           },
 
           async saveChart() {
@@ -513,7 +694,7 @@
 
       function setup() {
         commonSetup();
-        // // Initial chart render
+        // Initial chart render
         const data = [
           85, 92, 78, 105, 88, 112, 95, 87, 103, 99, 76, 108, 91, 84, 97, 101,
           89, 94, 106, 82,

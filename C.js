@@ -19,6 +19,8 @@ const config = {
   fontSize: 20,
   titleFontSize: 36,
   axisLabelColor: "#4b4b4bff",
+  bleedMin: 0.01,
+  bleedMax: 0.03,
 };
 
 // Check for pending config from page reload
@@ -231,7 +233,8 @@ function drawLinePlot(
 
   // Set random colors if not provided
   const lineColors =
-    colors || shuffle(palette).slice(0, isMultipleLines ? yValues.length : 1);
+    colors ||
+    shuffle(config.palette).slice(0, isMultipleLines ? yValues.length : 1);
 
   // Iterate over each array in yValues
   for (let i = 0; i < (isMultipleLines ? yValues.length : 1); i++) {
@@ -241,9 +244,9 @@ function drawLinePlot(
     // Draw fill if fillValues is provided
     if (fillValues !== null && fillValues[i] !== undefined) {
       brush.noStroke();
-      brush.bleed(0);
+      brush.bleed(config.bleedMin);
 
-      brush.fill(lineColors[i], 100);
+      brush.fill(lineColors[i]);
       brush.beginShape();
       for (let j = 0; j < xVals.length; j++) {
         const x = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
@@ -272,7 +275,7 @@ function drawLinePlot(
 
     // Plot line
     brush.stroke(lineColors[i]);
-    brush.strokeWeight(config.lineWidth);
+    brush.strokeWeight(10);
 
     for (let j = 0; j < yVals.length - 1; j++) {
       const x1 = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
@@ -291,7 +294,7 @@ function drawLinePlot(
         const x = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
         const y = map(yVals[j], niceMinY, niceMaxY, config.plotHeight, 0);
 
-        brush.bleed(random(0.01, 0.2));
+        brush.bleed(random(config.bleedMin, config.bleedMax));
         brush.fillTexture(0.55, 0.8);
         brush.circle(x, y, random(6, 12));
       }
@@ -346,7 +349,7 @@ function drawHistogram(values, numBins) {
   brush.fill(random(config.palette), random(60, 100));
 
   for (let i = 0; i < numBins; i++) {
-    brush.bleed(random(0.01, 0.05));
+    brush.bleed(random(config.bleedMin, config.bleedMax));
     brush.fillTexture(0.55, 0.8);
     const binHeight = (bins[i] / niceMaxCount) * config.plotHeight;
     brush.rect(
@@ -414,16 +417,16 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
       const group = values[j];
       const groupColor = Array.isArray(colors)
         ? colors[j % colors.length]
-        : colors || random(palette);
+        : colors || random(config.palette);
 
       for (let i = 0; i < group.length; i++) {
         const point = group[i];
         // Map data coordinates to screen coordinates
-        const x = map(point.x, niceMinX, niceMaxX, 0, plotWidth - 0);
-        const y = map(point.y, niceMinY, niceMaxY, plotHeight - 0, 0);
+        const x = map(point.x, niceMinX, niceMaxX, 0, config.plotWidth - 0);
+        const y = map(point.y, niceMinY, niceMaxY, config.plotHeight - 0, 0);
 
         brush.fill(groupColor, random(60, 100));
-        brush.bleed(random(0.01, 0.2));
+        brush.bleed(random(config.bleedMin, config.bleedMax));
         brush.fillTexture(0.55, 0.8);
         // brush.noStroke();
         brush.circle(x, y, random(10, 20));
@@ -436,16 +439,16 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
         "Colors should not be an array when values is a single array of points."
       );
     }
-    const pointColor = colors || random(palette);
+    const pointColor = colors || random(config.palette);
 
     for (let i = 0; i < values.length; i++) {
       const point = values[i];
       // Map data coordinates to screen coordinates
-      const x = map(point.x, niceMinX, niceMaxX, 0, plotWidth - 0);
-      const y = map(point.y, niceMinY, niceMaxY, plotHeight - 0, 0);
+      const x = map(point.x, niceMinX, niceMaxX, 0, config.plotWidth - 0);
+      const y = map(point.y, niceMinY, niceMaxY, config.plotHeight - 0, 0);
 
       brush.fill(pointColor, random(60, 100));
-      brush.bleed(random(0.01, 0.2));
+      brush.bleed(random(config.bleedMin, config.bleedMax));
       brush.fillTexture(0.55, 0.8);
       // brush.noStroke();
       brush.circle(x, y, random(10, 20));
@@ -470,7 +473,7 @@ function drawBoxPlot(data) {
 
   // Drawing settings
   const boxWidth = 50;
-  const groupSpacing = plotWidth / (data.length + 1);
+  const groupSpacing = config.plotWidth / (data.length + 1);
 
   // Move to the plotting area
   push();
@@ -478,8 +481,8 @@ function drawBoxPlot(data) {
   // Draw axes
   brush.stroke(config.lineColor);
   brush.strokeWeight(config.lineWidth);
-  brush.line(0, plotHeight, plotWidth, plotHeight); // x-axis line
-  drawYScale(niceMin, niceMax, niceTick, plotWidth, plotHeight);
+  brush.line(0, config.plotHeight, config.plotWidth, config.plotHeight); // x-axis line
+  drawYScale(niceMin, niceMax, niceTick, config.plotWidth, config.plotHeight);
 
   // Draw box plots
   data.forEach((group, index) => {
@@ -510,12 +513,15 @@ function drawBoxPlot(data) {
 
     // Scale values to plot height
     const scaleY = (val) => {
-      return plotHeight - ((val - minVal) / (maxVal - minVal)) * plotHeight;
+      return (
+        config.plotHeight -
+        ((val - minVal) / (maxVal - minVal)) * config.plotHeight
+      );
     };
 
     // Draw box
-    brush.fill(random(palette), random(60, 100));
-    brush.bleed(random(0.01, 0.04));
+    brush.fill(random(config.palette), random(60, 100));
+    brush.bleed(random(config.bleedMin, config.bleedMax));
     brush.fillTexture(0.55, 0.8);
     brush.rect(
       groupX - boxWidth / 2,
@@ -564,7 +570,7 @@ function drawBoxPlot(data) {
     textAlign(CENTER, TOP);
     textSize(config.fontSize);
     fill(config.axisLabelColor);
-    text(`Group ${index + 1}`, groupX, plotHeight + 10);
+    text(`Group ${index + 1}`, groupX, config.plotHeight + 10);
   });
 
   pop();
@@ -583,6 +589,10 @@ function calculateQuantile(sortedArr, q) {
 }
 
 // Utility functions
+
+function range(start, end) {
+  return Array.from({ length: end - start }, (_, i) => start + i);
+}
 
 function getNormalDistData(length, mean, variance) {
   let arr = Array.from({ length: length }, () => {
