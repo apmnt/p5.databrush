@@ -14,17 +14,17 @@ const config = {
   palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
   // Style options
   backgroundColor: "#fffceb",
-  lineWidth: 1.5,
+  lineWidth: 3,
   lineColor: "#000000ff",
   fontSize: 20,
   titleFontSize: 36,
   axisLabelColor: "#4b4b4bff",
   bleedMin: 0.01,
   bleedMax: 0.03,
-  brushType: "rotring",
+  brushType: "pen",
   gridBrushType: "pen",
   gridLineColor: "#000000ff",
-  gridLineWidth: 1,
+  gridLineWidth: 3,
 };
 
 // Check for pending config from page reload
@@ -284,7 +284,7 @@ function drawLinePlot(
 
     // Plot line
     brush.stroke(lineColors[i]);
-    brush.strokeWeight(10);
+    brush.strokeWeight(config.lineWidth);
 
     for (let j = 0; j < yVals.length - 1; j++) {
       const x1 = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
@@ -358,6 +358,8 @@ function drawHistogram(values, numBins) {
 
   // Histogram bars
   brush.pick(config.brushType);
+  brush.stroke(config.lineColor);
+  brush.strokeWeight(config.lineWidth);
   brush.fill(random(config.palette), random(60, 100));
 
   for (let i = 0; i < numBins; i++) {
@@ -374,8 +376,8 @@ function drawHistogram(values, numBins) {
 
   // Draw axes
   brush.pick(config.gridBrushType);
-  brush.stroke(config.lineColor);
-  brush.strokeWeight(config.lineWidth);
+  brush.stroke(config.gridLineColor);
+  brush.strokeWeight(config.gridLineWidth);
   brush.line(0, config.plotHeight, config.plotWidth, config.plotHeight); // x-axis
   brush.line(0, 0, 0, config.plotHeight); // y-axis
 
@@ -439,10 +441,11 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
         const x = map(point.x, niceMinX, niceMaxX, 0, config.plotWidth - 0);
         const y = map(point.y, niceMinY, niceMaxY, config.plotHeight - 0, 0);
 
+        brush.stroke(config.lineColor);
+        brush.strokeWeight(config.lineWidth);
         brush.fill(groupColor, random(60, 100));
         brush.bleed(random(config.bleedMin, config.bleedMax));
         brush.fillTexture(0.55, 0.8);
-        // brush.noStroke();
         brush.circle(x, y, random(10, 20));
       }
     }
@@ -461,10 +464,11 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
       const x = map(point.x, niceMinX, niceMaxX, 0, config.plotWidth - 0);
       const y = map(point.y, niceMinY, niceMaxY, config.plotHeight - 0, 0);
 
+      brush.stroke(config.lineColor);
+      brush.strokeWeight(config.lineWidth);
       brush.fill(pointColor, random(60, 100));
       brush.bleed(random(config.bleedMin, config.bleedMax));
       brush.fillTexture(0.55, 0.8);
-      // brush.noStroke();
       brush.circle(x, y, random(10, 20));
     }
   }
@@ -537,6 +541,8 @@ function drawBoxPlot(data) {
     };
 
     // Draw box
+    brush.stroke(config.lineColor);
+    brush.strokeWeight(config.lineWidth);
     brush.fill(random(config.palette), random(60, 100));
     brush.bleed(random(config.bleedMin, config.bleedMax));
     brush.fillTexture(0.55, 0.8);
@@ -559,7 +565,7 @@ function drawBoxPlot(data) {
     );
 
     // Draw whiskers
-    strokeWeight(config.gridLineWidth);
+    brush.strokeWeight(config.gridLineWidth);
     if (upperWhisker !== null) {
       brush.line(groupX, scaleY(q3), groupX, scaleY(upperWhisker)); // Upper whisker
       brush.line(
