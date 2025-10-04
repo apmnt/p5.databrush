@@ -376,6 +376,105 @@
         </div>
       </div>
 
+      <!-- Palette & Colors Section -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" @click="toggleSection('palette')">
+          <span>Palette & Colors</span>
+          <span class="arrow" :class="{ open: openSections.palette }">►</span>
+        </div>
+        <div class="collapsible-content" x-show="openSections.palette">
+          <label>
+            Palette Preset:
+            <select
+              class="dropdown"
+              x-model="palettePreset"
+              @change="onPalettePresetChange()"
+            >
+              <option value="matplotlib">matplotlib</option>
+              <option value="matplotlib_dark">matplotlib_dark</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              x-model="randomColors"
+              @change="updateChart()"
+              style="width: auto; margin-left: 0; float: none"
+            />
+            Random Colors from Palette
+          </label>
+          <div x-show="!randomColors">
+            <!-- Histogram: 1 color -->
+            <template x-if="chartType === 'histogram'">
+              <div>
+                <label
+                  >Color 1:
+                  <input type="color" x-model="color1" @input="onColorChange()"
+                /></label>
+              </div>
+            </template>
+
+            <!-- Scatter plot: dynamic based on data -->
+            <template x-if="chartType === 'scatter'">
+              <div>
+                <template x-for="i in getScatterColorCount()" :key="i">
+                  <label>
+                    <span
+                      x-text="'Color ' + i + ':'"
+                      style="display: inline-block; width: 60px"
+                    ></span>
+                    <input
+                      type="color"
+                      :value="getColorValue(i)"
+                      @input="setColorValue(i, $event.target.value)"
+                    />
+                  </label>
+                </template>
+              </div>
+            </template>
+
+            <!-- Box plot: dynamic based on data -->
+            <template x-if="chartType === 'boxplot'">
+              <div>
+                <template x-for="i in getBoxPlotColorCount()" :key="i">
+                  <label>
+                    <span
+                      x-text="'Color ' + i + ':'"
+                      style="display: inline-block; width: 60px"
+                    ></span>
+                    <input
+                      type="color"
+                      :value="getColorValue(i)"
+                      @input="setColorValue(i, $event.target.value)"
+                    />
+                  </label>
+                </template>
+              </div>
+            </template>
+
+            <!-- Line plot: dynamic based on data -->
+            <template x-if="chartType === 'line'">
+              <div>
+                <template x-for="i in getLineColorCount()" :key="i">
+                  <label>
+                    <span
+                      x-text="'Color ' + i + ':'"
+                      style="display: inline-block; width: 60px"
+                    ></span>
+                    <input
+                      type="color"
+                      :value="getColorValue(i)"
+                      @input="setColorValue(i, $event.target.value)"
+                    />
+                  </label>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
       <!-- Fill Options Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('fill')">
@@ -392,6 +491,7 @@
             >
               <option value="watercolor">Watercolor</option>
               <option value="hatch">Hatch</option>
+              <option value="none">No Fill</option>
             </select>
           </label>
 
@@ -654,7 +754,17 @@
           gridBrushType: C.config.gridBrushType,
           gridLineColor: C.config.gridLineColor,
           gridLineWidth: C.config.gridLineWidth,
-          fillType: C.config.useHatching ? "hatch" : "watercolor",
+          palettePreset: C.config.palettePreset,
+          randomColors: C.config.randomColors,
+          color1: C.config.color1,
+          color2: C.config.color2,
+          color3: C.config.color3,
+          color4: C.config.color4,
+          color5: C.config.color5,
+          color6: C.config.color6,
+          fillType:
+            C.config.fillType ||
+            (C.config.useHatching ? "hatch" : "watercolor"),
           useHatching: C.config.useHatching,
           hatchDistance: C.config.hatchDistance,
           hatchAngle: C.config.hatchAngle,
@@ -669,11 +779,141 @@
             chartOptions: false,
             style: false,
             typography: false,
+            palette: false,
             fill: false,
           },
 
           toggleSection(section) {
             this.openSections[section] = !this.openSections[section];
+          },
+
+          getColorValue(index) {
+            const colorKey = "color" + index;
+            return this[colorKey];
+          },
+
+          setColorValue(index, value) {
+            const colorKey = "color" + index;
+            this[colorKey] = value;
+            this.onColorChange();
+          },
+
+          getScatterColorCount() {
+            try {
+              const parsed = JSON.parse(this.dataInput);
+              if (
+                Array.isArray(parsed[0]) &&
+                parsed[0].length > 0 &&
+                parsed[0][0].hasOwnProperty("x")
+              ) {
+                // Array of arrays - show min of groups or 6 colors (will loop if more groups)
+                return Math.min(parsed.length, 6);
+              }
+              return 1; // Single array
+            } catch (e) {
+              return 1;
+            }
+          },
+
+          getBoxPlotColorCount() {
+            try {
+              const parsed = JSON.parse(this.dataInput);
+              if (Array.isArray(parsed) && Array.isArray(parsed[0])) {
+                // Show min of boxes or 6 colors (will loop if more boxes)
+                return Math.min(parsed.length, 6);
+              }
+              return 1;
+            } catch (e) {
+              return 1;
+            }
+          },
+
+          getLineColorCount() {
+            try {
+              const parsed = JSON.parse(this.dataInput);
+              if (Array.isArray(parsed[0])) {
+                // Array of arrays - show min of lines or 6 colors (will loop if more lines)
+                return Math.min(parsed.length, 6);
+              }
+              return 1; // Single array
+            } catch (e) {
+              return 1;
+            }
+          },
+
+          onPalettePresetChange() {
+            // Update colors when preset changes
+            const palettePresets = {
+              default: [
+                "#2c695a",
+                "#4ad6af",
+                "#7facc6",
+                "#4e93cc",
+                "#f6684f",
+                "#ffd300",
+              ],
+              warm: [
+                "#ff6b35",
+                "#f7931e",
+                "#fdc70f",
+                "#f3722c",
+                "#f94144",
+                "#d62828",
+              ],
+              cool: [
+                "#4361ee",
+                "#4895ef",
+                "#4cc9f0",
+                "#7209b7",
+                "#560bad",
+                "#3a0ca3",
+              ],
+              pastel: [
+                "#ffadad",
+                "#ffd6a5",
+                "#fdffb6",
+                "#caffbf",
+                "#9bf6ff",
+                "#a0c4ff",
+              ],
+              earthy: [
+                "#6a4c93",
+                "#1982c4",
+                "#8ac926",
+                "#ffca3a",
+                "#ff595e",
+                "#774936",
+              ],
+              monochrome: [
+                "#2b2d42",
+                "#8d99ae",
+                "#edf2f4",
+                "#ef233c",
+                "#d90429",
+                "#6c757d",
+              ],
+            };
+
+            if (
+              this.palettePreset !== "custom" &&
+              palettePresets[this.palettePreset]
+            ) {
+              const colors = palettePresets[this.palettePreset];
+              this.color1 = colors[0];
+              this.color2 = colors[1];
+              this.color3 = colors[2];
+              this.color4 = colors[3];
+              this.color5 = colors[4];
+              this.color6 = colors[5];
+            }
+
+            this.updateChart();
+          },
+
+          onColorChange() {
+            // Switch to custom when any color is changed
+            this.palettePreset = "custom";
+            this.updateChart();
           },
 
           generateRandomData() {
@@ -956,6 +1196,23 @@
               gridBrushType: this.gridBrushType,
               gridLineColor: this.gridLineColor,
               gridLineWidth: Number(this.gridLineWidth),
+              palettePreset: this.palettePreset,
+              randomColors: this.randomColors,
+              color1: this.color1,
+              color2: this.color2,
+              color3: this.color3,
+              color4: this.color4,
+              color5: this.color5,
+              color6: this.color6,
+              palettePreset: this.palettePreset,
+              randomColors: this.randomColors,
+              color1: this.color1,
+              color2: this.color2,
+              color3: this.color3,
+              color4: this.color4,
+              color5: this.color5,
+              color6: this.color6,
+              fillType: this.fillType,
               useHatching: this.useHatching,
               hatchDistance: Number(this.hatchDistance),
               hatchAngle: Number(this.hatchAngle),

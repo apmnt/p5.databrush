@@ -11,7 +11,26 @@ const config = {
   plotHeight: initialSize - 2 * 50,
   previousPlotWidth: initialSize - 2 * 50,
   previousPlotHeight: initialSize - 2 * 50,
-  palette: ["#2c695a", "#4ad6af", "#7facc6", "#4e93cc", "#f6684f", "#ffd300"],
+  palette: [
+    "#1f77b4",
+    "#ff7f0e",
+    "#2ca02c",
+    "#d62728",
+    "#9467bd",
+    "#8c564b",
+    "#e377c2",
+    "#7f7f7f",
+    "#bcbd22",
+    "#17becf",
+  ],
+  palettePreset: "matplotlib",
+  randomColors: true,
+  color1: "#1f77b4",
+  color2: "#ff7f0e",
+  color3: "#2ca02c",
+  color4: "#d62728",
+  color5: "#9467bd",
+  color6: "#8c564b",
   backgroundColor: "#fffceb",
   lineWidth: 3,
   lineColor: "#000000ff",
@@ -25,6 +44,7 @@ const config = {
   gridLineColor: "#000000ff",
   gridLineWidth: 3,
   useHatching: false,
+  fillType: "watercolor",
   hatchDistance: 5,
   hatchAngle: 45,
   hatchRand: 0.1,
@@ -32,6 +52,34 @@ const config = {
   hatchGradient: 0,
   hatchBrushType: "cpencil",
   hatchLineWidth: 5,
+};
+
+// Palette presets
+const palettePresets = {
+  matplotlib: [
+    "#1f77b4",
+    "#ff7f0e",
+    "#2ca02c",
+    "#d62728",
+    "#9467bd",
+    "#8c564b",
+    "#e377c2",
+    "#7f7f7f",
+    "#bcbd22",
+    "#17becf",
+  ],
+  matplotlib_dark: [
+    "#001c7f",
+    "#b1400d",
+    "#12711c",
+    "#8c0800",
+    "#591e71",
+    "#592f0d",
+    "#a23582",
+    "#3c3c3c",
+    "#b8850a",
+    "#006374",
+  ],
 };
 
 // Check for pending config from page reload
@@ -71,6 +119,36 @@ const C = {
       newConfig.canvasWidth !== config.canvasWidth ||
       newConfig.canvasHeight !== config.canvasHeight;
     Object.assign(config, newConfig);
+
+    // Sync fillType with useHatching if provided
+    if (newConfig.fillType !== undefined) {
+      config.fillType = newConfig.fillType;
+    }
+
+    // Update palette if preset changed
+    if (newConfig.palettePreset && palettePresets[newConfig.palettePreset]) {
+      config.palette = [...palettePresets[newConfig.palettePreset]];
+      // Update individual colors when preset changes
+      config.color1 = config.palette[0];
+      config.color2 = config.palette[1];
+      config.color3 = config.palette[2];
+      config.color4 = config.palette[3];
+      config.color5 = config.palette[4];
+      config.color6 = config.palette[5];
+    }
+
+    // Update palette with custom colors if not random
+    if (!config.randomColors) {
+      config.palette = [
+        config.color1,
+        config.color2,
+        config.color3,
+        config.color4,
+        config.color5,
+        config.color6,
+      ];
+    }
+
     config.plotWidth = config.canvasWidth - 2 * config.padding;
     config.plotHeight = config.canvasHeight - 2 * config.padding;
     if (dimensionsChanged) {
@@ -273,6 +351,8 @@ function drawLinePlot(
           continuous: config.hatchContinuous,
           gradient: config.hatchGradient,
         });
+      } else if (config.fillType === "none") {
+        brush.noFill();
       } else {
         brush.bleed(config.bleedMin);
         brush.fill(lineColors[i]);
@@ -387,7 +467,9 @@ function drawHistogram(values, numBins) {
   brush.stroke(config.lineColor);
   brush.strokeWeight(config.lineWidth);
 
-  const barColor = random(config.palette);
+  const barColor = config.randomColors
+    ? random(config.palette)
+    : config.palette[0];
 
   if (config.useHatching) {
     brush.noFill();
@@ -397,12 +479,14 @@ function drawHistogram(values, numBins) {
       continuous: config.hatchContinuous,
       gradient: config.hatchGradient,
     });
+  } else if (config.fillType === "none") {
+    brush.noFill();
   } else {
     brush.fill(barColor, random(60, 100));
   }
 
   for (let i = 0; i < numBins; i++) {
-    if (!config.useHatching) {
+    if (!config.useHatching && config.fillType !== "none") {
       brush.bleed(random(config.bleedMin, config.bleedMax));
       brush.fillTexture(0.55, 0.8);
     }
@@ -478,7 +562,10 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
       const group = values[j];
       const groupColor = Array.isArray(colors)
         ? colors[j % colors.length]
-        : colors || random(config.palette);
+        : colors ||
+          (config.randomColors
+            ? random(config.palette)
+            : config.palette[j % config.palette.length]);
 
       for (let i = 0; i < group.length; i++) {
         const point = group[i];
@@ -501,6 +588,8 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
             continuous: config.hatchContinuous,
             gradient: config.hatchGradient,
           });
+        } else if (config.fillType === "none") {
+          brush.noFill();
         } else {
           brush.fill(groupColor, random(60, 100));
           brush.bleed(random(config.bleedMin, config.bleedMax));
@@ -521,7 +610,9 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
         "Colors should not be an array when values is a single array of points."
       );
     }
-    const pointColor = colors || random(config.palette);
+    const pointColor =
+      colors ||
+      (config.randomColors ? random(config.palette) : config.palette[0]);
 
     for (let i = 0; i < values.length; i++) {
       const point = values[i];
@@ -544,6 +635,8 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
           continuous: config.hatchContinuous,
           gradient: config.hatchGradient,
         });
+      } else if (config.fillType === "none") {
+        brush.noFill();
       } else {
         brush.fill(pointColor, random(60, 100));
         brush.bleed(random(config.bleedMin, config.bleedMax));
@@ -638,7 +731,9 @@ function drawBoxPlot(data) {
     brush.stroke(config.lineColor);
     brush.strokeWeight(config.lineWidth);
 
-    const boxColor = random(config.palette);
+    const boxColor = config.randomColors
+      ? random(config.palette)
+      : config.palette[index % config.palette.length];
 
     if (config.useHatching) {
       brush.noFill();
@@ -648,6 +743,8 @@ function drawBoxPlot(data) {
         continuous: config.hatchContinuous,
         gradient: config.hatchGradient,
       });
+    } else if (config.fillType === "none") {
+      brush.noFill();
     } else {
       brush.fill(boxColor, random(60, 100));
       brush.bleed(random(config.bleedMin, config.bleedMax));
