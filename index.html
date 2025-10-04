@@ -246,29 +246,6 @@
         your own data, or try randomized plots with sample datasets and
         palettes.
       </p>
-      <!-- Canvas Dimensions Section -->
-      <div class="collapsible-section">
-        <div class="collapsible-header" @click="toggleSection('dimensions')">
-          <span>Canvas Dimensions</span>
-          <span class="arrow" :class="{ open: openSections.dimensions }"
-            >►</span
-          >
-        </div>
-        <div class="collapsible-content" x-show="openSections.dimensions">
-          <label
-            >Canvas Width:
-            <input type="number" x-model="canvasWidth" @input="updateChart()"
-          /></label>
-          <label
-            >Canvas Height:
-            <input type="number" x-model="canvasHeight" @input="updateChart()"
-          /></label>
-          <label
-            >Padding:
-            <input type="number" x-model="padding" @input="updateChart()"
-          /></label>
-        </div>
-      </div>
 
       <!-- Chart Options Section -->
       <div class="collapsible-section">
@@ -449,6 +426,30 @@
         </div>
       </div>
 
+      <!-- Canvas Dimensions Section -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" @click="toggleSection('dimensions')">
+          <span>Canvas Dimensions</span>
+          <span class="arrow" :class="{ open: openSections.dimensions }"
+            >►</span
+          >
+        </div>
+        <div class="collapsible-content" x-show="openSections.dimensions">
+          <label
+            >Canvas Width:
+            <input type="number" x-model="canvasWidth" @input="updateChart()"
+          /></label>
+          <label
+            >Canvas Height:
+            <input type="number" x-model="canvasHeight" @input="updateChart()"
+          /></label>
+          <label
+            >Padding:
+            <input type="number" x-model="padding" @input="updateChart()"
+          /></label>
+        </div>
+      </div>
+
       <br />
       <button @click="saveChart()">Copy chart to clipboard</button>
       <span
@@ -548,8 +549,8 @@
           gridLineWidth: C.config.gridLineWidth,
           // Collapsible sections state
           openSections: {
-            dimensions: true,
-            chartOptions: true,
+            dimensions: false,
+            chartOptions: false,
             style: false,
             typography: false,
           },
