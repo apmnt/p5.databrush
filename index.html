@@ -340,26 +340,6 @@
               step="0.5"
               @input="updateChart()"
           /></label>
-          <label
-            >Bleed Min:
-            <input
-              type="number"
-              x-model="bleedMin"
-              min="0"
-              max="1"
-              step="0.01"
-              @input="updateChart()"
-          /></label>
-          <label
-            >Bleed Max:
-            <input
-              type="number"
-              x-model="bleedMax"
-              min="0"
-              max="1"
-              step="0.01"
-              @input="updateChart()"
-          /></label>
           <label>
             Grid Brush Type:
             <select
@@ -393,6 +373,133 @@
               step="0.5"
               @input="updateChart()"
           /></label>
+        </div>
+      </div>
+
+      <!-- Fill Options Section -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" @click="toggleSection('fill')">
+          <span>Fill Options</span>
+          <span class="arrow" :class="{ open: openSections.fill }">►</span>
+        </div>
+        <div class="collapsible-content" x-show="openSections.fill">
+          <label>
+            Fill Type:
+            <select
+              class="dropdown"
+              x-model="fillType"
+              @change="useHatching = (fillType === 'hatch'); updateChart()"
+            >
+              <option value="watercolor">Watercolor</option>
+              <option value="hatch">Hatch</option>
+            </select>
+          </label>
+
+          <!-- Watercolor options -->
+          <div x-show="fillType === 'watercolor'">
+            <label
+              >Bleed Min:
+              <input
+                type="number"
+                x-model="bleedMin"
+                min="0"
+                max="1"
+                step="0.01"
+                @input="updateChart()"
+            /></label>
+            <label
+              >Bleed Max:
+              <input
+                type="number"
+                x-model="bleedMax"
+                min="0"
+                max="1"
+                step="0.01"
+                @input="updateChart()"
+            /></label>
+          </div>
+
+          <!-- Hatching options -->
+          <div x-show="fillType === 'hatch'">
+            <label
+              >Hatch Distance:
+              <input
+                type="number"
+                x-model="hatchDistance"
+                min="1"
+                max="20"
+                step="1"
+                @input="updateChart()"
+            /></label>
+            <label
+              >Hatch Angle:
+              <input
+                type="number"
+                x-model="hatchAngle"
+                min="0"
+                max="180"
+                step="5"
+                @input="updateChart()"
+            /></label>
+            <label
+              >Hatch Randomness:
+              <input
+                type="number"
+                x-model="hatchRand"
+                min="0"
+                max="1"
+                step="0.05"
+                @input="updateChart()"
+            /></label>
+            <label
+              >Hatch Gradient:
+              <input
+                type="number"
+                x-model="hatchGradient"
+                min="0"
+                max="1"
+                step="0.05"
+                @input="updateChart()"
+            /></label>
+            <label>
+              <input
+                type="checkbox"
+                x-model="hatchContinuous"
+                @change="updateChart()"
+                style="width: auto; margin-left: 0; float: none"
+              />
+              Continuous Hatching
+            </label>
+            <label>
+              Hatch Brush Type:
+              <select
+                class="dropdown"
+                x-model="hatchBrushType"
+                @change="updateChart()"
+              >
+                <option value="pen">Pen</option>
+                <option value="rotring">Rotring</option>
+                <option value="2B">2B Pencil</option>
+                <option value="HB">HB Pencil</option>
+                <option value="2H">2H Pencil</option>
+                <option value="cpencil">Color Pencil</option>
+                <option value="charcoal">Charcoal</option>
+                <option value="hatch_brush">Hatch Brush</option>
+                <option value="marker">Marker</option>
+                <option value="marker2">Marker 2</option>
+              </select>
+            </label>
+            <label
+              >Hatch Line Width:
+              <input
+                type="number"
+                x-model="hatchLineWidth"
+                min="0.5"
+                max="10"
+                step="0.5"
+                @input="updateChart()"
+            /></label>
+          </div>
         </div>
       </div>
 
@@ -547,12 +654,22 @@
           gridBrushType: C.config.gridBrushType,
           gridLineColor: C.config.gridLineColor,
           gridLineWidth: C.config.gridLineWidth,
+          fillType: C.config.useHatching ? "hatch" : "watercolor",
+          useHatching: C.config.useHatching,
+          hatchDistance: C.config.hatchDistance,
+          hatchAngle: C.config.hatchAngle,
+          hatchRand: C.config.hatchRand,
+          hatchContinuous: C.config.hatchContinuous,
+          hatchGradient: C.config.hatchGradient,
+          hatchBrushType: C.config.hatchBrushType,
+          hatchLineWidth: C.config.hatchLineWidth,
           // Collapsible sections state
           openSections: {
             dimensions: false,
             chartOptions: false,
             style: false,
             typography: false,
+            fill: false,
           },
 
           toggleSection(section) {
@@ -808,6 +925,14 @@
                 gridBrushType: this.gridBrushType,
                 gridLineColor: this.gridLineColor,
                 gridLineWidth: Number(this.gridLineWidth),
+                useHatching: this.useHatching,
+                hatchDistance: Number(this.hatchDistance),
+                hatchAngle: Number(this.hatchAngle),
+                hatchRand: Number(this.hatchRand),
+                hatchContinuous: this.hatchContinuous,
+                hatchGradient: Number(this.hatchGradient),
+                hatchBrushType: this.hatchBrushType,
+                hatchLineWidth: Number(this.hatchLineWidth),
               });
 
               return;
@@ -831,8 +956,15 @@
               gridBrushType: this.gridBrushType,
               gridLineColor: this.gridLineColor,
               gridLineWidth: Number(this.gridLineWidth),
+              useHatching: this.useHatching,
+              hatchDistance: Number(this.hatchDistance),
+              hatchAngle: Number(this.hatchAngle),
+              hatchRand: Number(this.hatchRand),
+              hatchContinuous: this.hatchContinuous,
+              hatchGradient: Number(this.hatchGradient),
+              hatchBrushType: this.hatchBrushType,
+              hatchLineWidth: Number(this.hatchLineWidth),
             });
-
             this.renderChart();
           },
 

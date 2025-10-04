@@ -24,6 +24,14 @@ const config = {
   gridBrushType: "pen",
   gridLineColor: "#000000ff",
   gridLineWidth: 3,
+  useHatching: false,
+  hatchDistance: 5,
+  hatchAngle: 45,
+  hatchRand: 0.1,
+  hatchContinuous: false,
+  hatchGradient: 0,
+  hatchBrushType: "cpencil",
+  hatchLineWidth: 5,
 };
 
 // Check for pending config from page reload
@@ -252,9 +260,24 @@ function drawLinePlot(
     // Draw fill if fillValues is provided
     if (fillValues !== null && fillValues[i] !== undefined) {
       brush.noStroke();
-      brush.bleed(config.bleedMin);
 
-      brush.fill(lineColors[i]);
+      if (config.useHatching) {
+        brush.noFill();
+        brush.setHatch(
+          config.hatchBrushType,
+          lineColors[i],
+          config.hatchLineWidth
+        );
+        brush.hatch(config.hatchDistance, config.hatchAngle, {
+          rand: config.hatchRand,
+          continuous: config.hatchContinuous,
+          gradient: config.hatchGradient,
+        });
+      } else {
+        brush.bleed(config.bleedMin);
+        brush.fill(lineColors[i]);
+      }
+
       brush.beginShape();
       for (let j = 0; j < xVals.length; j++) {
         const x = map(xVals[j], niceMinX, niceMaxX, 0, config.plotWidth);
@@ -279,6 +302,10 @@ function drawLinePlot(
         brush.vertex(x, y2);
       }
       brush.endShape(CLOSE);
+
+      if (config.useHatching) {
+        brush.noHatch();
+      }
     }
 
     // Plot line
@@ -359,11 +386,26 @@ function drawHistogram(values, numBins) {
   brush.pick(config.brushType);
   brush.stroke(config.lineColor);
   brush.strokeWeight(config.lineWidth);
-  brush.fill(random(config.palette), random(60, 100));
+
+  const barColor = random(config.palette);
+
+  if (config.useHatching) {
+    brush.noFill();
+    brush.setHatch(config.hatchBrushType, barColor, config.hatchLineWidth);
+    brush.hatch(config.hatchDistance, config.hatchAngle, {
+      rand: config.hatchRand,
+      continuous: config.hatchContinuous,
+      gradient: config.hatchGradient,
+    });
+  } else {
+    brush.fill(barColor, random(60, 100));
+  }
 
   for (let i = 0; i < numBins; i++) {
-    brush.bleed(random(config.bleedMin, config.bleedMax));
-    brush.fillTexture(0.55, 0.8);
+    if (!config.useHatching) {
+      brush.bleed(random(config.bleedMin, config.bleedMax));
+      brush.fillTexture(0.55, 0.8);
+    }
     const binHeight = (bins[i] / niceMaxCount) * config.plotHeight;
     brush.rect(
       i * binWidth,
@@ -371,6 +413,10 @@ function drawHistogram(values, numBins) {
       binWidth - 1,
       binHeight
     );
+  }
+
+  if (config.useHatching) {
+    brush.noHatch();
   }
 
   // Draw axes
@@ -442,10 +488,30 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
 
         brush.stroke(config.lineColor);
         brush.strokeWeight(config.lineWidth);
-        brush.fill(groupColor, random(60, 100));
-        brush.bleed(random(config.bleedMin, config.bleedMax));
-        brush.fillTexture(0.55, 0.8);
+
+        if (config.useHatching) {
+          brush.noFill();
+          brush.setHatch(
+            config.hatchBrushType,
+            groupColor,
+            config.hatchLineWidth
+          );
+          brush.hatch(config.hatchDistance, config.hatchAngle, {
+            rand: config.hatchRand,
+            continuous: config.hatchContinuous,
+            gradient: config.hatchGradient,
+          });
+        } else {
+          brush.fill(groupColor, random(60, 100));
+          brush.bleed(random(config.bleedMin, config.bleedMax));
+          brush.fillTexture(0.55, 0.8);
+        }
+
         brush.circle(x, y, random(10, 20));
+
+        if (config.useHatching) {
+          brush.noHatch();
+        }
       }
     }
   } else {
@@ -465,10 +531,30 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
 
       brush.stroke(config.lineColor);
       brush.strokeWeight(config.lineWidth);
-      brush.fill(pointColor, random(60, 100));
-      brush.bleed(random(config.bleedMin, config.bleedMax));
-      brush.fillTexture(0.55, 0.8);
+
+      if (config.useHatching) {
+        brush.noFill();
+        brush.setHatch(
+          config.hatchBrushType,
+          pointColor,
+          config.hatchLineWidth
+        );
+        brush.hatch(config.hatchDistance, config.hatchAngle, {
+          rand: config.hatchRand,
+          continuous: config.hatchContinuous,
+          gradient: config.hatchGradient,
+        });
+      } else {
+        brush.fill(pointColor, random(60, 100));
+        brush.bleed(random(config.bleedMin, config.bleedMax));
+        brush.fillTexture(0.55, 0.8);
+      }
+
       brush.circle(x, y, random(10, 20));
+
+      if (config.useHatching) {
+        brush.noHatch();
+      }
     }
   }
 }
@@ -551,15 +637,33 @@ function drawBoxPlot(data) {
     // Draw box
     brush.stroke(config.lineColor);
     brush.strokeWeight(config.lineWidth);
-    brush.fill(random(config.palette), random(60, 100));
-    brush.bleed(random(config.bleedMin, config.bleedMax));
-    brush.fillTexture(0.55, 0.8);
+
+    const boxColor = random(config.palette);
+
+    if (config.useHatching) {
+      brush.noFill();
+      brush.setHatch(config.hatchBrushType, boxColor, config.hatchLineWidth);
+      brush.hatch(config.hatchDistance, config.hatchAngle, {
+        rand: config.hatchRand,
+        continuous: config.hatchContinuous,
+        gradient: config.hatchGradient,
+      });
+    } else {
+      brush.fill(boxColor, random(60, 100));
+      brush.bleed(random(config.bleedMin, config.bleedMax));
+      brush.fillTexture(0.55, 0.8);
+    }
+
     brush.rect(
       groupX - boxWidth / 2,
       scaleY(q3),
       boxWidth,
       scaleY(q1) - scaleY(q3)
     );
+
+    if (config.useHatching) {
+      brush.noHatch();
+    }
 
     // Draw median line
     brush.pick(config.gridBrushType);
