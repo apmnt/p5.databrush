@@ -390,8 +390,12 @@
               x-model="palettePreset"
               @change="onPalettePresetChange()"
             >
-              <option value="matplotlib">matplotlib</option>
-              <option value="matplotlib_dark">matplotlib_dark</option>
+              <template
+                x-for="presetName in palettePresetNames"
+                :key="presetName"
+              >
+                <option :value="presetName" x-text="presetName"></option>
+              </template>
               <option value="custom">Custom</option>
             </select>
           </label>
@@ -734,6 +738,7 @@
           ],
           isValidData: true,
           copyStatus: "",
+          palettePresetNames: Object.keys(C.palettePresets),
           // Load all config values from C.config
           canvasWidth: C.config.canvasWidth,
           canvasHeight: C.config.canvasHeight,
@@ -843,62 +848,11 @@
 
           onPalettePresetChange() {
             // Update colors when preset changes
-            const palettePresets = {
-              default: [
-                "#2c695a",
-                "#4ad6af",
-                "#7facc6",
-                "#4e93cc",
-                "#f6684f",
-                "#ffd300",
-              ],
-              warm: [
-                "#ff6b35",
-                "#f7931e",
-                "#fdc70f",
-                "#f3722c",
-                "#f94144",
-                "#d62828",
-              ],
-              cool: [
-                "#4361ee",
-                "#4895ef",
-                "#4cc9f0",
-                "#7209b7",
-                "#560bad",
-                "#3a0ca3",
-              ],
-              pastel: [
-                "#ffadad",
-                "#ffd6a5",
-                "#fdffb6",
-                "#caffbf",
-                "#9bf6ff",
-                "#a0c4ff",
-              ],
-              earthy: [
-                "#6a4c93",
-                "#1982c4",
-                "#8ac926",
-                "#ffca3a",
-                "#ff595e",
-                "#774936",
-              ],
-              monochrome: [
-                "#2b2d42",
-                "#8d99ae",
-                "#edf2f4",
-                "#ef233c",
-                "#d90429",
-                "#6c757d",
-              ],
-            };
-
             if (
               this.palettePreset !== "custom" &&
-              palettePresets[this.palettePreset]
+              C.palettePresets[this.palettePreset]
             ) {
-              const colors = palettePresets[this.palettePreset];
+              const colors = C.palettePresets[this.palettePreset];
               this.color1 = colors[0];
               this.color2 = colors[1];
               this.color3 = colors[2];

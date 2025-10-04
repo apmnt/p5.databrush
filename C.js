@@ -105,6 +105,7 @@ function preload() {
 const C = {
   loaded: false,
   config: config,
+  palettePresets: palettePresets,
   prop() {
     return this.height / this.width;
   },
