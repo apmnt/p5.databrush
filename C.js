@@ -80,6 +80,22 @@ const palettePresets = {
     "#b8850a",
     "#006374",
   ],
+  viridis: ["#46317e", "#365b8c", "#277e8e", "#1fa187", "#49c16d", "#9fd938"],
+  cividis: ["#213b6e", "#4c546c", "#6c6d72", "#8d8978", "#b1a570", "#d8c45b"],
+  mako: ["#2e1e3a", "#403c7b", "#37659d", "#338ea7", "#40b7ad", "#8bd9b2"],
+  bone: ["#1f1f2b", "#3f3f58", "#5f647f", "#7f919f", "#9fbcbf", "#cddfdf"],
+  afmhot: ["#480000", "#921200", "#da5a00", "#ffa424", "#ffec6d", "#ffffb6"],
+  cubehelix: ["#1a2341", "#1b6144", "#687a30", "#c77a7c", "#cda2e0", "#c6e1f1"],
+  gnuplot: ["#5f00c5", "#8805f8", "#a61370", "#c02f00", "#d75c00", "#eca100"],
+  RdYlGn: ["#e24932", "#fba55c", "#fee899", "#e3f399", "#9dd569", "#39a757"],
+  gist_earth: [
+    "#174079",
+    "#30807e",
+    "#419552",
+    "#82a853",
+    "#b8b35f",
+    "#d4b093",
+  ],
 };
 
 // Check for pending config from page reload
