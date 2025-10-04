@@ -247,10 +247,10 @@
         palettes.
       </p>
 
-      <!-- Chart Options Section -->
+      <!-- Chart Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('chartOptions')">
-          <span>Chart Options</span>
+          <span>Chart</span>
           <span class="arrow" :class="{ open: openSections.chartOptions }"
             >►</span
           >
@@ -289,10 +289,10 @@
         </div>
       </div>
 
-      <!-- Style Options Section -->
+      <!-- Style Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('style')">
-          <span>Style Options</span>
+          <span>Style</span>
           <span class="arrow" :class="{ open: openSections.style }">►</span>
         </div>
         <div class="collapsible-content" x-show="openSections.style">
@@ -479,10 +479,10 @@
         </div>
       </div>
 
-      <!-- Fill Options Section -->
+      <!-- Fill Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('fill')">
-          <span>Fill Options</span>
+          <span>Fill</span>
           <span class="arrow" :class="{ open: openSections.fill }">►</span>
         </div>
         <div class="collapsible-content" x-show="openSections.fill">
@@ -499,7 +499,7 @@
             </select>
           </label>
 
-          <!-- Watercolor options -->
+          <!-- Watercolor -->
           <div x-show="fillType === 'watercolor'">
             <label
               >Bleed Min:
@@ -523,7 +523,7 @@
             /></label>
           </div>
 
-          <!-- Hatching options -->
+          <!-- Hatching -->
           <div x-show="fillType === 'hatch'">
             <label
               >Hatch Distance:
@@ -640,7 +640,7 @@
       <!-- Canvas Dimensions Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('dimensions')">
-          <span>Canvas Dimensions</span>
+          <span>Canvas</span>
           <span class="arrow" :class="{ open: openSections.dimensions }"
             >►</span
           >
