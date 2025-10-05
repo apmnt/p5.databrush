@@ -363,7 +363,7 @@ function drawLinePlot(
           lineColors[i],
           config.hatchLineWidth
         );
-        brush.hatch(config.hatchDistance, config.hatchAngle, {
+        brush.hatch(config.hatchDistance, config.hatchAngle + random(-10, 10), {
           rand: config.hatchRand,
           continuous: config.hatchContinuous,
           gradient: config.hatchGradient,
@@ -491,7 +491,7 @@ function drawHistogram(values, numBins) {
   if (config.useHatching) {
     brush.noFill();
     brush.setHatch(config.hatchBrushType, barColor, config.hatchLineWidth);
-    brush.hatch(config.hatchDistance, config.hatchAngle, {
+    brush.hatch(config.hatchDistance, config.hatchAngle + random(-10, 10), {
       rand: config.hatchRand,
       continuous: config.hatchContinuous,
       gradient: config.hatchGradient,
@@ -600,11 +600,15 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
             groupColor,
             config.hatchLineWidth
           );
-          brush.hatch(config.hatchDistance, config.hatchAngle, {
-            rand: config.hatchRand,
-            continuous: config.hatchContinuous,
-            gradient: config.hatchGradient,
-          });
+          brush.hatch(
+            config.hatchDistance,
+            config.hatchAngle + random(-10, 10),
+            {
+              rand: config.hatchRand,
+              continuous: config.hatchContinuous,
+              gradient: config.hatchGradient,
+            }
+          );
         } else if (config.fillType === "none") {
           brush.noFill();
         } else {
@@ -647,7 +651,7 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
           pointColor,
           config.hatchLineWidth
         );
-        brush.hatch(config.hatchDistance, config.hatchAngle, {
+        brush.hatch(config.hatchDistance, config.hatchAngle + random(-10, 10), {
           rand: config.hatchRand,
           continuous: config.hatchContinuous,
           gradient: config.hatchGradient,
@@ -745,6 +749,7 @@ function drawBoxPlot(data) {
     };
 
     // Draw box
+    brush.pick(config.brushType);
     brush.stroke(config.lineColor);
     brush.strokeWeight(config.lineWidth);
 
@@ -755,7 +760,7 @@ function drawBoxPlot(data) {
     if (config.useHatching) {
       brush.noFill();
       brush.setHatch(config.hatchBrushType, boxColor, config.hatchLineWidth);
-      brush.hatch(config.hatchDistance, config.hatchAngle, {
+      brush.hatch(config.hatchDistance, config.hatchAngle + random(-10, 10), {
         rand: config.hatchRand,
         continuous: config.hatchContinuous,
         gradient: config.hatchGradient,
