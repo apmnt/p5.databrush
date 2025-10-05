@@ -398,6 +398,8 @@
             use your own data, or try randomized plots with sample datasets and
             palettes.
           </p>
+          <button @click="randomizeAll()">Randomize Everything</button>
+          <br />
           <button @click="generateRandomData()">Generate random data</button>
           <br />
           <button @click="updateChart()" x-text="'Redraw chart'"></button>
@@ -1250,6 +1252,197 @@
             }
 
             // Update the chart with new random data
+            this.updateChart();
+          },
+
+          randomizeAll() {
+            const chartTypes = ["histogram", "scatter", "boxplot", "line"];
+            this.chartType =
+              chartTypes[Math.floor(Math.random() * chartTypes.length)];
+
+            const presetKeys = Object.keys(C.palettePresets);
+            this.palettePreset =
+              presetKeys[Math.floor(Math.random() * presetKeys.length)];
+
+            if (
+              this.palettePreset !== "custom" &&
+              C.palettePresets[this.palettePreset]
+            ) {
+              const colors = C.palettePresets[this.palettePreset];
+              this.color1 = colors[0];
+              this.color2 = colors[1];
+              this.color3 = colors[2];
+              this.color4 = colors[3];
+              this.color5 = colors[4];
+              this.color6 = colors[5];
+            }
+
+            this.randomColors = Math.random() > 0.5;
+
+            const bgColors = [
+              "#f5f5dc",
+              "#faf0e6",
+              "#fff8dc",
+              "#ffefd5",
+              "#e6e6fa",
+              "#f0f8ff",
+              "#ccd5ae",
+              "#e9edc9",
+              "#fefae0",
+              "#faedcd",
+              "#edede9",
+              "#d6ccc2",
+              "#f5ebe0",
+              "#e3d5ca",
+              "#d5bdaf",
+            ];
+            this.backgroundColor =
+              bgColors[Math.floor(Math.random() * bgColors.length)];
+
+            const brushTypes = [
+              "pen",
+              "rotring",
+              "2B",
+              "HB",
+              "2H",
+              "cpencil",
+              "charcoal",
+              "marker",
+              "marker2",
+            ];
+            this.brushType =
+              brushTypes[Math.floor(Math.random() * brushTypes.length)];
+            this.gridBrushType =
+              brushTypes[Math.floor(Math.random() * brushTypes.length)];
+
+            this.lineWidth = Math.floor(Math.random() * 5) + 1;
+            this.gridLineWidth = Math.floor(Math.random() * 5) + 1;
+
+            const fillTypes = ["watercolor", "hatch", "none"];
+            this.fillType =
+              fillTypes[Math.floor(Math.random() * fillTypes.length)];
+            this.useHatching = this.fillType === "hatch";
+
+            if (this.useHatching) {
+              this.hatchDistance = Math.floor(Math.random() * 15) + 5;
+              this.hatchAngle = Math.floor(Math.random() * 36) * 5;
+              this.hatchRand = Math.round(Math.random() * 20) / 20;
+              this.hatchContinuous = Math.random() > 0.5;
+              this.hatchGradient = Math.round(Math.random() * 20) / 20;
+              this.hatchBrushType =
+                brushTypes[Math.floor(Math.random() * brushTypes.length)];
+              this.hatchLineWidth = Math.floor(Math.random() * 8) + 1;
+            } else {
+              this.bleedMin = Math.round(Math.random() * 50) / 1000;
+              this.bleedMax = Math.round(Math.random() * 50 + 50) / 1000; 
+            }
+
+            this.fontSize = Math.floor(Math.random() * 10) + 14;
+            this.titleFontSize = Math.floor(Math.random() * 30) + 24;
+
+            if (this.chartType === "histogram") {
+              this.numBins = Math.floor(Math.random() * 15) + 5;
+            } else if (this.chartType === "line") {
+              this.showDots = Math.random() > 0.5;
+            }
+
+            switch (this.chartType) {
+              case "histogram":
+                const histData = [];
+                const numPoints = Math.floor(Math.random() * 50) + 30;
+                const mean = Math.random() * 50 + 50;
+                const variance = Math.random() * 400 + 100;
+
+                for (let i = 0; i < numPoints; i++) {
+                  let sum = 0;
+                  for (let j = 0; j < 6; j++) {
+                    sum += Math.random();
+                  }
+                  let normalValue = (sum / 6) * Math.sqrt(variance) + mean;
+                  histData.push(Math.round(normalValue * 10) / 10);
+                }
+                this.dataInput = JSON.stringify(histData);
+                break;
+
+              case "scatter":
+                const numClusters = Math.floor(Math.random() * 3) + 2;
+                const scatterClusters = [];
+
+                for (let c = 0; c < numClusters; c++) {
+                  const cluster = [];
+                  const clusterSize = Math.floor(Math.random() * 5) + 5;
+                  const centerX = Math.random() * 15 + 5;
+                  const centerY = Math.random() * 15 + 5;
+                  const spreadX = Math.random() * 3 + 1;
+                  const spreadY = Math.random() * 3 + 1;
+
+                  for (let i = 0; i < clusterSize; i++) {
+                    const x =
+                      centerX +
+                      (Math.random() + Math.random() + Math.random() - 1.5) *
+                        spreadX;
+                    const y =
+                      centerY +
+                      (Math.random() + Math.random() + Math.random() - 1.5) *
+                        spreadY;
+                    cluster.push({
+                      x: Math.round(x * 100) / 100,
+                      y: Math.round(y * 100) / 100,
+                    });
+                  }
+                  scatterClusters.push(cluster);
+                }
+                this.dataInput = JSON.stringify(scatterClusters);
+                break;
+
+              case "boxplot":
+                const numGroups = Math.floor(Math.random() * 10) + 2;
+                const boxplotGroups = [];
+
+                for (let g = 0; g < numGroups; g++) {
+                  const group = [];
+                  const groupSize = Math.floor(Math.random() * 40) + 50;
+                  const groupMean = Math.random() * 3 + g;
+                  const groupVariance = Math.random() * 4 + 2;
+
+                  for (let i = 0; i < groupSize; i++) {
+                    let sum = 0;
+                    for (let j = 0; j < 6; j++) {
+                      sum += Math.random();
+                    }
+                    let normalValue =
+                      (sum / 6) * Math.sqrt(groupVariance) + groupMean;
+                    group.push(Math.round(normalValue * 10) / 10);
+                  }
+
+                  boxplotGroups.push(group);
+                }
+                this.dataInput = JSON.stringify(boxplotGroups);
+                break;
+
+              case "line":
+                const numLines = Math.floor(Math.random() * 3) + 2;
+                const lineSeries = [];
+                const numPointsPerLine = Math.floor(Math.random() * 15) + 10;
+
+                for (let l = 0; l < numLines; l++) {
+                  const line = [];
+                  const baseValue = Math.random() * 5 + 1;
+                  const trend = (Math.random() - 0.5) * 0.5;
+                  const noise = Math.random() * 2 + 0.5;
+
+                  for (let i = 0; i < numPointsPerLine; i++) {
+                    const trendValue = baseValue + trend * i;
+                    const randomNoise = (Math.random() - 0.5) * noise;
+                    const value = trendValue + randomNoise;
+                    line.push(Math.round(value * 10) / 10);
+                  }
+                  lineSeries.push(line);
+                }
+                this.dataInput = JSON.stringify(lineSeries);
+                break;
+            }
+
             this.updateChart();
           },
 
