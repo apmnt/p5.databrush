@@ -955,21 +955,14 @@
         </div>
       </div>
 
-      <div style="display: none">
-        <br />
+      <div>
         <button @click="saveChart()">Copy chart to clipboard</button>
         <span
           class="button-message"
           x-show="copyStatus"
           x-text="copyStatus"
         ></span>
-        <br />
-        <button @click="generateRandomData()">Generate random data</button>
-        <br />
-        <button @click="updateChart()" x-text="'Redraw chart'"></button>
-        <span class="button-message" x-show="!isValidData"
-          >Please enter valid JSON array</span
-        >
+
         <div x-show="chartType === 'histogram'">
           <h3>Histogram Data Input</h3>
           <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
