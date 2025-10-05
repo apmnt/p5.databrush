@@ -163,13 +163,20 @@
       @media (max-width: 800px) {
         body {
           flex-direction: column;
+          align-items: stretch;
         }
 
         #chartContainer {
           margin: 0;
+          position: sticky;
+          top: 0;
+          height: auto;
+          max-height: 70vh;
+          border: none;
+          z-index: 100;
         }
 
-        #chartcontainer canvas {
+        #chartContainer canvas {
           max-height: 70vh;
         }
 
@@ -181,6 +188,8 @@
           margin-bottom: 20px;
           padding-left: 10px;
           padding-right: 10px;
+          min-height: auto;
+          overflow: visible;
         }
       }
 
@@ -234,6 +243,133 @@
         color: #000;
         padding: 0;
       }
+
+      /* Mobile tab navigation */
+      .mobile-tabs {
+        display: none;
+      }
+
+      .mobile-content-area {
+        display: none;
+      }
+
+      .mobile-section-title {
+        display: none;
+      }
+
+      @media (max-width: 800px) {
+        body {
+          padding-bottom: 60px;
+          justify-content: flex-start;
+        }
+
+        .controls {
+          padding-bottom: 80px;
+          overflow-y: visible;
+          min-height: auto;
+          position: relative;
+        }
+
+        .controls::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ffffff85;
+          backdrop-filter: blur(100px);
+          -webkit-backdrop-filter: blur(100px);
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0) 0px,
+            rgba(0, 0, 0, 1) 85px
+          );
+          mask-image: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0) 0px,
+            rgba(0, 0, 0, 1) 85px
+          );
+          z-index: -1;
+          pointer-events: none;
+        }
+
+        .controls > h1,
+        .controls > p {
+          display: none;
+        }
+
+        .mobile-content-area {
+          display: block;
+          min-height: auto;
+        }
+
+        .mobile-section-title,
+        .mobile-databrush-title {
+          display: block;
+          font-size: 2em;
+          font-weight: bold;
+          margin-top: 0;
+          margin-bottom: 20px;
+        }
+
+        .mobile-tabs {
+          display: block;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          overflow-x: auto;
+          overflow-y: hidden;
+          white-space: nowrap;
+          -webkit-overflow-scrolling: touch;
+          border-top: 1px solid #000000;
+          background-color: #ffffffee;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          z-index: 1000;
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* Edge */
+        }
+
+        .mobile-tabs::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
+
+        .mobile-tab {
+          display: inline-block;
+          padding: 15px 20px;
+          cursor: pointer;
+          user-select: none;
+          font-weight: normal;
+          color: #666;
+          transition: color 0.2s, border-top-color 0.2s;
+          border-top: 2px solid transparent;
+        }
+
+        .mobile-tab.active {
+          color: #000;
+          border-top-color: #000;
+          text-shadow: 0 0 0.5px #000, 0 0 0.5px #000;
+        }
+
+        .collapsible-section {
+          border-top: none;
+        }
+
+        .collapsible-header {
+          display: none;
+        }
+
+        .collapsible-content {
+          display: none;
+          border-top: none;
+        }
+
+        .collapsible-content.mobile-active {
+          display: block !important;
+        }
+      }
     </style>
   </head>
   <body x-data="chartData()">
@@ -247,6 +383,83 @@
         palettes.
       </p>
 
+      <!-- Mobile content area -->
+      <div class="mobile-content-area">
+        <!-- About section (mobile only) -->
+        <div
+          class="collapsible-content"
+          :class="{ 'mobile-active': activeTab === 'about' }"
+          x-show="activeTab === 'about'"
+        >
+          <h1 class="mobile-databrush-title">*p5.databrush</h1>
+          <p>
+            Visualize your data on a watercolor canvas. Choose from histograms,
+            scatter plots, box plots, and line plots. Customize the settings and
+            use your own data, or try randomized plots with sample datasets and
+            palettes.
+          </p>
+          <button @click="generateRandomData()">Generate random data</button>
+          <br />
+          <button @click="updateChart()" x-text="'Redraw chart'"></button>
+          <span class="button-message" x-show="!isValidData"
+            >Please enter valid JSON array</span
+          >
+        </div>
+      </div>
+
+      <!-- Mobile tab navigation -->
+      <div class="mobile-tabs">
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'about' }"
+          @click="setActiveTab('about')"
+        >
+          About
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'chartOptions' }"
+          @click="setActiveTab('chartOptions')"
+        >
+          Chart
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'style' }"
+          @click="setActiveTab('style')"
+        >
+          Style
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'palette' }"
+          @click="setActiveTab('palette')"
+        >
+          Palette & Colors
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'fill' }"
+          @click="setActiveTab('fill')"
+        >
+          Fill
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'typography' }"
+          @click="setActiveTab('typography')"
+        >
+          Typography
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'dimensions' }"
+          @click="setActiveTab('dimensions')"
+        >
+          Canvas
+        </div>
+      </div>
+
       <!-- Chart Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('chartOptions')">
@@ -255,7 +468,12 @@
             >►</span
           >
         </div>
-        <div class="collapsible-content" x-show="openSections.chartOptions">
+        <div
+          class="collapsible-content mobile-content-area"
+          :class="{ 'mobile-active': activeTab === 'chartOptions' }"
+          x-show="!isMobile() ? openSections.chartOptions : activeTab === 'chartOptions'"
+        >
+          <h1 class="mobile-section-title">Chart</h1>
           <label>
             Chart Type:
             <select
@@ -295,7 +513,12 @@
           <span>Style</span>
           <span class="arrow" :class="{ open: openSections.style }">►</span>
         </div>
-        <div class="collapsible-content" x-show="openSections.style">
+        <div
+          class="collapsible-content mobile-content-area"
+          :class="{ 'mobile-active': activeTab === 'style' }"
+          x-show="!isMobile() ? openSections.style : activeTab === 'style'"
+        >
+          <h1 class="mobile-section-title">Style</h1>
           <label
             >Background Color:
             <input
@@ -385,7 +608,12 @@
           <span>Palette & Colors</span>
           <span class="arrow" :class="{ open: openSections.palette }">►</span>
         </div>
-        <div class="collapsible-content" x-show="openSections.palette">
+        <div
+          class="collapsible-content mobile-content-area"
+          :class="{ 'mobile-active': activeTab === 'palette' }"
+          x-show="!isMobile() ? openSections.palette : activeTab === 'palette'"
+        >
+          <h1 class="mobile-section-title">Palette & Colors</h1>
           <label>
             Palette Preset:
             <select
@@ -495,7 +723,12 @@
           <span>Fill</span>
           <span class="arrow" :class="{ open: openSections.fill }">►</span>
         </div>
-        <div class="collapsible-content" x-show="openSections.fill">
+        <div
+          class="collapsible-content mobile-content-area"
+          :class="{ 'mobile-active': activeTab === 'fill' }"
+          x-show="!isMobile() ? openSections.fill : activeTab === 'fill'"
+        >
+          <h1 class="mobile-section-title">Fill</h1>
           <label>
             Fill Type:
             <select
@@ -625,7 +858,12 @@
             >►</span
           >
         </div>
-        <div class="collapsible-content" x-show="openSections.typography">
+        <div
+          class="collapsible-content mobile-content-area"
+          :class="{ 'mobile-active': activeTab === 'typography' }"
+          x-show="!isMobile() ? openSections.typography : activeTab === 'typography'"
+        >
+          <h1 class="mobile-section-title">Typography</h1>
           <label
             >Label Font Size:
             <input
@@ -655,7 +893,12 @@
             >►</span
           >
         </div>
-        <div class="collapsible-content" x-show="openSections.dimensions">
+        <div
+          class="collapsible-content mobile-content-area"
+          :class="{ 'mobile-active': activeTab === 'dimensions' }"
+          x-show="!isMobile() ? openSections.dimensions : activeTab === 'dimensions'"
+        >
+          <h1 class="mobile-section-title">Canvas</h1>
           <label
             >Canvas Width:
             <input type="number" x-model="canvasWidth" @change="updateChart()"
@@ -671,59 +914,64 @@
         </div>
       </div>
 
-      <br />
-      <button @click="saveChart()">Copy chart to clipboard</button>
-      <span
-        class="button-message"
-        x-show="copyStatus"
-        x-text="copyStatus"
-      ></span>
-      <br />
-      <button @click="generateRandomData()">Generate random data</button>
-      <br />
-      <button @click="updateChart()" x-text="'Redraw chart'"></button>
-      <span class="button-message" x-show="!isValidData"
-        >Please enter valid JSON array</span
-      >
-      <div x-show="chartType === 'histogram'">
-        <h3>Histogram Data Input</h3>
-        <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
-        <textarea
-          x-model="dataInput"
-          class="data-input"
-          placeholder="Enter data as JSON array..."
-        ></textarea>
-      </div>
-      <div x-show="chartType === 'scatter'">
-        <h3>Scatter Plot Data Input</h3>
-        <p>Enter your data as an array of {x, y} objects or array of arrays:</p>
-        <textarea
-          x-model="dataInput"
-          class="data-input"
-          placeholder="[{x: 1, y: 2}, {x: 3, y: 4}] or [[{x: 1, y: 2}], [{x: 3, y: 4}]]"
-        ></textarea>
-      </div>
-      <div x-show="chartType === 'boxplot'">
-        <h3>Box Plot Data Input</h3>
-        <p>
-          Enter your data as an array of arrays (each inner array is a group):
-        </p>
-        <textarea
-          x-model="dataInput"
-          class="data-input"
-          placeholder="[[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]"
-        ></textarea>
-      </div>
-      <div x-show="chartType === 'line'">
-        <h3>Line Plot Data Input</h3>
-        <p>
-          Enter Y values as an array or array of arrays. X values are optional:
-        </p>
-        <textarea
-          x-model="dataInput"
-          class="data-input"
-          placeholder="[1, 2, 3, 4, 5] or [[1, 2, 3], [4, 5, 6]]"
-        ></textarea>
+      <div style="display: none">
+        <br />
+        <button @click="saveChart()">Copy chart to clipboard</button>
+        <span
+          class="button-message"
+          x-show="copyStatus"
+          x-text="copyStatus"
+        ></span>
+        <br />
+        <button @click="generateRandomData()">Generate random data</button>
+        <br />
+        <button @click="updateChart()" x-text="'Redraw chart'"></button>
+        <span class="button-message" x-show="!isValidData"
+          >Please enter valid JSON array</span
+        >
+        <div x-show="chartType === 'histogram'">
+          <h3>Histogram Data Input</h3>
+          <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
+          <textarea
+            x-model="dataInput"
+            class="data-input"
+            placeholder="Enter data as JSON array..."
+          ></textarea>
+        </div>
+        <div x-show="chartType === 'scatter'">
+          <h3>Scatter Plot Data Input</h3>
+          <p>
+            Enter your data as an array of {x, y} objects or array of arrays:
+          </p>
+          <textarea
+            x-model="dataInput"
+            class="data-input"
+            placeholder="[{x: 1, y: 2}, {x: 3, y: 4}] or [[{x: 1, y: 2}], [{x: 3, y: 4}]]"
+          ></textarea>
+        </div>
+        <div x-show="chartType === 'boxplot'">
+          <h3>Box Plot Data Input</h3>
+          <p>
+            Enter your data as an array of arrays (each inner array is a group):
+          </p>
+          <textarea
+            x-model="dataInput"
+            class="data-input"
+            placeholder="[[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]"
+          ></textarea>
+        </div>
+        <div x-show="chartType === 'line'">
+          <h3>Line Plot Data Input</h3>
+          <p>
+            Enter Y values as an array or array of arrays. X values are
+            optional:
+          </p>
+          <textarea
+            x-model="dataInput"
+            class="data-input"
+            placeholder="[1, 2, 3, 4, 5] or [[1, 2, 3], [4, 5, 6]]"
+          ></textarea>
+        </div>
       </div>
       <br />
 
@@ -797,10 +1045,21 @@
             palette: false,
             fill: false,
           },
+          // Active tab for mobile
+          activeTab: "about",
 
           // Check if on mobile device
           isMobile() {
             return window.innerWidth <= 800;
+          },
+
+          // Set active tab for mobile
+          setActiveTab(tab) {
+            this.activeTab = tab;
+            // Scroll to top when changing tabs on mobile
+            if (this.isMobile()) {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }
           },
 
           // Handle color input changes - only update on desktop
