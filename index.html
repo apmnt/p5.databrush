@@ -177,7 +177,7 @@
         }
 
         #chartContainer canvas {
-          max-height: 70vh;
+          max-height: 100vh;
         }
 
         .controls {
@@ -398,7 +398,7 @@
             use your own data, or try randomized plots with sample datasets and
             palettes.
           </p>
-          <button @click="randomizeAll()">Randomize Everything</button>
+          <button @click="randomizeAll()">Randomize everything</button>
           <br />
           <button @click="generateRandomData()">Generate random data</button>
           <br />
@@ -406,6 +406,45 @@
           <span class="button-message" x-show="!isValidData"
             >Please enter valid JSON array</span
           >
+          <br />
+          <button @click="exportConfig()">Export config</button>
+          <span
+            class="button-message"
+            x-show="exportStatus"
+            x-text="exportStatus"
+          ></span>
+          <br />
+          <button @click="copyConfigToClipboard()">
+            Copy config to clipboard
+          </button>
+          <span
+            class="button-message"
+            x-show="copyConfigStatus"
+            x-text="copyConfigStatus"
+          ></span>
+          <br />
+          <button @click="loadConfigFromClipboard()">
+            Load config from clipboard
+          </button>
+          <span
+            class="button-message"
+            x-show="loadClipboardStatus"
+            x-text="loadClipboardStatus"
+          ></span>
+          <br />
+          <button @click="$refs.configFileInput.click()">Load config</button>
+          <input
+            type="file"
+            x-ref="configFileInput"
+            @change="loadConfig($event)"
+            accept=".json"
+            style="display: none"
+          />
+          <span
+            class="button-message"
+            x-show="loadStatus"
+            x-text="loadStatus"
+          ></span>
         </div>
       </div>
 
@@ -998,6 +1037,10 @@
           ],
           isValidData: true,
           copyStatus: "",
+          exportStatus: "",
+          copyConfigStatus: "",
+          loadClipboardStatus: "",
+          loadStatus: "",
           palettePresetNames: Object.keys(C.palettePresets),
           // Load all config values from C.config
           canvasWidth: C.config.canvasWidth,
@@ -1334,7 +1377,7 @@
               this.hatchLineWidth = Math.floor(Math.random() * 8) + 1;
             } else {
               this.bleedMin = Math.round(Math.random() * 50) / 1000;
-              this.bleedMax = Math.round(Math.random() * 50 + 50) / 1000; 
+              this.bleedMax = Math.round(Math.random() * 50 + 50) / 1000;
             }
 
             this.fontSize = Math.floor(Math.random() * 10) + 14;
@@ -1713,6 +1756,377 @@
             URL.revokeObjectURL(url);
             this.copyStatus = "Downloaded!";
             setTimeout(() => (this.copyStatus = ""), 2000);
+          },
+
+          exportConfig() {
+            try {
+              const configToExport = {
+                // Chart settings
+                chartType: this.chartType,
+                numBins: this.numBins,
+                showDots: this.showDots,
+
+                // Canvas dimensions
+                canvasWidth: this.canvasWidth,
+                canvasHeight: this.canvasHeight,
+                padding: this.padding,
+
+                // Style settings
+                backgroundColor: this.backgroundColor,
+                lineWidth: this.lineWidth,
+                lineColor: this.lineColor,
+                brushType: this.brushType,
+                gridBrushType: this.gridBrushType,
+                gridLineColor: this.gridLineColor,
+                gridLineWidth: this.gridLineWidth,
+
+                // Palette and colors
+                palettePreset: this.palettePreset,
+                randomColors: this.randomColors,
+                color1: this.color1,
+                color2: this.color2,
+                color3: this.color3,
+                color4: this.color4,
+                color5: this.color5,
+                color6: this.color6,
+
+                // Fill settings
+                fillType: this.fillType,
+                useHatching: this.useHatching,
+                bleedMin: this.bleedMin,
+                bleedMax: this.bleedMax,
+                hatchDistance: this.hatchDistance,
+                hatchAngle: this.hatchAngle,
+                hatchRand: this.hatchRand,
+                hatchContinuous: this.hatchContinuous,
+                hatchGradient: this.hatchGradient,
+                hatchBrushType: this.hatchBrushType,
+                hatchLineWidth: this.hatchLineWidth,
+
+                // Typography
+                fontSize: this.fontSize,
+                titleFontSize: this.titleFontSize,
+                axisLabelColor: this.axisLabelColor,
+
+                // Data
+                dataInput: this.dataInput,
+              };
+
+              const jsonString = JSON.stringify(configToExport, null, 2);
+              const blob = new Blob([jsonString], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              const timestamp = new Date()
+                .toISOString()
+                .replace(/[:.]/g, "-")
+                .slice(0, -5);
+              link.href = url;
+              link.download = `p5-databrush-config-${timestamp}.json`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+
+              this.exportStatus = "Config exported!";
+              setTimeout(() => (this.exportStatus = ""), 2000);
+            } catch (err) {
+              console.error("Error exporting config:", err);
+              this.exportStatus = "Export failed";
+              setTimeout(() => (this.exportStatus = ""), 2000);
+            }
+          },
+
+          async copyConfigToClipboard() {
+            try {
+              const configToExport = {
+                // Chart settings
+                chartType: this.chartType,
+                numBins: this.numBins,
+                showDots: this.showDots,
+
+                // Canvas dimensions
+                canvasWidth: this.canvasWidth,
+                canvasHeight: this.canvasHeight,
+                padding: this.padding,
+
+                // Style settings
+                backgroundColor: this.backgroundColor,
+                lineWidth: this.lineWidth,
+                lineColor: this.lineColor,
+                brushType: this.brushType,
+                gridBrushType: this.gridBrushType,
+                gridLineColor: this.gridLineColor,
+                gridLineWidth: this.gridLineWidth,
+
+                // Palette and colors
+                palettePreset: this.palettePreset,
+                randomColors: this.randomColors,
+                color1: this.color1,
+                color2: this.color2,
+                color3: this.color3,
+                color4: this.color4,
+                color5: this.color5,
+                color6: this.color6,
+
+                // Fill settings
+                fillType: this.fillType,
+                useHatching: this.useHatching,
+                bleedMin: this.bleedMin,
+                bleedMax: this.bleedMax,
+                hatchDistance: this.hatchDistance,
+                hatchAngle: this.hatchAngle,
+                hatchRand: this.hatchRand,
+                hatchContinuous: this.hatchContinuous,
+                hatchGradient: this.hatchGradient,
+                hatchBrushType: this.hatchBrushType,
+                hatchLineWidth: this.hatchLineWidth,
+
+                // Typography
+                fontSize: this.fontSize,
+                titleFontSize: this.titleFontSize,
+                axisLabelColor: this.axisLabelColor,
+
+                // Data
+                dataInput: this.dataInput,
+              };
+
+              const jsonString = JSON.stringify(configToExport, null, 2);
+
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(jsonString);
+                this.copyConfigStatus = "Copied to clipboard!";
+              } else {
+                // Fallback for browsers that don't support clipboard API
+                const textArea = document.createElement("textarea");
+                textArea.value = jsonString;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+                this.copyConfigStatus = "Copied to clipboard!";
+              }
+
+              setTimeout(() => (this.copyConfigStatus = ""), 2000);
+            } catch (err) {
+              console.error("Error copying config:", err);
+              this.copyConfigStatus = "Copy failed";
+              setTimeout(() => (this.copyConfigStatus = ""), 2000);
+            }
+          },
+
+          async loadConfigFromClipboard() {
+            try {
+              let jsonString = "";
+
+              if (navigator.clipboard && navigator.clipboard.readText) {
+                jsonString = await navigator.clipboard.readText();
+              } else {
+                // Fallback: prompt user to paste (less ideal but works)
+                jsonString = prompt("Paste your config JSON here:");
+                if (!jsonString) {
+                  this.loadClipboardStatus = "Cancelled";
+                  setTimeout(() => (this.loadClipboardStatus = ""), 2000);
+                  return;
+                }
+              }
+
+              const loadedConfig = JSON.parse(jsonString);
+
+              // Apply all loaded config values
+              if (loadedConfig.chartType !== undefined)
+                this.chartType = loadedConfig.chartType;
+              if (loadedConfig.numBins !== undefined)
+                this.numBins = loadedConfig.numBins;
+              if (loadedConfig.showDots !== undefined)
+                this.showDots = loadedConfig.showDots;
+
+              if (loadedConfig.canvasWidth !== undefined)
+                this.canvasWidth = loadedConfig.canvasWidth;
+              if (loadedConfig.canvasHeight !== undefined)
+                this.canvasHeight = loadedConfig.canvasHeight;
+              if (loadedConfig.padding !== undefined)
+                this.padding = loadedConfig.padding;
+
+              if (loadedConfig.backgroundColor !== undefined)
+                this.backgroundColor = loadedConfig.backgroundColor;
+              if (loadedConfig.lineWidth !== undefined)
+                this.lineWidth = loadedConfig.lineWidth;
+              if (loadedConfig.lineColor !== undefined)
+                this.lineColor = loadedConfig.lineColor;
+              if (loadedConfig.brushType !== undefined)
+                this.brushType = loadedConfig.brushType;
+              if (loadedConfig.gridBrushType !== undefined)
+                this.gridBrushType = loadedConfig.gridBrushType;
+              if (loadedConfig.gridLineColor !== undefined)
+                this.gridLineColor = loadedConfig.gridLineColor;
+              if (loadedConfig.gridLineWidth !== undefined)
+                this.gridLineWidth = loadedConfig.gridLineWidth;
+
+              if (loadedConfig.palettePreset !== undefined)
+                this.palettePreset = loadedConfig.palettePreset;
+              if (loadedConfig.randomColors !== undefined)
+                this.randomColors = loadedConfig.randomColors;
+              if (loadedConfig.color1 !== undefined)
+                this.color1 = loadedConfig.color1;
+              if (loadedConfig.color2 !== undefined)
+                this.color2 = loadedConfig.color2;
+              if (loadedConfig.color3 !== undefined)
+                this.color3 = loadedConfig.color3;
+              if (loadedConfig.color4 !== undefined)
+                this.color4 = loadedConfig.color4;
+              if (loadedConfig.color5 !== undefined)
+                this.color5 = loadedConfig.color5;
+              if (loadedConfig.color6 !== undefined)
+                this.color6 = loadedConfig.color6;
+
+              if (loadedConfig.fillType !== undefined)
+                this.fillType = loadedConfig.fillType;
+              if (loadedConfig.useHatching !== undefined)
+                this.useHatching = loadedConfig.useHatching;
+              if (loadedConfig.bleedMin !== undefined)
+                this.bleedMin = loadedConfig.bleedMin;
+              if (loadedConfig.bleedMax !== undefined)
+                this.bleedMax = loadedConfig.bleedMax;
+              if (loadedConfig.hatchDistance !== undefined)
+                this.hatchDistance = loadedConfig.hatchDistance;
+              if (loadedConfig.hatchAngle !== undefined)
+                this.hatchAngle = loadedConfig.hatchAngle;
+              if (loadedConfig.hatchRand !== undefined)
+                this.hatchRand = loadedConfig.hatchRand;
+              if (loadedConfig.hatchContinuous !== undefined)
+                this.hatchContinuous = loadedConfig.hatchContinuous;
+              if (loadedConfig.hatchGradient !== undefined)
+                this.hatchGradient = loadedConfig.hatchGradient;
+              if (loadedConfig.hatchBrushType !== undefined)
+                this.hatchBrushType = loadedConfig.hatchBrushType;
+              if (loadedConfig.hatchLineWidth !== undefined)
+                this.hatchLineWidth = loadedConfig.hatchLineWidth;
+
+              if (loadedConfig.fontSize !== undefined)
+                this.fontSize = loadedConfig.fontSize;
+              if (loadedConfig.titleFontSize !== undefined)
+                this.titleFontSize = loadedConfig.titleFontSize;
+              if (loadedConfig.axisLabelColor !== undefined)
+                this.axisLabelColor = loadedConfig.axisLabelColor;
+
+              if (loadedConfig.dataInput !== undefined)
+                this.dataInput = loadedConfig.dataInput;
+
+              // Update the chart with loaded config
+              this.updateChart();
+
+              this.loadClipboardStatus = "Config loaded!";
+              setTimeout(() => (this.loadClipboardStatus = ""), 2000);
+            } catch (err) {
+              console.error("Error loading config from clipboard:", err);
+              this.loadClipboardStatus = "Load failed - invalid JSON";
+              setTimeout(() => (this.loadClipboardStatus = ""), 3000);
+            }
+          },
+
+          async loadConfig(event) {
+            try {
+              const file = event.target.files[0];
+              if (!file) return;
+
+              const text = await file.text();
+              const loadedConfig = JSON.parse(text);
+
+              // Apply all loaded config values
+              if (loadedConfig.chartType !== undefined)
+                this.chartType = loadedConfig.chartType;
+              if (loadedConfig.numBins !== undefined)
+                this.numBins = loadedConfig.numBins;
+              if (loadedConfig.showDots !== undefined)
+                this.showDots = loadedConfig.showDots;
+
+              if (loadedConfig.canvasWidth !== undefined)
+                this.canvasWidth = loadedConfig.canvasWidth;
+              if (loadedConfig.canvasHeight !== undefined)
+                this.canvasHeight = loadedConfig.canvasHeight;
+              if (loadedConfig.padding !== undefined)
+                this.padding = loadedConfig.padding;
+
+              if (loadedConfig.backgroundColor !== undefined)
+                this.backgroundColor = loadedConfig.backgroundColor;
+              if (loadedConfig.lineWidth !== undefined)
+                this.lineWidth = loadedConfig.lineWidth;
+              if (loadedConfig.lineColor !== undefined)
+                this.lineColor = loadedConfig.lineColor;
+              if (loadedConfig.brushType !== undefined)
+                this.brushType = loadedConfig.brushType;
+              if (loadedConfig.gridBrushType !== undefined)
+                this.gridBrushType = loadedConfig.gridBrushType;
+              if (loadedConfig.gridLineColor !== undefined)
+                this.gridLineColor = loadedConfig.gridLineColor;
+              if (loadedConfig.gridLineWidth !== undefined)
+                this.gridLineWidth = loadedConfig.gridLineWidth;
+
+              if (loadedConfig.palettePreset !== undefined)
+                this.palettePreset = loadedConfig.palettePreset;
+              if (loadedConfig.randomColors !== undefined)
+                this.randomColors = loadedConfig.randomColors;
+              if (loadedConfig.color1 !== undefined)
+                this.color1 = loadedConfig.color1;
+              if (loadedConfig.color2 !== undefined)
+                this.color2 = loadedConfig.color2;
+              if (loadedConfig.color3 !== undefined)
+                this.color3 = loadedConfig.color3;
+              if (loadedConfig.color4 !== undefined)
+                this.color4 = loadedConfig.color4;
+              if (loadedConfig.color5 !== undefined)
+                this.color5 = loadedConfig.color5;
+              if (loadedConfig.color6 !== undefined)
+                this.color6 = loadedConfig.color6;
+
+              if (loadedConfig.fillType !== undefined)
+                this.fillType = loadedConfig.fillType;
+              if (loadedConfig.useHatching !== undefined)
+                this.useHatching = loadedConfig.useHatching;
+              if (loadedConfig.bleedMin !== undefined)
+                this.bleedMin = loadedConfig.bleedMin;
+              if (loadedConfig.bleedMax !== undefined)
+                this.bleedMax = loadedConfig.bleedMax;
+              if (loadedConfig.hatchDistance !== undefined)
+                this.hatchDistance = loadedConfig.hatchDistance;
+              if (loadedConfig.hatchAngle !== undefined)
+                this.hatchAngle = loadedConfig.hatchAngle;
+              if (loadedConfig.hatchRand !== undefined)
+                this.hatchRand = loadedConfig.hatchRand;
+              if (loadedConfig.hatchContinuous !== undefined)
+                this.hatchContinuous = loadedConfig.hatchContinuous;
+              if (loadedConfig.hatchGradient !== undefined)
+                this.hatchGradient = loadedConfig.hatchGradient;
+              if (loadedConfig.hatchBrushType !== undefined)
+                this.hatchBrushType = loadedConfig.hatchBrushType;
+              if (loadedConfig.hatchLineWidth !== undefined)
+                this.hatchLineWidth = loadedConfig.hatchLineWidth;
+
+              if (loadedConfig.fontSize !== undefined)
+                this.fontSize = loadedConfig.fontSize;
+              if (loadedConfig.titleFontSize !== undefined)
+                this.titleFontSize = loadedConfig.titleFontSize;
+              if (loadedConfig.axisLabelColor !== undefined)
+                this.axisLabelColor = loadedConfig.axisLabelColor;
+
+              if (loadedConfig.dataInput !== undefined)
+                this.dataInput = loadedConfig.dataInput;
+
+              // Update the chart with loaded config
+              this.updateChart();
+
+              this.loadStatus = "Config loaded!";
+              setTimeout(() => (this.loadStatus = ""), 2000);
+
+              // Reset file input
+              event.target.value = "";
+            } catch (err) {
+              console.error("Error loading config:", err);
+              this.loadStatus = "Load failed";
+              setTimeout(() => (this.loadStatus = ""), 2000);
+            }
           },
         };
       }
