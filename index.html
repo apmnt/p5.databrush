@@ -1189,21 +1189,121 @@
             this.updateChart();
           },
 
+          sampleNormal(m, s) {
+            let u = 0,
+              v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            const z =
+              Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            return z * s + m;
+          },
+
+          sampleLogNormal(m, s) {
+            const n = this.sampleNormal(m, s);
+            return Math.exp(n / 10);
+          },
+
+          sampleBimodal(m, s) {
+            const shift = Math.random() * 20 + 10;
+            if (Math.random() > 0.5) return this.sampleNormal(m - shift, s);
+            return this.sampleNormal(m + shift, s);
+          },
+
+          normalQuantile(p, mu, sigma) {
+            var a1 = -3.969683028665376e1,
+              a2 = 2.209460984245205e2,
+              a3 = -2.759285104469687e2,
+              a4 = 1.38357751867269e2,
+              a5 = -3.066479806614716e1,
+              a6 = 2.506628277459239;
+            var b1 = -5.447609879822406e1,
+              b2 = 1.615858368580409e2,
+              b3 = -1.556989798598866e2,
+              b4 = 6.680131188771972e1,
+              b5 = -1.328068155288572e1;
+            var c1 = -7.784894002430293e-3,
+              c2 = -3.223964580411365e-1,
+              c3 = -2.400758277161838,
+              c4 = -2.549732539343734,
+              c5 = 4.374664141464968,
+              c6 = 2.938163982698783;
+            var d1 = 7.784695709041462e-3,
+              d2 = 3.224671290700398e-1,
+              d3 = 2.445134137142996,
+              d4 = 3.754408661907416;
+            var plow = 0.02425;
+            var phigh = 1 - plow;
+            var q, r, x;
+            if (p < plow) {
+              q = Math.sqrt(-2 * Math.log(p));
+              x = ((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6;
+              x = x / ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+              x = -x;
+            } else if (p <= phigh) {
+              q = p - 0.5;
+              r = q * q;
+              x = (((((a1 * r + a2) * r + a3) * r + a4) * r + a5) * r + a6) * q;
+              x = x / (((((b1 * r + b2) * r + b3) * r + b4) * r + b5) * r + 1);
+            } else {
+              q = Math.sqrt(-2 * Math.log(1 - p));
+              x = ((((c1 * q + c2) * q + c3) * q + c4) * q + c5) * q + c6;
+              x = x / ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+            }
+            return mu + sigma * x;
+          },
+
+          lognormalQuantile(p, mean, lnSigma) {
+            var lnMu = Math.log(Math.max(1, mean)) - 0.5 * lnSigma * lnSigma;
+            return Math.exp(this.normalQuantile(p, lnMu, lnSigma));
+          },
+
+          bimodalQuantile(p, mean, sigma, shift) {
+            if (p < 0.5) return this.normalQuantile(p * 2, mean - shift, sigma);
+            return this.normalQuantile((p - 0.5) * 2, mean + shift, sigma);
+          },
+
           generateRandomData() {
             switch (this.chartType) {
               case "histogram":
                 const histData = [];
-                const numPoints = Math.floor(Math.random() * 50) + 30;
+                const numPoints = Math.floor(Math.random() * 60) + 60;
                 const mean = Math.random() * 50 + 50;
-                const variance = Math.random() * 400 + 100;
+                const sd = Math.random() * 10 + 2;
+
+                const dists = ["normal", "lognormal", "bimodal"];
+                const dist = dists[Math.floor(Math.random() * dists.length)];
+
+                let lnMu = 0;
+                let lnSigma = 0;
+                if (dist === "lognormal") {
+                  lnSigma = Math.random() * 0.6 + 0.2;
+                  lnMu = Math.log(Math.max(1, mean)) - 0.5 * lnSigma * lnSigma;
+                }
+
+                let bimodalShift = 0;
+                if (dist === "bimodal") {
+                  bimodalShift = Math.random() * 12 + 8;
+                }
 
                 for (let i = 0; i < numPoints; i++) {
-                  let sum = 0;
-                  for (let j = 0; j < 6; j++) {
-                    sum += Math.random();
+                  const p = (i + 1) / (numPoints + 1);
+                  let val;
+                  switch (dist) {
+                    case "lognormal":
+                      val = this.lognormalQuantile(p, mean, lnSigma);
+                      break;
+                    case "bimodal":
+                      val = this.bimodalQuantile(p, mean, sd, bimodalShift);
+                      break;
+                    default:
+                      val = this.normalQuantile(p, mean, sd);
                   }
-                  let normalValue = (sum / 6) * Math.sqrt(variance) + mean;
-                  histData.push(Math.round(normalValue * 10) / 10);
+                  if (!Number.isFinite(val) || Number.isNaN(val)) {
+                    val = mean;
+                  }
+                  val = Math.round(val * 10) / 10;
+                  histData.push(val);
                 }
                 this.dataInput = JSON.stringify(histData);
                 break;
@@ -1385,17 +1485,43 @@
             switch (this.chartType) {
               case "histogram":
                 const histData = [];
-                const numPoints = Math.floor(Math.random() * 50) + 30;
+                const numPoints = Math.floor(Math.random() * 60) + 60;
                 const mean = Math.random() * 50 + 50;
-                const variance = Math.random() * 400 + 100;
+                const sd = Math.random() * 10 + 5;
+
+                const dists = ["normal", "lognormal", "bimodal"];
+                const dist = dists[Math.floor(Math.random() * dists.length)];
+
+                let lnMu = 0;
+                let lnSigma = 0;
+                if (dist === "lognormal") {
+                  lnSigma = Math.random() * 0.6 + 0.2;
+                  lnMu = Math.log(Math.max(1, mean)) - 0.5 * lnSigma * lnSigma;
+                }
+
+                let bimodalShift = 0;
+                if (dist === "bimodal") {
+                  bimodalShift = Math.random() * 12 + 8;
+                }
 
                 for (let i = 0; i < numPoints; i++) {
-                  let sum = 0;
-                  for (let j = 0; j < 6; j++) {
-                    sum += Math.random();
+                  const p = (i + 1) / (numPoints + 1);
+                  let val;
+                  switch (dist) {
+                    case "lognormal":
+                      val = this.lognormalQuantile(p, mean, lnSigma);
+                      break;
+                    case "bimodal":
+                      val = this.bimodalQuantile(p, mean, sd, bimodalShift);
+                      break;
+                    default:
+                      val = this.normalQuantile(p, mean, sd);
                   }
-                  let normalValue = (sum / 6) * Math.sqrt(variance) + mean;
-                  histData.push(Math.round(normalValue * 10) / 10);
+                  if (!Number.isFinite(val) || Number.isNaN(val)) {
+                    val = mean;
+                  }
+                  val = Math.round(val * 10) / 10;
+                  histData.push(val);
                 }
                 this.dataInput = JSON.stringify(histData);
                 break;
