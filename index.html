@@ -528,6 +528,7 @@
               <option value="scatter">Scatter Plot</option>
               <option value="boxplot">Box Plot</option>
               <option value="line">Line Plot</option>
+              <option value="barplot">Bar Plot</option>
             </select>
           </label>
           <div x-show="chartType === 'histogram'">
@@ -739,6 +740,26 @@
             <template x-if="chartType === 'line'">
               <div>
                 <template x-for="i in getLineColorCount()" :key="i">
+                  <label>
+                    <span
+                      x-text="'Color ' + i + ':'"
+                      style="display: inline-block; width: 60px"
+                    ></span>
+                    <input
+                      type="color"
+                      :value="getColorValue(i)"
+                      @input="setColorValue(i, $event.target.value)"
+                      @change="onColorChange()"
+                    />
+                  </label>
+                </template>
+              </div>
+            </template>
+
+            <!-- Bar plot: dynamic based on data -->
+            <template x-if="chartType === 'barplot'">
+              <div>
+                <template x-for="i in getBarPlotColorCount()" :key="i">
                   <label>
                     <span
                       x-text="'Color ' + i + ':'"
@@ -1003,6 +1024,18 @@
             placeholder="[1, 2, 3, 4, 5] or [[1, 2, 3], [4, 5, 6]]"
           ></textarea>
         </div>
+        <div x-show="chartType === 'barplot'">
+          <h3>Bar Plot Data Input</h3>
+          <p>
+            Enter data as an array of numbers or array of {label, value}
+            objects:
+          </p>
+          <textarea
+            x-model="dataInput"
+            class="data-input"
+            placeholder="[10, 20, 30, 40] or [{label: 'A', value: 10}, {label: 'B', value: 20}]"
+          ></textarea>
+        </div>
       </div>
       <br />
 
@@ -1178,6 +1211,19 @@
                 return Math.min(parsed.length, 6);
               }
               return 1; // Single array
+            } catch (e) {
+              return 1;
+            }
+          },
+
+          getBarPlotColorCount() {
+            try {
+              const parsed = JSON.parse(this.dataInput);
+              if (Array.isArray(parsed)) {
+                // Show min of bars or 6 colors (will loop if more bars)
+                return Math.min(parsed.length, 6);
+              }
+              return 1;
             } catch (e) {
               return 1;
             }
@@ -1403,6 +1449,34 @@
                 }
                 this.dataInput = JSON.stringify(lineSeries);
                 break;
+
+              case "barplot":
+                const numBars = Math.floor(Math.random() * 8) + 4;
+                const barData = [];
+                const labels = [
+                  "Alpha",
+                  "Beta",
+                  "Gamma",
+                  "Delta",
+                  "Epsilon",
+                  "Zeta",
+                  "Eta",
+                  "Theta",
+                  "Iota",
+                  "Kappa",
+                  "Lambda",
+                  "Mu",
+                ];
+
+                for (let i = 0; i < numBars; i++) {
+                  const value = Math.round((Math.random() * 80 + 20) * 10) / 10;
+                  barData.push({
+                    label: labels[i % labels.length],
+                    value: value,
+                  });
+                }
+                this.dataInput = JSON.stringify(barData);
+                break;
             }
 
             // Update the chart with new random data
@@ -1410,7 +1484,13 @@
           },
 
           randomizeAll() {
-            const chartTypes = ["histogram", "scatter", "boxplot", "line"];
+            const chartTypes = [
+              "histogram",
+              "scatter",
+              "boxplot",
+              "line",
+              "barplot",
+            ];
             this.chartType =
               chartTypes[Math.floor(Math.random() * chartTypes.length)];
 
@@ -1621,6 +1701,34 @@
                 }
                 this.dataInput = JSON.stringify(lineSeries);
                 break;
+
+              case "barplot":
+                const numBarsRand = Math.floor(Math.random() * 8) + 4;
+                const barDataRand = [];
+                const labelsRand = [
+                  "Alpha",
+                  "Beta",
+                  "Gamma",
+                  "Delta",
+                  "Epsilon",
+                  "Zeta",
+                  "Eta",
+                  "Theta",
+                  "Iota",
+                  "Kappa",
+                  "Lambda",
+                  "Mu",
+                ];
+
+                for (let i = 0; i < numBarsRand; i++) {
+                  const value = Math.round((Math.random() * 80 + 20) * 10) / 10;
+                  barDataRand.push({
+                    label: labelsRand[i % labelsRand.length],
+                    value: value,
+                  });
+                }
+                this.dataInput = JSON.stringify(barDataRand);
+                break;
             }
 
             this.updateChart();
@@ -1643,6 +1751,10 @@
                 break;
               case "line":
                 this.dataInput = "[1, 2, 4, 3, 5, 7, 6, 8, 9, 8]";
+                break;
+              case "barplot":
+                this.dataInput =
+                  '[{"label": "A", "value": 25}, {"label": "B", "value": 40}, {"label": "C", "value": 30}, {"label": "D", "value": 55}, {"label": "E", "value": 20}]';
                 break;
             }
             this.updateChart();
@@ -1728,6 +1840,24 @@
                         : parsed.map((val, idx) => ({ x: idx + 1, y: val }))
                     );
                     drawLinePlot(parsed, null, this.showDots);
+                  } else {
+                    this.isValidData = false;
+                    return;
+                  }
+                  break;
+
+                case "barplot":
+                  // Validate bar plot data (array of numbers or array of {label, value} objects)
+                  const isValidBarplot =
+                    Array.isArray(parsed) &&
+                    (parsed.every((x) => typeof x === "number") ||
+                      (parsed.length > 0 &&
+                        typeof parsed[0] === "object" &&
+                        parsed[0].hasOwnProperty("value") &&
+                        parsed.every((x) => typeof x.value === "number")));
+
+                  if (isValidBarplot) {
+                    drawBarPlot(parsed);
                   } else {
                     this.isValidData = false;
                     return;

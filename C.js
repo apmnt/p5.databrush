@@ -737,6 +737,135 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
   }
 }
 
+function drawBarPlot(data, labels = null) {
+  brush.pick(config.brushType);
+
+  // Handle both array of numbers and array of {label, value} objects
+  let values = [];
+  let barLabels = [];
+
+  if (
+    Array.isArray(data) &&
+    typeof data[0] === "object" &&
+    data[0].value !== undefined
+  ) {
+    // Array of {label, value} objects
+    values = data.map((d) => d.value);
+    barLabels = data.map((d) => d.label || "");
+  } else if (Array.isArray(data) && typeof data[0] === "number") {
+    // Array of numbers
+    values = data;
+    barLabels = labels || values.map((_, i) => `Bar ${i + 1}`);
+  } else {
+    throw new Error("Invalid data format for bar plot");
+  }
+
+  // Find min and max for scaling
+  let minVal = Math.min(...values, 0); // Include 0 in the range
+  let maxVal = Math.max(...values);
+
+  // Use nice scale for the y-axis
+  const {
+    min: niceMin,
+    max: niceMax,
+    tick: niceTick,
+  } = getNiceScale(minVal, maxVal);
+  minVal = niceMin;
+  maxVal = niceMax;
+
+  const totalBars = values.length;
+  const availableWidth = config.plotWidth / (totalBars + 1);
+
+  // Bar width should be 60% of available space
+  const maxBarWidth = Math.min(config.plotWidth * 0.15, 200);
+  const minBarWidth = 30;
+
+  let barWidth = availableWidth * 0.6;
+  barWidth = Math.max(minBarWidth, Math.min(maxBarWidth, barWidth));
+
+  const barSpacing = config.plotWidth / (totalBars + 1);
+
+  // Determine if labels should be rotated based on available space
+  const estimatedLabelWidth =
+    config.fontSize * 0.6 * Math.max(...barLabels.map((label) => label.length));
+  const shouldRotate = estimatedLabelWidth > barSpacing;
+
+  push();
+
+  // Draw axes
+  brush.pick(config.gridBrushType);
+  brush.stroke(config.gridLineColor);
+  brush.strokeWeight(config.gridLineWidth);
+  brush.line(0, config.plotHeight, config.plotWidth, config.plotHeight); // x-axis line
+  drawYScale(niceMin, niceMax, niceTick, config.plotWidth, config.plotHeight);
+
+  // Draw bars
+  brush.pick(config.brushType);
+  values.forEach((value, index) => {
+    const barX = (index + 1) * barSpacing;
+
+    // Scale value to plot height
+    const zeroY =
+      config.plotHeight -
+      ((0 - minVal) / (maxVal - minVal)) * config.plotHeight;
+    const valueY =
+      config.plotHeight -
+      ((value - minVal) / (maxVal - minVal)) * config.plotHeight;
+    const barHeight = Math.abs(valueY - zeroY);
+    const barY = Math.min(valueY, zeroY);
+
+    // Draw bar
+    brush.stroke(config.lineColor);
+    brush.strokeWeight(config.lineWidth);
+
+    const barColor = config.randomColors
+      ? random(config.palette)
+      : config.palette[index % config.palette.length];
+
+    if (config.useHatching) {
+      brush.noFill();
+      brush.setHatch(config.hatchBrushType, barColor, config.hatchLineWidth);
+      brush.hatch(config.hatchDistance, config.hatchAngle + random(-10, 10), {
+        rand: config.hatchRand,
+        continuous: config.hatchContinuous,
+        gradient: config.hatchGradient,
+      });
+    } else if (config.fillType === "none") {
+      brush.noFill();
+    } else {
+      brush.fill(barColor, random(60, 100));
+      brush.bleed(random(config.bleedMin, config.bleedMax));
+      brush.fillTexture(0.55, 0.8);
+    }
+
+    brush.rect(barX - barWidth / 2, barY, barWidth, barHeight);
+
+    if (config.useHatching) {
+      brush.noHatch();
+    }
+
+    // Draw bar labels - ALWAYS show all labels
+    textSize(config.fontSize);
+    fill(config.axisLabelColor);
+
+    const labelText = barLabels[index];
+
+    if (shouldRotate) {
+      push();
+      textAlign(LEFT, CENTER);
+      translate(barX, config.plotHeight + 10);
+      rotate(45);
+      text(labelText, 0, 0);
+      pop();
+    } else {
+      textAlign(CENTER, TOP);
+      text(labelText, barX, config.plotHeight + 10);
+    }
+  });
+
+  pop();
+}
+
 function drawBoxPlot(data) {
   brush.pick(config.brushType);
   // Find global min and max for scaling
