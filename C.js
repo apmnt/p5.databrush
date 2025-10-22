@@ -239,10 +239,26 @@ function drawXScale(niceMinX, niceMaxX, niceTickX, plotWidth, plotHeight) {
   brush.line(0, plotHeight, plotWidth, plotHeight); // x-axis top
 
   const numTicksX = Math.round((niceMaxX - niceMinX) / niceTickX);
+
+  // Calculate minimum spacing needed for labels (estimate char width * avg label length + padding)
+  const minLabelSpacing = config.fontSize * 0.6 * 5; // Approximate width for "XX.X" format
+  const availableSpacing = plotWidth / numTicksX;
+  const labelStep = Math.max(1, Math.ceil(minLabelSpacing / availableSpacing));
+
+  // Calculate the ideal number of labels and ensure consistent spacing
+  const maxLabels = Math.floor(numTicksX / labelStep) + 1;
+  const actualStep =
+    numTicksX > maxLabels ? Math.ceil(numTicksX / maxLabels) : labelStep;
+
   for (let i = 1; i < numTicksX; i++) {
     const value = niceMinX + i * niceTickX;
     const x = ((value - niceMinX) / (niceMaxX - niceMinX)) * plotWidth;
-    text(value.toFixed(1), x, plotHeight + 10);
+
+    // Show labels at consistent intervals
+    if (i % actualStep === 0 && i + actualStep <= numTicksX) {
+      text(value.toFixed(1), x, plotHeight + 10);
+    }
+
     brush.line(x, 0, x, plotHeight);
   }
 }
@@ -259,11 +275,27 @@ function drawYScale(niceMinY, niceMaxY, niceTickY, plotWidth, plotHeight) {
   brush.line(plotWidth, 0, plotWidth, plotHeight); // y-axis right
 
   const numTicksY = Math.round((niceMaxY - niceMinY) / niceTickY);
+
+  // Calculate minimum spacing needed for labels based on font size
+  const minLabelSpacing = config.fontSize * 1.5; // Font size + some padding
+  const availableSpacing = plotHeight / numTicksY;
+  const labelStep = Math.max(1, Math.ceil(minLabelSpacing / availableSpacing));
+
+  // Calculate the ideal number of labels and ensure consistent spacing
+  const maxLabels = Math.floor(numTicksY / labelStep) + 1;
+  const actualStep =
+    numTicksY > maxLabels ? Math.ceil(numTicksY / maxLabels) : labelStep;
+
   for (let i = 1; i < numTicksY; i++) {
     const value = niceMinY + i * niceTickY;
     const y =
       plotHeight - ((value - niceMinY) / (niceMaxY - niceMinY)) * plotHeight;
-    text(value.toFixed(1), -10, y);
+
+    // Show labels at consistent intervals
+    if (i % actualStep === 0 && i + actualStep <= numTicksY) {
+      text(value.toFixed(1), -10, y);
+    }
+
     brush.line(0, y, plotWidth, y);
   }
 }
@@ -536,31 +568,63 @@ function drawHistogram(values, numBins) {
   push(); // Save current transformation matrix
   textAlign(CENTER);
 
+  // Calculate minimum spacing needed for labels based on font size
+  const minLabelSpacing = config.fontSize * 0.6 * 5; // Approximate width for "XX.X" format
+  const availableSpacing = binWidth;
+  const labelStep = Math.max(1, Math.ceil(minLabelSpacing / availableSpacing));
+
+  // Calculate the ideal number of labels and ensure consistent spacing
+  const maxLabels = Math.floor(numBins / labelStep) + 1;
+  const actualStep =
+    numBins > maxLabels ? Math.ceil(numBins / maxLabels) : labelStep;
+
   for (let i = 0; i <= numBins; i++) {
-    const value = minValue + i * binSize;
-    // Translate to the position where we want to draw the text
-    translate(i * binWidth, config.plotHeight + yOffset); // Moved labels down by increasing y offset
-    // Rotate 90 degrees
-    // rotate(HALF_PI);
-    // Draw the text at the rotated position
-    text(value.toFixed(1), 0, 0);
-    // Reset the transformation
-    // rotate(-HALF_PI);
-    translate(-(i * binWidth), -(config.plotHeight + yOffset));
+    // Show labels at consistent intervals, always including first and last
+    if (
+      i === 0 ||
+      i === numBins ||
+      (i % actualStep === 0 && i + actualStep <= numBins)
+    ) {
+      const value = minValue + i * binSize;
+      // Translate to the position where we want to draw the text
+      translate(i * binWidth, config.plotHeight + yOffset);
+      text(value.toFixed(1), 0, 0);
+      translate(-(i * binWidth), -(config.plotHeight + yOffset));
+    }
   }
 
   pop(); // Restore transformation matrix
 
   // Y-axis labels
   textAlign(RIGHT, CENTER);
+
+  // Calculate minimum spacing for Y labels
+  const minYLabelSpacing = config.fontSize * 1.5;
+  const availableYSpacing = config.plotHeight / (numYTicks - 1);
+  const yLabelStep = Math.max(
+    1,
+    Math.ceil(minYLabelSpacing / availableYSpacing)
+  );
+
+  // Calculate consistent spacing for Y labels
+  const maxYLabels = Math.floor((numYTicks - 1) / yLabelStep) + 1;
+  const actualYStep =
+    numYTicks - 1 > maxYLabels
+      ? Math.ceil((numYTicks - 1) / maxYLabels)
+      : yLabelStep;
+
   for (let i = 0; i <= numYTicks - 1; i++) {
     if (i === 0) continue; // Skip the zero label
-    const value = (niceMaxCount / (numYTicks - 1)) * i;
-    text(
-      Math.round(value),
-      -5,
-      config.plotHeight - (config.plotHeight / (numYTicks - 1)) * i
-    );
+
+    // Show labels at consistent intervals
+    if (i % actualYStep === 0 && i + actualYStep <= numYTicks - 1) {
+      const value = (niceMaxCount / (numYTicks - 1)) * i;
+      text(
+        Math.round(value),
+        -5,
+        config.plotHeight - (config.plotHeight / (numYTicks - 1)) * i
+      );
+    }
   }
 }
 
@@ -702,6 +766,10 @@ function drawBoxPlot(data) {
 
   const groupSpacing = config.plotWidth / (totalGroups + 1);
 
+  // Calculate minimum spacing needed for group labels
+  const minLabelWidth = config.fontSize * 0.6 * 8;
+  const labelStep = Math.max(1, Math.ceil(minLabelWidth / groupSpacing));
+
   // Move to the plotting area
   push();
 
@@ -821,11 +889,13 @@ function drawBoxPlot(data) {
       brush.circle(groupX, scaleY(value), 5);
     });
 
-    // Draw group labels
-    textAlign(CENTER, TOP);
-    textSize(config.fontSize);
-    fill(config.axisLabelColor);
-    text(`Group ${index + 1}`, groupX, config.plotHeight + 10);
+    // Draw group labels - only if they fit
+    if (index % labelStep === 0) {
+      textAlign(CENTER, TOP);
+      textSize(config.fontSize);
+      fill(config.axisLabelColor);
+      text(`Group ${index + 1}`, groupX, config.plotHeight + 10);
+    }
   });
 
   pop();
