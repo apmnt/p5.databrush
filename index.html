@@ -348,6 +348,19 @@
           color: #999;
           transition: color 0.2s;
           scroll-snap-align: start;
+          position: relative;
+        }
+
+        .mobile-tab::after {
+          content: attr(data-text);
+          content: attr(data-text) / "";
+          height: 0;
+          visibility: hidden;
+          overflow: hidden;
+          user-select: none;
+          pointer-events: none;
+          font-weight: bold;
+          display: block;
         }
 
         .mobile-tab:first-child {
@@ -392,6 +405,7 @@
           :class="{ active: activeTab === 'about' }"
           @click="setActiveTab('about')"
           x-ref="tab_about"
+          data-text="*p5.databrush"
         >
           *p5.databrush
         </div>
@@ -400,6 +414,7 @@
           :class="{ active: activeTab === 'chartOptions' }"
           @click="setActiveTab('chartOptions')"
           x-ref="tab_chartOptions"
+          data-text="chart"
         >
           chart
         </div>
@@ -408,6 +423,7 @@
           :class="{ active: activeTab === 'style' }"
           @click="setActiveTab('style')"
           x-ref="tab_style"
+          data-text="style"
         >
           style
         </div>
@@ -416,6 +432,7 @@
           :class="{ active: activeTab === 'palette' }"
           @click="setActiveTab('palette')"
           x-ref="tab_palette"
+          data-text="palette"
         >
           palette
         </div>
@@ -424,6 +441,7 @@
           :class="{ active: activeTab === 'fill' }"
           @click="setActiveTab('fill')"
           x-ref="tab_fill"
+          data-text="fill"
         >
           fill
         </div>
@@ -432,6 +450,7 @@
           :class="{ active: activeTab === 'typography' }"
           @click="setActiveTab('typography')"
           x-ref="tab_typography"
+          data-text="typography"
         >
           typography
         </div>
@@ -440,6 +459,7 @@
           :class="{ active: activeTab === 'dimensions' }"
           @click="setActiveTab('dimensions')"
           x-ref="tab_dimensions"
+          data-text="canvas"
         >
           canvas
         </div>
