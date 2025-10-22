@@ -25,6 +25,8 @@ const config = {
   ],
   palettePreset: "matplotlib",
   randomColors: true,
+  shuffleColors: false,
+  shuffledPalette: [],
   color1: "#1f77b4",
   color2: "#ff7f0e",
   color3: "#2ca02c",
@@ -154,8 +156,16 @@ const C = {
       config.color6 = config.palette[5];
     }
 
-    // Update palette with custom colors if not random
-    if (!config.randomColors) {
+    // Update palette based on shuffle and random settings
+    // Use shuffled palette if shuffle is enabled
+    if (
+      config.shuffleColors &&
+      config.shuffledPalette &&
+      config.shuffledPalette.length > 0
+    ) {
+      config.palette = [...config.shuffledPalette];
+    } else if (!config.randomColors) {
+      // Use custom colors in order if not random and not shuffled
       config.palette = [
         config.color1,
         config.color2,
@@ -374,10 +384,9 @@ function drawLinePlot(
         )
       : getNiceBounds(plotRange);
 
-  // Set random colors if not provided
+  // Use colors in order from palette if not provided
   const lineColors =
-    colors ||
-    shuffle(config.palette).slice(0, isMultipleLines ? yValues.length : 1);
+    colors || config.palette.slice(0, isMultipleLines ? yValues.length : 1);
 
   // Iterate over each array in yValues
   for (let i = 0; i < (isMultipleLines ? yValues.length : 1); i++) {
@@ -643,10 +652,7 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
       const group = values[j];
       const groupColor = Array.isArray(colors)
         ? colors[j % colors.length]
-        : colors ||
-          (config.randomColors
-            ? random(config.palette)
-            : config.palette[j % config.palette.length]);
+        : colors || config.palette[j % config.palette.length];
 
       for (let i = 0; i < group.length; i++) {
         const point = group[i];
@@ -695,9 +701,7 @@ function drawScatterPlot(values, colors = null, plotRange = null) {
         "Colors should not be an array when values is a single array of points."
       );
     }
-    const pointColor =
-      colors ||
-      (config.randomColors ? random(config.palette) : config.palette[0]);
+    const pointColor = colors || config.palette[0];
 
     for (let i = 0; i < values.length; i++) {
       const point = values[i];
@@ -818,9 +822,7 @@ function drawBarPlot(data, labels = null) {
     brush.stroke(config.lineColor);
     brush.strokeWeight(config.lineWidth);
 
-    const barColor = config.randomColors
-      ? random(config.palette)
-      : config.palette[index % config.palette.length];
+    const barColor = config.palette[index % config.palette.length];
 
     if (config.useHatching) {
       brush.noFill();
@@ -950,9 +952,7 @@ function drawBoxPlot(data) {
     brush.stroke(config.lineColor);
     brush.strokeWeight(config.lineWidth);
 
-    const boxColor = config.randomColors
-      ? random(config.palette)
-      : config.palette[index % config.palette.length];
+    const boxColor = config.palette[index % config.palette.length];
 
     if (config.useHatching) {
       brush.noFill();

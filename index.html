@@ -681,6 +681,15 @@
             />
             Random Colors from Palette
           </label>
+          <label>
+            <input
+              type="checkbox"
+              x-model="shuffleColors"
+              @change="onShuffleColorsChange()"
+              style="width: auto; margin-left: 0; float: none"
+            />
+            Shuffle Color Order
+          </label>
           <div x-show="!randomColors">
             <!-- Histogram: 1 color -->
             <template x-if="chartType === 'histogram'">
@@ -1093,6 +1102,8 @@
           color4: C.config.color4,
           color5: C.config.color5,
           color6: C.config.color6,
+          shuffleColors: false,
+          shuffledPalette: [],
           fillType:
             C.config.fillType ||
             (C.config.useHatching ? "hatch" : "watercolor"),
@@ -1242,9 +1253,42 @@
               this.color4 = colors[3];
               this.color5 = colors[4];
               this.color6 = colors[5];
+
+              // If shuffle is on, create new shuffled palette
+              if (this.shuffleColors) {
+                this.generateShuffledPalette();
+              }
             }
 
             this.updateChart();
+          },
+
+          onShuffleColorsChange() {
+            if (this.shuffleColors) {
+              this.generateShuffledPalette();
+            }
+            this.updateChart();
+          },
+
+          generateShuffledPalette() {
+            // Create a shuffled version of the current palette
+            const currentPalette = [
+              this.color1,
+              this.color2,
+              this.color3,
+              this.color4,
+              this.color5,
+              this.color6,
+            ];
+
+            // Fisher-Yates shuffle algorithm
+            const shuffled = [...currentPalette];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+
+            this.shuffledPalette = shuffled;
           },
 
           onColorChange() {
@@ -1877,6 +1921,11 @@
             const newH = Number(this.canvasHeight);
             const newPad = Number(this.padding);
 
+            // Generate new shuffle every time if shuffle is enabled
+            if (this.shuffleColors) {
+              this.generateShuffledPalette();
+            }
+
             const sizeChanged =
               newW !== this.previousCanvasWidth ||
               newH !== this.previousCanvasHeight;
@@ -1936,6 +1985,8 @@
               gridLineWidth: Number(this.gridLineWidth),
               palettePreset: this.palettePreset,
               randomColors: this.randomColors,
+              shuffleColors: this.shuffleColors,
+              shuffledPalette: this.shuffledPalette,
               color1: this.color1,
               color2: this.color2,
               color3: this.color3,
@@ -1944,6 +1995,8 @@
               color6: this.color6,
               palettePreset: this.palettePreset,
               randomColors: this.randomColors,
+              shuffleColors: this.shuffleColors,
+              shuffledPalette: this.shuffledPalette,
               color1: this.color1,
               color2: this.color2,
               color3: this.color3,
