@@ -264,6 +264,8 @@
         }
 
         .controls {
+          padding-top: 20px;
+          margin-top: -20px;
           padding-bottom: 20px;
           overflow-y: visible;
           min-height: auto;
@@ -315,6 +317,7 @@
           margin-left: -20px;
           margin-right: -10px;
           padding-right: 10px;
+          padding-bottom: 20px;
           height: auto;
           overflow-x: auto;
           overflow-y: hidden;
@@ -367,10 +370,15 @@
         .collapsible-content {
           display: none;
           border-top: none;
+          padding-top: 0;
         }
 
         .collapsible-content.mobile-active {
           display: block !important;
+        }
+
+        .about-text {
+          margin-top: 0;
         }
       }
     </style>
@@ -436,15 +444,6 @@
           canvas
         </div>
       </div>
-
-      <h1>*p5.databrush</h1>
-      <p>
-        Visualize your data on a watercolor canvas. Choose from histograms,
-        scatter plots, box plots, and line plots. Customize the settings and use
-        your own data, or try randomized plots with sample datasets and
-        palettes.
-      </p>
-
       <!-- Mobile content area -->
       <div class="mobile-content-area">
         <!-- About section (mobile only) -->
@@ -453,7 +452,7 @@
           :class="{ 'mobile-active': activeTab === 'about' }"
           x-show="activeTab === 'about'"
         >
-          <p>
+          <p class="about-text">
             Visualize your data on a watercolor canvas. Choose from histograms,
             scatter plots, box plots, and line plots. Customize the settings and
             use your own data, or try randomized plots with sample datasets and
