@@ -259,12 +259,12 @@
 
       @media (max-width: 800px) {
         body {
-          padding-bottom: 60px;
+          padding-bottom: 20px;
           justify-content: flex-start;
         }
 
         .controls {
-          padding-bottom: 80px;
+          padding-bottom: 20px;
           overflow-y: visible;
           min-height: auto;
           position: relative;
@@ -306,30 +306,23 @@
 
         .mobile-section-title,
         .mobile-databrush-title {
-          display: block;
-          font-size: 2em;
-          font-weight: bold;
-          margin-top: 0;
-          margin-bottom: 20px;
+          display: none;
         }
 
         .mobile-tabs {
           display: block;
-          position: fixed;
-          bottom: -160px;
-          left: 0;
-          right: 0;
-          height: 200px;
+          position: relative;
+          margin-left: -20px;
+          margin-right: -10px;
+          padding-right: 10px;
+          height: auto;
           overflow-x: auto;
+          overflow-y: hidden;
           white-space: nowrap;
           -webkit-overflow-scrolling: touch;
-          border-top: 1px solid #000000;
-          background-color: #ffffffee;
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          z-index: 1000;
           scrollbar-width: none; /* Firefox */
           -ms-overflow-style: none; /* Edge */
+          scroll-snap-type: x proximity;
         }
 
         .mobile-tabs::-webkit-scrollbar {
@@ -338,19 +331,25 @@
 
         .mobile-tab {
           display: inline-block;
-          padding: 15px 20px;
+          padding: 8px 0px;
+          margin-right: 20px;
           cursor: pointer;
           user-select: none;
+          font-family: "IBM Plex Serif", sans-serif;
+          font-size: 1.5em;
           font-weight: normal;
-          color: #666;
-          transition: color 0.2s, border-top-color 0.2s;
-          border-top: 2px solid transparent;
+          color: #999;
+          transition: color 0.2s;
+          scroll-snap-align: start;
+        }
+
+        .mobile-tab:first-child {
+          padding-left: 20px;
         }
 
         .mobile-tab.active {
           color: #000;
-          border-top-color: #000;
-          text-shadow: 0 0 0.5px #000, 0 0 0.5px #000;
+          font-weight: bold;
         }
 
         .collapsible-section {
@@ -375,6 +374,65 @@
   <body x-data="chartData()">
     <div id="chartContainer"></div>
     <div class="controls">
+      <div class="mobile-tabs" x-ref="mobileTabsContainer">
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'about' }"
+          @click="setActiveTab('about')"
+          x-ref="tab_about"
+        >
+          *p5.databrush
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'chartOptions' }"
+          @click="setActiveTab('chartOptions')"
+          x-ref="tab_chartOptions"
+        >
+          chart
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'style' }"
+          @click="setActiveTab('style')"
+          x-ref="tab_style"
+        >
+          style
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'palette' }"
+          @click="setActiveTab('palette')"
+          x-ref="tab_palette"
+        >
+          palette
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'fill' }"
+          @click="setActiveTab('fill')"
+          x-ref="tab_fill"
+        >
+          fill
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'typography' }"
+          @click="setActiveTab('typography')"
+          x-ref="tab_typography"
+        >
+          typography
+        </div>
+        <div
+          class="mobile-tab"
+          :class="{ active: activeTab === 'dimensions' }"
+          @click="setActiveTab('dimensions')"
+          x-ref="tab_dimensions"
+        >
+          canvas
+        </div>
+      </div>
+
       <h1>*p5.databrush</h1>
       <p>
         Visualize your data on a watercolor canvas. Choose from histograms,
@@ -391,7 +449,6 @@
           :class="{ 'mobile-active': activeTab === 'about' }"
           x-show="activeTab === 'about'"
         >
-          <h1 class="mobile-databrush-title">*p5.databrush</h1>
           <p>
             Visualize your data on a watercolor canvas. Choose from histograms,
             scatter plots, box plots, and line plots. Customize the settings and
@@ -448,59 +505,6 @@
         </div>
       </div>
 
-      <!-- Mobile tab navigation -->
-      <div class="mobile-tabs">
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'about' }"
-          @click="setActiveTab('about')"
-        >
-          About
-        </div>
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'chartOptions' }"
-          @click="setActiveTab('chartOptions')"
-        >
-          Chart
-        </div>
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'style' }"
-          @click="setActiveTab('style')"
-        >
-          Style
-        </div>
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'palette' }"
-          @click="setActiveTab('palette')"
-        >
-          Palette & Colors
-        </div>
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'fill' }"
-          @click="setActiveTab('fill')"
-        >
-          Fill
-        </div>
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'typography' }"
-          @click="setActiveTab('typography')"
-        >
-          Typography
-        </div>
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'dimensions' }"
-          @click="setActiveTab('dimensions')"
-        >
-          Canvas
-        </div>
-      </div>
-
       <!-- Chart Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('chartOptions')">
@@ -514,7 +518,6 @@
           :class="{ 'mobile-active': activeTab === 'chartOptions' }"
           x-show="!isMobile() ? openSections.chartOptions : activeTab === 'chartOptions'"
         >
-          <h1 class="mobile-section-title">Chart</h1>
           <label>
             Chart Type:
             <select
@@ -559,7 +562,6 @@
           :class="{ 'mobile-active': activeTab === 'style' }"
           x-show="!isMobile() ? openSections.style : activeTab === 'style'"
         >
-          <h1 class="mobile-section-title">Style</h1>
           <label
             >Background Color:
             <input
@@ -654,7 +656,6 @@
           :class="{ 'mobile-active': activeTab === 'palette' }"
           x-show="!isMobile() ? openSections.palette : activeTab === 'palette'"
         >
-          <h1 class="mobile-section-title">Palette & Colors</h1>
           <label>
             Palette Preset:
             <select
@@ -769,7 +770,6 @@
           :class="{ 'mobile-active': activeTab === 'fill' }"
           x-show="!isMobile() ? openSections.fill : activeTab === 'fill'"
         >
-          <h1 class="mobile-section-title">Fill</h1>
           <label>
             Fill Type:
             <select
@@ -904,7 +904,6 @@
           :class="{ 'mobile-active': activeTab === 'typography' }"
           x-show="!isMobile() ? openSections.typography : activeTab === 'typography'"
         >
-          <h1 class="mobile-section-title">Typography</h1>
           <label
             >Label Font Size:
             <input
@@ -939,7 +938,6 @@
           :class="{ 'mobile-active': activeTab === 'dimensions' }"
           x-show="!isMobile() ? openSections.dimensions : activeTab === 'dimensions'"
         >
-          <h1 class="mobile-section-title">Canvas</h1>
           <label
             >Canvas Width:
             <input type="number" x-model="canvasWidth" @change="updateChart()"
@@ -1097,6 +1095,27 @@
             // Scroll to top when changing tabs on mobile
             if (this.isMobile()) {
               window.scrollTo({ top: 0, behavior: "smooth" });
+
+              // Scroll the active tab into view horizontally
+              this.$nextTick(() => {
+                const tabElement = this.$refs[`tab_${tab}`];
+                const container = this.$refs.mobileTabsContainer;
+
+                if (tabElement && container) {
+                  // Calculate the position to scroll to center the tab
+                  const tabRect = tabElement.getBoundingClientRect();
+                  const containerRect = container.getBoundingClientRect();
+                  const scrollLeft =
+                    tabElement.offsetLeft -
+                    containerRect.width / 2 +
+                    tabRect.width / 2;
+
+                  container.scrollTo({
+                    left: scrollLeft,
+                    behavior: "smooth",
+                  });
+                }
+              });
             }
           },
 
