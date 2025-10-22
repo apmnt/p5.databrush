@@ -77,29 +77,6 @@
         z-index: 999;
       }
 
-      .controls::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ffffff85;
-        backdrop-filter: blur(100px);
-        -webkit-backdrop-filter: blur(100px);
-        -webkit-mask-image: linear-gradient(
-          to bottom,
-          rgba(0, 0, 0, 0) 0px,
-          rgba(0, 0, 0, 1) 100px
-        );
-        mask-image: linear-gradient(
-          to bottom,
-          rgba(0, 0, 0, 0) 0px,
-          rgba(0, 0, 0, 1) 100px
-        );
-        z-index: -1;
-      }
-
       .collapsible-section {
         border-top: 1px solid #000000;
       }
@@ -279,18 +256,18 @@
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: #ffffff85;
+          background-color: #ffffff49;
           backdrop-filter: blur(100px);
           -webkit-backdrop-filter: blur(100px);
           -webkit-mask-image: linear-gradient(
             to bottom,
             rgba(0, 0, 0, 0) 0px,
-            rgba(0, 0, 0, 1) 85px
+            rgba(0, 0, 0, 1) 30px
           );
           mask-image: linear-gradient(
             to bottom,
             rgba(0, 0, 0, 0) 0px,
-            rgba(0, 0, 0, 1) 85px
+            rgba(0, 0, 0, 1) 30px
           );
           z-index: -1;
           pointer-events: none;
@@ -349,6 +326,7 @@
           transition: color 0.2s;
           scroll-snap-align: start;
           position: relative;
+          mix-blend-mode: difference;
         }
 
         .mobile-tab::after {
