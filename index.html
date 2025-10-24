@@ -609,26 +609,38 @@
           :class="{ 'mobile-active': activeTab === 'style' }"
           x-show="!isMobile() ? openSections.style : activeTab === 'style'"
         >
+          <label>
+            Style Preset:
+            <select x-model="stylePreset" @change="onStylePresetChange()">
+              <option value="custom">Custom</option>
+              <template x-for="preset in stylePresetNames" :key="preset">
+                <option
+                  :value="preset"
+                  x-text="preset.replace(/_/g, ' ')"
+                ></option>
+              </template>
+            </select>
+          </label>
           <label
             >Background Color:
             <input
               type="color"
               x-model="backgroundColor"
-              @change="updateChart()"
+              @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label
             >Axis Label Color:
             <input
               type="color"
               x-model="axisLabelColor"
-              @change="updateChart()"
+              @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label>
             Brush Type:
             <select
               class="dropdown"
               x-model="brushType"
-              @change="updateChart()"
+              @change="stylePreset = 'custom'; updateChart()"
             >
               <option value="pen">Pen</option>
               <option value="rotring">Rotring</option>
@@ -644,7 +656,10 @@
           </label>
           <label
             >Line Color:
-            <input type="color" x-model="lineColor" @change="updateChart()"
+            <input
+              type="color"
+              x-model="lineColor"
+              @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label
             >Line Width:
@@ -654,14 +669,14 @@
               min="0.5"
               max="10"
               step="0.5"
-              @change="updateChart()"
+              @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label>
             Grid Brush Type:
             <select
               class="dropdown"
               x-model="gridBrushType"
-              @change="updateChart()"
+              @change="stylePreset = 'custom'; updateChart()"
             >
               <option value="pen">Pen</option>
               <option value="rotring">Rotring</option>
@@ -677,7 +692,10 @@
           </label>
           <label
             >Grid Line Color:
-            <input type="color" x-model="gridLineColor" @change="updateChart()"
+            <input
+              type="color"
+              x-model="gridLineColor"
+              @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label
             >Grid Line Width:
@@ -687,7 +705,7 @@
               min="0.5"
               max="10"
               step="0.5"
-              @change="updateChart()"
+              @change="stylePreset = 'custom'; updateChart()"
           /></label>
         </div>
       </div>
@@ -1121,6 +1139,8 @@
           loadClipboardStatus: "",
           loadStatus: "",
           palettePresetNames: Object.keys(C.palettePresets),
+          stylePresetNames: Object.keys(C.stylePresets),
+          stylePreset: "custom",
           // Load all config values from C.config
           canvasWidth: C.config.canvasWidth,
           canvasHeight: C.config.canvasHeight,
@@ -1285,6 +1305,78 @@
             } catch (e) {
               return 1;
             }
+          },
+
+          onStylePresetChange() {
+            // Apply complete style configuration when preset changes
+            if (
+              this.stylePreset !== "custom" &&
+              C.stylePresets[this.stylePreset]
+            ) {
+              const style = C.stylePresets[this.stylePreset];
+
+              // Apply all style settings
+              this.backgroundColor = style.backgroundColor;
+              this.lineWidth = style.lineWidth;
+              this.lineColor = style.lineColor;
+              this.fontSize = style.fontSize;
+              this.titleFontSize = style.titleFontSize;
+              this.axisLabelColor = style.axisLabelColor;
+              this.brushType = style.brushType;
+              this.gridBrushType = style.gridBrushType;
+              this.gridLineColor = style.gridLineColor;
+              this.gridLineWidth = style.gridLineWidth;
+              this.fillType = style.fillType;
+              this.useHatching = style.useHatching;
+              this.bleedMin = style.bleedMin;
+              this.bleedMax = style.bleedMax;
+              this.palettePreset = style.palettePreset;
+              this.randomColors = style.randomColors;
+
+              // Apply hatching settings if present
+              if (style.hatchDistance !== undefined) {
+                this.hatchDistance = style.hatchDistance;
+              }
+              if (style.hatchAngle !== undefined) {
+                this.hatchAngle = style.hatchAngle;
+              }
+              if (style.hatchRand !== undefined) {
+                this.hatchRand = style.hatchRand;
+              }
+              if (style.hatchContinuous !== undefined) {
+                this.hatchContinuous = style.hatchContinuous;
+              }
+              if (style.hatchGradient !== undefined) {
+                this.hatchGradient = style.hatchGradient;
+              }
+              if (style.hatchBrushType !== undefined) {
+                this.hatchBrushType = style.hatchBrushType;
+              }
+              if (style.hatchLineWidth !== undefined) {
+                this.hatchLineWidth = style.hatchLineWidth;
+              }
+
+              // Update palette colors (but don't trigger chart update from there)
+              if (
+                this.palettePreset !== "custom" &&
+                C.palettePresets[this.palettePreset]
+              ) {
+                const colors = C.palettePresets[this.palettePreset];
+                this.color1 = colors[0];
+                this.color2 = colors[1];
+                this.color3 = colors[2];
+                this.color4 = colors[3];
+                this.color5 = colors[4];
+                this.color6 = colors[5];
+
+                // If shuffle is on, create new shuffled palette
+                if (this.shuffleColors) {
+                  this.generateShuffledPalette();
+                }
+              }
+            }
+
+            this.updateChart();
           },
 
           onPalettePresetChange() {
@@ -1852,6 +1944,7 @@
           },
 
           renderChart() {
+            push();
             setupRest();
 
             try {
@@ -1866,6 +1959,7 @@
                     drawHistogram(parsed, Number(this.numBins));
                   } else {
                     this.isValidData = false;
+                    pop();
                     return;
                   }
                   break;
@@ -1888,6 +1982,7 @@
                     drawScatterPlot(parsed);
                   } else {
                     this.isValidData = false;
+                    pop();
                     return;
                   }
                   break;
@@ -1908,6 +2003,7 @@
                     drawBoxPlot(parsed);
                   } else {
                     this.isValidData = false;
+                    pop();
                     return;
                   }
                   break;
@@ -1933,6 +2029,7 @@
                     drawLinePlot(parsed, null, this.showDots);
                   } else {
                     this.isValidData = false;
+                    pop();
                     return;
                   }
                   break;
@@ -1951,6 +2048,7 @@
                     drawBarPlot(parsed);
                   } else {
                     this.isValidData = false;
+                    pop();
                     return;
                   }
                   break;
@@ -1960,7 +2058,11 @@
             } catch (e) {
               this.isValidData = false;
               console.error("Chart rendering error:", e);
+              pop();
+              return;
             }
+
+            pop();
           },
 
           updateChart() {
@@ -2138,6 +2240,9 @@
                 canvasHeight: this.canvasHeight,
                 padding: this.padding,
 
+                // Style preset
+                stylePreset: this.stylePreset,
+
                 // Style settings
                 backgroundColor: this.backgroundColor,
                 lineWidth: this.lineWidth,
@@ -2215,6 +2320,9 @@
                 canvasWidth: this.canvasWidth,
                 canvasHeight: this.canvasHeight,
                 padding: this.padding,
+
+                // Style preset
+                stylePreset: this.stylePreset,
 
                 // Style settings
                 backgroundColor: this.backgroundColor,
@@ -2316,6 +2424,9 @@
               if (loadedConfig.padding !== undefined)
                 this.padding = loadedConfig.padding;
 
+              if (loadedConfig.stylePreset !== undefined)
+                this.stylePreset = loadedConfig.stylePreset;
+
               if (loadedConfig.backgroundColor !== undefined)
                 this.backgroundColor = loadedConfig.backgroundColor;
               if (loadedConfig.lineWidth !== undefined)
@@ -2413,6 +2524,8 @@
                 this.canvasWidth = loadedConfig.canvasWidth;
               if (loadedConfig.canvasHeight !== undefined)
                 this.canvasHeight = loadedConfig.canvasHeight;
+              if (loadedConfig.stylePreset !== undefined)
+                this.stylePreset = loadedConfig.stylePreset;
               if (loadedConfig.padding !== undefined)
                 this.padding = loadedConfig.padding;
 
