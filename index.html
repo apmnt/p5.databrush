@@ -129,7 +129,7 @@
 
       /* Loading placeholder - only show when canvas doesn't exist */
       #chartContainer:empty::before {
-        content: "Loading...";
+        content: "loading...";
         display: block;
         width: 1000px;
         aspect-ratio: 1;
@@ -501,16 +501,16 @@
             use your own data, or try randomized plots with sample datasets and
             palettes.
           </p>
-          <button @click="randomizeAll()">Randomize everything</button>
+          <button @click="randomizeAll()">randomize everything</button>
           <br />
-          <button @click="generateRandomData()">Generate random data</button>
+          <button @click="generateRandomData()">generate random data</button>
           <br />
-          <button @click="updateChart()" x-text="'Redraw chart'"></button>
+          <button @click="updateChart()" x-text="'redraw chart'"></button>
           <span class="button-message" x-show="!isValidData"
-            >Please enter valid JSON array</span
+            >please enter valid JSON array</span
           >
           <br />
-          <button @click="exportConfig()">Export config</button>
+          <button @click="exportConfig()">export config</button>
           <span
             class="button-message"
             x-show="exportStatus"
@@ -518,7 +518,7 @@
           ></span>
           <br />
           <button @click="copyConfigToClipboard()">
-            Copy config to clipboard
+            copy config to clipboard
           </button>
           <span
             class="button-message"
@@ -527,7 +527,7 @@
           ></span>
           <br />
           <button @click="loadConfigFromClipboard()">
-            Load config from clipboard
+            load config from clipboard
           </button>
           <span
             class="button-message"
@@ -535,7 +535,7 @@
             x-text="loadClipboardStatus"
           ></span>
           <br />
-          <button @click="$refs.configFileInput.click()">Load config</button>
+          <button @click="$refs.configFileInput.click()">load config</button>
           <input
             type="file"
             x-ref="configFileInput"
@@ -554,7 +554,7 @@
       <!-- Chart Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('chartOptions')">
-          <span>Chart</span>
+          <span>chart</span>
           <span class="arrow" :class="{ open: openSections.chartOptions }"
             >►</span
           >
@@ -565,22 +565,22 @@
           x-show="!isMobile() ? openSections.chartOptions : activeTab === 'chartOptions'"
         >
           <label>
-            Chart Type:
+            chart type:
             <select
               class="dropdown"
               x-model="chartType"
               @change="onChartTypeChange()"
             >
-              <option value="histogram">Histogram</option>
-              <option value="scatter">Scatter Plot</option>
-              <option value="boxplot">Box Plot</option>
-              <option value="line">Line Plot</option>
-              <option value="barplot">Bar Plot</option>
+              <option value="histogram">histogram</option>
+              <option value="scatter">scatter plot</option>
+              <option value="boxplot">box plot</option>
+              <option value="line">line plot</option>
+              <option value="barplot">bar plot</option>
             </select>
           </label>
           <div x-show="chartType === 'histogram'">
             <label
-              >Number of Bins:
+              >number of bins:
               <input type="number" x-model="numBins" @change="updateChart()"
             /></label>
           </div>
@@ -592,7 +592,7 @@
                 @change="updateChart()"
                 style="width: auto; margin-left: 0; float: none"
               />
-              Show Dots
+              show dots
             </label>
           </div>
         </div>
@@ -601,7 +601,7 @@
       <!-- Style Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('style')">
-          <span>Style</span>
+          <span>style</span>
           <span class="arrow" :class="{ open: openSections.style }">►</span>
         </div>
         <div
@@ -610,7 +610,7 @@
           x-show="!isMobile() ? openSections.style : activeTab === 'style'"
         >
           <label>
-            Style Preset:
+            style preset:
             <select
               class="dropdown"
               x-model="stylePreset"
@@ -622,51 +622,51 @@
                   x-text="preset.replace(/_/g, ' ')"
                 ></option>
               </template>
-              <option value="custom">Custom</option>
+              <option value="custom">custom</option>
             </select>
           </label>
           <label
-            >Background Color:
+            >background color:
             <input
               type="color"
               x-model="backgroundColor"
               @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label
-            >Axis Label Color:
+            >axis label color:
             <input
               type="color"
               x-model="axisLabelColor"
               @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label>
-            Brush Type:
+            brush type:
             <select
               class="dropdown"
               x-model="brushType"
               @change="stylePreset = 'custom'; updateChart()"
             >
-              <option value="pen">Pen</option>
-              <option value="rotring">Rotring</option>
-              <option value="2B">2B Pencil</option>
-              <option value="HB">HB Pencil</option>
-              <option value="2H">2H Pencil</option>
-              <option value="cpencil">Color Pencil</option>
-              <option value="charcoal">Charcoal</option>
-              <option value="hatch_brush">Hatch Brush</option>
-              <option value="marker">Marker</option>
-              <option value="marker2">Marker 2</option>
+              <option value="pen">pen</option>
+              <option value="rotring">rotring</option>
+              <option value="2B">2b pencil</option>
+              <option value="HB">hb pencil</option>
+              <option value="2H">2h pencil</option>
+              <option value="cpencil">color pencil</option>
+              <option value="charcoal">charcoal</option>
+              <option value="hatch_brush">hatch brush</option>
+              <option value="marker">marker</option>
+              <option value="marker2">marker 2</option>
             </select>
           </label>
           <label
-            >Line Color:
+            >line color:
             <input
               type="color"
               x-model="lineColor"
               @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label
-            >Line Width:
+            >line width:
             <input
               type="number"
               x-model="lineWidth"
@@ -676,33 +676,33 @@
               @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label>
-            Grid Brush Type:
+            grid brush type:
             <select
               class="dropdown"
               x-model="gridBrushType"
               @change="stylePreset = 'custom'; updateChart()"
             >
-              <option value="pen">Pen</option>
-              <option value="rotring">Rotring</option>
-              <option value="2B">2B Pencil</option>
-              <option value="HB">HB Pencil</option>
-              <option value="2H">2H Pencil</option>
-              <option value="cpencil">Color Pencil</option>
-              <option value="charcoal">Charcoal</option>
-              <option value="hatch_brush">Hatch Brush</option>
-              <option value="marker">Marker</option>
-              <option value="marker2">Marker 2</option>
+              <option value="pen">pen</option>
+              <option value="rotring">rotring</option>
+              <option value="2B">2b pencil</option>
+              <option value="HB">hb pencil</option>
+              <option value="2H">2h pencil</option>
+              <option value="cpencil">color pencil</option>
+              <option value="charcoal">charcoal</option>
+              <option value="hatch_brush">hatch brush</option>
+              <option value="marker">marker</option>
+              <option value="marker2">marker 2</option>
             </select>
           </label>
           <label
-            >Grid Line Color:
+            >grid line color:
             <input
               type="color"
               x-model="gridLineColor"
               @change="stylePreset = 'custom'; updateChart()"
           /></label>
           <label
-            >Grid Line Width:
+            >grid line width:
             <input
               type="number"
               x-model="gridLineWidth"
@@ -717,7 +717,7 @@
       <!-- Palette & Colors Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('palette')">
-          <span>Palette & Colors</span>
+          <span>palette & colors</span>
           <span class="arrow" :class="{ open: openSections.palette }">►</span>
         </div>
         <div
@@ -726,7 +726,7 @@
           x-show="!isMobile() ? openSections.palette : activeTab === 'palette'"
         >
           <label>
-            Palette Preset:
+            palette preset:
             <select
               class="dropdown"
               x-model="palettePreset"
@@ -738,7 +738,7 @@
               >
                 <option :value="presetName" x-text="presetName"></option>
               </template>
-              <option value="custom">Custom</option>
+              <option value="custom">custom</option>
             </select>
           </label>
           <label>
@@ -748,7 +748,7 @@
               @change="updateChart()"
               style="width: auto; margin-left: 0; float: none"
             />
-            Random Colors from Palette
+            random colors from palette
           </label>
           <label>
             <input
@@ -757,14 +757,14 @@
               @change="onShuffleColorsChange()"
               style="width: auto; margin-left: 0; float: none"
             />
-            Shuffle Color Order
+            shuffle color order
           </label>
           <div x-show="!randomColors">
             <!-- Histogram: 1 color -->
             <template x-if="chartType === 'histogram'">
               <div>
                 <label
-                  >Color 1:
+                  >color 1:
                   <input
                     type="color"
                     x-model="color1"
@@ -780,7 +780,7 @@
                 <template x-for="i in getScatterColorCount()" :key="i">
                   <label>
                     <span
-                      x-text="'Color ' + i + ':'"
+                      x-text="'color ' + i + ':'"
                       style="display: inline-block; width: 60px"
                     ></span>
                     <input
@@ -800,7 +800,7 @@
                 <template x-for="i in getBoxPlotColorCount()" :key="i">
                   <label>
                     <span
-                      x-text="'Color ' + i + ':'"
+                      x-text="'color ' + i + ':'"
                       style="display: inline-block; width: 60px"
                     ></span>
                     <input
@@ -820,7 +820,7 @@
                 <template x-for="i in getLineColorCount()" :key="i">
                   <label>
                     <span
-                      x-text="'Color ' + i + ':'"
+                      x-text="'color ' + i + ':'"
                       style="display: inline-block; width: 60px"
                     ></span>
                     <input
@@ -840,7 +840,7 @@
                 <template x-for="i in getBarPlotColorCount()" :key="i">
                   <label>
                     <span
-                      x-text="'Color ' + i + ':'"
+                      x-text="'color ' + i + ':'"
                       style="display: inline-block; width: 60px"
                     ></span>
                     <input
@@ -860,7 +860,7 @@
       <!-- Fill Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('fill')">
-          <span>Fill</span>
+          <span>fill</span>
           <span class="arrow" :class="{ open: openSections.fill }">►</span>
         </div>
         <div
@@ -869,22 +869,22 @@
           x-show="!isMobile() ? openSections.fill : activeTab === 'fill'"
         >
           <label>
-            Fill Type:
+            fill type:
             <select
               class="dropdown"
               x-model="fillType"
               @change="useHatching = (fillType === 'hatch'); updateChart()"
             >
-              <option value="watercolor">Watercolor</option>
-              <option value="hatch">Hatch</option>
-              <option value="none">No Fill</option>
+              <option value="watercolor">watercolor</option>
+              <option value="hatch">hatch</option>
+              <option value="none">no fill</option>
             </select>
           </label>
 
           <!-- Watercolor -->
           <div x-show="fillType === 'watercolor'">
             <label
-              >Bleed Min:
+              >bleed min:
               <input
                 type="number"
                 x-model="bleedMin"
@@ -894,7 +894,7 @@
                 @change="updateChart()"
             /></label>
             <label
-              >Bleed Max:
+              >bleed max:
               <input
                 type="number"
                 x-model="bleedMax"
@@ -908,7 +908,7 @@
           <!-- Hatching -->
           <div x-show="fillType === 'hatch'">
             <label
-              >Hatch Distance:
+              >hatch distance:
               <input
                 type="number"
                 x-model="hatchDistance"
@@ -918,7 +918,7 @@
                 @change="updateChart()"
             /></label>
             <label
-              >Hatch Angle:
+              >hatch angle:
               <input
                 type="number"
                 x-model="hatchAngle"
@@ -928,7 +928,7 @@
                 @change="updateChart()"
             /></label>
             <label
-              >Hatch Randomness:
+              >hatch randomness:
               <input
                 type="number"
                 x-model="hatchRand"
@@ -938,7 +938,7 @@
                 @change="updateChart()"
             /></label>
             <label
-              >Hatch Gradient:
+              >hatch gradient:
               <input
                 type="number"
                 x-model="hatchGradient"
@@ -954,29 +954,29 @@
                 @change="updateChart()"
                 style="width: auto; margin-left: 0; float: none"
               />
-              Continuous Hatching
+              continuous hatching
             </label>
             <label>
-              Hatch Brush Type:
+              hatch brush type:
               <select
                 class="dropdown"
                 x-model="hatchBrushType"
                 @change="updateChart()"
               >
-                <option value="pen">Pen</option>
-                <option value="rotring">Rotring</option>
-                <option value="2B">2B Pencil</option>
-                <option value="HB">HB Pencil</option>
-                <option value="2H">2H Pencil</option>
-                <option value="cpencil">Color Pencil</option>
-                <option value="charcoal">Charcoal</option>
-                <option value="hatch_brush">Hatch Brush</option>
-                <option value="marker">Marker</option>
-                <option value="marker2">Marker 2</option>
+                <option value="pen">pen</option>
+                <option value="rotring">rotring</option>
+                <option value="2B">2b pencil</option>
+                <option value="HB">hb pencil</option>
+                <option value="2H">2h pencil</option>
+                <option value="cpencil">color pencil</option>
+                <option value="charcoal">charcoal</option>
+                <option value="hatch_brush">hatch brush</option>
+                <option value="marker">marker</option>
+                <option value="marker2">marker 2</option>
               </select>
             </label>
             <label
-              >Hatch Line Width:
+              >hatch line width:
               <input
                 type="number"
                 x-model="hatchLineWidth"
@@ -992,7 +992,7 @@
       <!-- Typography Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('typography')">
-          <span>Typography</span>
+          <span>typography</span>
           <span class="arrow" :class="{ open: openSections.typography }"
             >►</span
           >
@@ -1003,7 +1003,7 @@
           x-show="!isMobile() ? openSections.typography : activeTab === 'typography'"
         >
           <label
-            >Label Font Size:
+            >label font size:
             <input
               type="number"
               x-model="fontSize"
@@ -1012,7 +1012,7 @@
               @change="updateChart()"
           /></label>
           <label
-            >Title Font Size:
+            >title font size:
             <input
               type="number"
               x-model="titleFontSize"
@@ -1026,7 +1026,7 @@
       <!-- Canvas Dimensions Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('dimensions')">
-          <span>Canvas</span>
+          <span>canvas</span>
           <span class="arrow" :class="{ open: openSections.dimensions }"
             >►</span
           >
@@ -1037,22 +1037,22 @@
           x-show="!isMobile() ? openSections.dimensions : activeTab === 'dimensions'"
         >
           <label
-            >Canvas Width:
+            >canvas width:
             <input type="number" x-model="canvasWidth" @change="updateChart()"
           /></label>
           <label
-            >Canvas Height:
+            >canvas height:
             <input type="number" x-model="canvasHeight" @change="updateChart()"
           /></label>
           <label
-            >Padding:
+            >padding:
             <input type="number" x-model="padding" @change="updateChart()"
           /></label>
         </div>
       </div>
 
       <div>
-        <button @click="saveChart()">Copy chart to clipboard</button>
+        <button @click="saveChart()">copy chart to clipboard</button>
         <span
           class="button-message"
           x-show="copyStatus"
@@ -1060,8 +1060,8 @@
         ></span>
 
         <div x-show="chartType === 'histogram'">
-          <h3>Histogram Data Input</h3>
-          <p>Enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
+          <h3>histogram data input</h3>
+          <p>enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
           <textarea
             x-model="dataInput"
             class="data-input"
@@ -1069,9 +1069,9 @@
           ></textarea>
         </div>
         <div x-show="chartType === 'scatter'">
-          <h3>Scatter Plot Data Input</h3>
+          <h3>scatter plot data input</h3>
           <p>
-            Enter your data as an array of {x, y} objects or array of arrays:
+            enter your data as an array of {x, y} objects or array of arrays:
           </p>
           <textarea
             x-model="dataInput"
@@ -1080,9 +1080,9 @@
           ></textarea>
         </div>
         <div x-show="chartType === 'boxplot'">
-          <h3>Box Plot Data Input</h3>
+          <h3>box plot data input</h3>
           <p>
-            Enter your data as an array of arrays (each inner array is a group):
+            enter your data as an array of arrays (each inner array is a group):
           </p>
           <textarea
             x-model="dataInput"
@@ -1091,9 +1091,9 @@
           ></textarea>
         </div>
         <div x-show="chartType === 'line'">
-          <h3>Line Plot Data Input</h3>
+          <h3>line plot data input</h3>
           <p>
-            Enter Y values as an array or array of arrays. X values are
+            enter Y values as an array or array of arrays. X values are
             optional:
           </p>
           <textarea
@@ -1103,9 +1103,9 @@
           ></textarea>
         </div>
         <div x-show="chartType === 'barplot'">
-          <h3>Bar Plot Data Input</h3>
+          <h3>bar plot data input</h3>
           <p>
-            Enter data as an array of numbers or array of {label, value}
+            enter data as an array of numbers or array of {label, value}
             objects:
           </p>
           <textarea
@@ -1118,11 +1118,11 @@
       <br />
 
       <div class="footer">
-        Natural textures from
+        natural textures from
         <a href="https://github.com/acamposuribe/p5.brush">p5.brush</a>.
         <br />
-        Tool and the charts by
-        <a href="https://github.com/aapo/p5.databrush">Aapo Montin</a>
+        tool and the charts by
+        <a href="https://github.com/aapo/p5.databrush">aapo montin</a>
       </div>
     </div>
     <script src="C.js"></script>
@@ -1649,18 +1649,18 @@
                 const numBars = Math.floor(Math.random() * 8) + 4;
                 const barData = [];
                 const labels = [
-                  "Alpha",
-                  "Beta",
-                  "Gamma",
-                  "Delta",
-                  "Epsilon",
-                  "Zeta",
-                  "Eta",
-                  "Theta",
-                  "Iota",
-                  "Kappa",
-                  "Lambda",
-                  "Mu",
+                  "alpha",
+                  "beta",
+                  "gamma",
+                  "delta",
+                  "epsilon",
+                  "zeta",
+                  "eta",
+                  "theta",
+                  "iota",
+                  "kappa",
+                  "lambda",
+                  "mu",
                 ];
 
                 for (let i = 0; i < numBars; i++) {
@@ -1901,18 +1901,18 @@
                 const numBarsRand = Math.floor(Math.random() * 8) + 4;
                 const barDataRand = [];
                 const labelsRand = [
-                  "Alpha",
-                  "Beta",
-                  "Gamma",
-                  "Delta",
-                  "Epsilon",
-                  "Zeta",
-                  "Eta",
-                  "Theta",
-                  "Iota",
-                  "Kappa",
-                  "Lambda",
-                  "Mu",
+                  "alpha",
+                  "beta",
+                  "gamma",
+                  "delta",
+                  "epsilon",
+                  "zeta",
+                  "eta",
+                  "theta",
+                  "iota",
+                  "kappa",
+                  "lambda",
+                  "mu",
                 ];
 
                 for (let i = 0; i < numBarsRand; i++) {
@@ -1949,7 +1949,7 @@
                 break;
               case "barplot":
                 this.dataInput =
-                  '[{"label": "A", "value": 25}, {"label": "B", "value": 40}, {"label": "C", "value": 30}, {"label": "D", "value": 55}, {"label": "E", "value": 20}]';
+                  '[{"label": "a", "value": 25}, {"label": "b", "value": 40}, {"label": "c", "value": 30}, {"label": "d", "value": 55}, {"label": "e", "value": 20}]';
                 break;
             }
             this.updateChart();
@@ -2179,10 +2179,10 @@
 
           async saveChart() {
             try {
-              this.copyStatus = "Copying...";
+              this.copyStatus = "copying...";
               const canvas = document.getElementById("mainCanvas");
               if (!canvas) {
-                this.copyStatus = "Canvas not found";
+                this.copyStatus = "canvas not found";
                 setTimeout(() => (this.copyStatus = ""), 2000);
                 return;
               }
@@ -2200,7 +2200,7 @@
                     new ClipboardItem({ "image/png": blobPromise }),
                   ]);
 
-                  this.copyStatus = "Copied to clipboard!";
+                  this.copyStatus = "copied to clipboard!";
                   setTimeout(() => (this.copyStatus = ""), 2000);
                 } catch (err) {
                   console.error("Failed to copy to clipboard:", err);
@@ -2217,7 +2217,7 @@
               }
             } catch (err) {
               console.error("Error copying chart:", err);
-              this.copyStatus = "Failed to copy";
+              this.copyStatus = "failed to copy";
               setTimeout(() => (this.copyStatus = ""), 2000);
             }
           },
@@ -2235,7 +2235,7 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-            this.copyStatus = "Downloaded!";
+            this.copyStatus = "downloaded!";
             setTimeout(() => (this.copyStatus = ""), 2000);
           },
 
@@ -2311,11 +2311,11 @@
               document.body.removeChild(link);
               URL.revokeObjectURL(url);
 
-              this.exportStatus = "Config exported!";
+              this.exportStatus = "config exported!";
               setTimeout(() => (this.exportStatus = ""), 2000);
             } catch (err) {
               console.error("Error exporting config:", err);
-              this.exportStatus = "Export failed";
+              this.exportStatus = "export failed";
               setTimeout(() => (this.exportStatus = ""), 2000);
             }
           },
@@ -2381,7 +2381,7 @@
 
               if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(jsonString);
-                this.copyConfigStatus = "Copied to clipboard!";
+                this.copyConfigStatus = "copied to clipboard!";
               } else {
                 // Fallback for browsers that don't support clipboard API
                 const textArea = document.createElement("textarea");
@@ -2392,13 +2392,13 @@
                 textArea.select();
                 document.execCommand("copy");
                 document.body.removeChild(textArea);
-                this.copyConfigStatus = "Copied to clipboard!";
+                this.copyConfigStatus = "copied to clipboard!";
               }
 
               setTimeout(() => (this.copyConfigStatus = ""), 2000);
             } catch (err) {
               console.error("Error copying config:", err);
-              this.copyConfigStatus = "Copy failed";
+              this.copyConfigStatus = "copy failed";
               setTimeout(() => (this.copyConfigStatus = ""), 2000);
             }
           },
@@ -2413,7 +2413,7 @@
                 // Fallback: prompt user to paste (less ideal but works)
                 jsonString = prompt("Paste your config JSON here:");
                 if (!jsonString) {
-                  this.loadClipboardStatus = "Cancelled";
+                  this.loadClipboardStatus = "cancelled";
                   setTimeout(() => (this.loadClipboardStatus = ""), 2000);
                   return;
                 }
@@ -2507,11 +2507,11 @@
               // Update the chart with loaded config
               this.updateChart();
 
-              this.loadClipboardStatus = "Config loaded!";
+              this.loadClipboardStatus = "config loaded!";
               setTimeout(() => (this.loadClipboardStatus = ""), 2000);
             } catch (err) {
               console.error("Error loading config from clipboard:", err);
-              this.loadClipboardStatus = "Load failed - invalid JSON";
+              this.loadClipboardStatus = "load failed - invalid JSON";
               setTimeout(() => (this.loadClipboardStatus = ""), 3000);
             }
           },
@@ -2609,14 +2609,14 @@
               // Update the chart with loaded config
               this.updateChart();
 
-              this.loadStatus = "Config loaded!";
+              this.loadStatus = "config loaded!";
               setTimeout(() => (this.loadStatus = ""), 2000);
 
               // Reset file input
               event.target.value = "";
             } catch (err) {
               console.error("Error loading config:", err);
-              this.loadStatus = "Load failed";
+              this.loadStatus = "load failed";
               setTimeout(() => (this.loadStatus = ""), 2000);
             }
           },
