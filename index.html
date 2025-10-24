@@ -611,14 +611,18 @@
         >
           <label>
             Style Preset:
-            <select x-model="stylePreset" @change="onStylePresetChange()">
-              <option value="custom">Custom</option>
+            <select
+              class="dropdown"
+              x-model="stylePreset"
+              @change="onStylePresetChange()"
+            >
               <template x-for="preset in stylePresetNames" :key="preset">
                 <option
                   :value="preset"
                   x-text="preset.replace(/_/g, ' ')"
                 ></option>
               </template>
+              <option value="custom">Custom</option>
             </select>
           </label>
           <label
@@ -1140,7 +1144,7 @@
           loadStatus: "",
           palettePresetNames: Object.keys(C.palettePresets),
           stylePresetNames: Object.keys(C.stylePresets),
-          stylePreset: "custom",
+          stylePreset: "watercolor",
           // Load all config values from C.config
           canvasWidth: C.config.canvasWidth,
           canvasHeight: C.config.canvasHeight,
@@ -1193,6 +1197,14 @@
           },
           // Active tab for mobile
           activeTab: "about",
+
+          // Initialize component
+          init() {
+            // Apply watercolor preset on load
+            if (this.stylePreset === "watercolor") {
+              this.onStylePresetChange();
+            }
+          },
 
           // Check if on mobile device
           isMobile() {
