@@ -21,9 +21,6 @@
       defer
       src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
     ></script>
-    <script>
-      document.addEventListener("alpine:init", () => Alpine.plugin(collapse));
-    </script>
     <style>
       [x-cloak] {
         display: none !important;
@@ -151,7 +148,6 @@
         flex-direction: column;
         max-width: fit-content;
         height: 100vh;
-        border: 1px solid #ccc;
         display: inline-flex;
         justify-content: center;
         align-items: center;
@@ -159,7 +155,6 @@
         padding: 0;
         position: sticky;
         top: 0;
-        background-color: #f9f9f9;
       }
 
       /* Loading placeholder - only show when canvas doesn't exist */
@@ -2056,6 +2051,10 @@
           },
 
           renderChart() {
+            if (typeof push === "undefined") {
+              setTimeout(() => this.renderChart(), 50);
+              return;
+            }
             push();
             setupRest();
 
