@@ -103,8 +103,11 @@
         min-height: 100vh;
         padding-left: 20px;
         padding-right: 10px;
+        padding-bottom: 20px;
         overflow: hidden;
         z-index: 999;
+        display: flex;
+        flex-direction: column;
       }
 
       .collapsible-section {
@@ -265,8 +268,8 @@
       }
 
       .footer {
-        margin-top: 50px;
-        padding: 10px 0px 10px 0px;
+        margin-top: auto;
+        padding: 40px 0px 10px 0px;
         font-size: 12px;
         color: #666;
         text-align: left;
@@ -1146,71 +1149,93 @@
         </div>
       </div>
 
-      <div>
+      <!-- Data Input Section -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" @click="toggleSection('data')">
+          <span>data</span>
+          <span class="arrow" :class="{ open: openSections.data }">►</span>
+        </div>
+        <div
+          x-show="!isMobile() ? openSections.data : activeTab === 'data'"
+          x-collapse.duration.280ms
+          class="collapsible"
+          :class="{ 'is-open': !isMobile() ? openSections.data : activeTab === 'data' }"
+        >
+          <div
+            class="collapsible-content collapsible-inner collapse-fix"
+            :class="{ 'mobile-active': activeTab === 'data' }"
+          >
+            <div x-show="chartType === 'histogram'">
+              <p>
+                enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):
+              </p>
+              <textarea
+                x-model="dataInput"
+                class="data-input"
+                placeholder="Enter data as JSON array..."
+              ></textarea>
+            </div>
+            <div x-show="chartType === 'scatter'">
+              <h3>scatter plot data input</h3>
+              <p>
+                enter your data as an array of {x, y} objects or array of
+                arrays:
+              </p>
+              <textarea
+                x-model="dataInput"
+                class="data-input"
+                placeholder="[{x: 1, y: 2}, {x: 3, y: 4}] or [[{x: 1, y: 2}], [{x: 3, y: 4}]]"
+              ></textarea>
+            </div>
+            <div x-show="chartType === 'boxplot'">
+              <h3>box plot data input</h3>
+              <p>
+                enter your data as an array of arrays (each inner array is a
+                group):
+              </p>
+              <textarea
+                x-model="dataInput"
+                class="data-input"
+                placeholder="[[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]"
+              ></textarea>
+            </div>
+            <div x-show="chartType === 'line'">
+              <h3>line plot data input</h3>
+              <p>
+                enter Y values as an array or array of arrays. X values are
+                optional:
+              </p>
+              <textarea
+                x-model="dataInput"
+                class="data-input"
+                placeholder="[1, 2, 3, 4, 5] or [[1, 2, 3], [4, 5, 6]]"
+              ></textarea>
+            </div>
+            <div x-show="chartType === 'barplot'">
+              <h3>bar plot data input</h3>
+              <p>
+                enter data as an array of numbers or array of {label, value}
+                objects:
+              </p>
+              <textarea
+                x-model="dataInput"
+                class="data-input"
+                placeholder="[10, 20, 30, 40] or [{label: 'A', value: 10}, {label: 'B', value: 20}]"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Copy Button -->
+      <div style="border-top: 1px solid #000000; padding-top: 15px">
         <button @click="saveChart()">copy chart to clipboard</button>
         <span
           class="button-message"
           x-show="copyStatus"
           x-text="copyStatus"
         ></span>
-
-        <div x-show="chartType === 'histogram'">
-          <h3>histogram data input</h3>
-          <p>enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):</p>
-          <textarea
-            x-model="dataInput"
-            class="data-input"
-            placeholder="Enter data as JSON array..."
-          ></textarea>
-        </div>
-        <div x-show="chartType === 'scatter'">
-          <h3>scatter plot data input</h3>
-          <p>
-            enter your data as an array of {x, y} objects or array of arrays:
-          </p>
-          <textarea
-            x-model="dataInput"
-            class="data-input"
-            placeholder="[{x: 1, y: 2}, {x: 3, y: 4}] or [[{x: 1, y: 2}], [{x: 3, y: 4}]]"
-          ></textarea>
-        </div>
-        <div x-show="chartType === 'boxplot'">
-          <h3>box plot data input</h3>
-          <p>
-            enter your data as an array of arrays (each inner array is a group):
-          </p>
-          <textarea
-            x-model="dataInput"
-            class="data-input"
-            placeholder="[[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]"
-          ></textarea>
-        </div>
-        <div x-show="chartType === 'line'">
-          <h3>line plot data input</h3>
-          <p>
-            enter Y values as an array or array of arrays. X values are
-            optional:
-          </p>
-          <textarea
-            x-model="dataInput"
-            class="data-input"
-            placeholder="[1, 2, 3, 4, 5] or [[1, 2, 3], [4, 5, 6]]"
-          ></textarea>
-        </div>
-        <div x-show="chartType === 'barplot'">
-          <h3>bar plot data input</h3>
-          <p>
-            enter data as an array of numbers or array of {label, value}
-            objects:
-          </p>
-          <textarea
-            x-model="dataInput"
-            class="data-input"
-            placeholder="[10, 20, 30, 40] or [{label: 'A', value: 10}, {label: 'B', value: 20}]"
-          ></textarea>
-        </div>
       </div>
-      <br />
 
       <div class="footer">
         natural textures from
@@ -1289,6 +1314,7 @@
             typography: false,
             palette: false,
             fill: false,
+            data: false,
           },
           // Active tab for mobile
           activeTab: "about",
