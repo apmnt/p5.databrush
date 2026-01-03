@@ -2097,7 +2097,7 @@
           },
 
           renderChart() {
-            if (typeof push === "undefined") {
+            if (typeof push === "undefined" || !isSetupComplete) {
               setTimeout(() => this.renderChart(), 50);
               return;
             }
