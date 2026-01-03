@@ -56,7 +56,7 @@
         font-family: "IBM Plex Serif", sans-serif;
         font-size: 16px;
         margin: 0;
-        padding: 0;
+        padding: 0 20px 0 20px;
         display: flex;
         align-items: flex-start;
         justify-content: center;
@@ -102,7 +102,6 @@
         position: relative;
         min-height: 100vh;
         padding-left: 20px;
-        padding-right: 10px;
         padding-bottom: 20px;
         overflow: hidden;
         z-index: 999;
@@ -1235,6 +1234,18 @@
           x-show="copyStatus"
           x-text="copyStatus"
         ></span>
+        <br />
+        <button @click="saveChart(true)">download chart</button>
+        <span
+          class="button-message"
+          x-show="copyStatus"
+          x-text="copyStatus"
+        ></span>
+        <br />
+        <button @click="updateChart()" x-text="'redraw chart'"></button>
+        <span class="button-message" x-show="!isValidData"
+          >please enter valid JSON array</span
+        >
       </div>
 
       <div class="footer">
@@ -2302,13 +2313,21 @@
             this.renderChart();
           },
 
-          async saveChart() {
+          async saveChart(forceDownload = false) {
             try {
-              this.copyStatus = "copying...";
+              this.copyStatus = forceDownload ? "downloading..." : "copying...";
               const canvas = document.getElementById("mainCanvas");
               if (!canvas) {
                 this.copyStatus = "canvas not found";
                 setTimeout(() => (this.copyStatus = ""), 2000);
+                return;
+              }
+
+              // If forceDownload is true, skip clipboard and go straight to download
+              if (forceDownload) {
+                canvas.toBlob((blob) => {
+                  this.downloadChart(blob);
+                });
                 return;
               }
 
