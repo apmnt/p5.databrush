@@ -2767,14 +2767,12 @@
         };
       }
 
+      let isSetupComplete = false;
+
       function setup() {
         commonSetup();
-        // Initial chart render
-        const data = [
-          85, 92, 78, 105, 88, 112, 95, 87, 103, 99, 76, 108, 91, 84, 97, 101,
-          89, 94, 106, 82,
-        ];
-        drawHistogram(data, 10);
+        isSetupComplete = true;
+        // Chart will be rendered by Alpine.js calling updateChart()
       }
 
       function draw() {}

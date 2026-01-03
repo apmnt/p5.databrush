@@ -344,8 +344,6 @@ function reloadWithNewDimensions(newWidth, newHeight) {
 
 function commonSetup() {
   C.createCanvas();
-  // setup the rest
-  setupRest();
 }
 
 function setupRest() {
