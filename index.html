@@ -1242,6 +1242,10 @@
 
       <!-- Copy Button -->
       <div style="border-top: 1px solid #000000; padding-top: 15px">
+        <button @click="randomizeAll()" x-show="isMobile()">
+          randomize everything
+        </button>
+        <br x-show="isMobile()" />
         <button @click="saveChart()">copy chart to clipboard</button>
         <span
           class="button-message"
