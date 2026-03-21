@@ -317,7 +317,10 @@ const C = {
       this.main = createCanvas(config.canvasWidth, config.canvasHeight, WEBGL);
       pixelDensity(this.pD);
       this.main.id(this.css);
-      this.main.parent("chartContainer");
+      const chartContainer = document.getElementById("chartContainer");
+      if (chartContainer) {
+        this.main.parent("chartContainer");
+      }
       console.log("WebGL canvas created successfully");
     } catch (e) {
       console.error("Failed to create WebGL canvas:", e);
