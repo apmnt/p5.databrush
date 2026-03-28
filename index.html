@@ -27,6 +27,10 @@
       src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
     ></script>
     <style>
+      :root {
+        --default-plot-background: #fffceb;
+      }
+
       [x-cloak] {
         display: none !important;
       }
@@ -67,7 +71,7 @@
         justify-content: center;
         min-height: 100vh;
         overflow-x: hidden;
-        background-color: #fffefb;
+        background-color: var(--default-plot-background);
         position: relative;
       }
 
@@ -138,6 +142,17 @@
       .collapsible-content label {
         display: block;
         margin-bottom: 8px;
+      }
+
+      .settings-group + .settings-group {
+        margin-top: 18px;
+        padding-top: 14px;
+        border-top: 1px solid #000000;
+      }
+
+      .settings-group-title {
+        margin-bottom: 10px;
+        font-weight: bold;
       }
 
       .arrow {
@@ -254,7 +269,7 @@
         #chartContainer:empty::before {
           max-width: 100vw;
           max-height: 100vh;
-          background-color: #fffceb;
+          background-color: var(--default-plot-background);
           animation: fadeOut 0.5s ease-out;
         }
 
@@ -321,6 +336,12 @@
         margin-left: 10px;
       }
 
+      .validation-message {
+        font-size: 12px;
+        color: #8c0800;
+        margin: 0 0 12px;
+      }
+
       .dropdown {
         font-family: "IBM Plex Serif", sans-serif;
         width: 128px;
@@ -376,7 +397,7 @@
           left: 0;
           right: 0;
           bottom: 0;
-          background-color: #ffffff49;
+          background-color: #fffceb49;
           backdrop-filter: blur(100px);
           -webkit-backdrop-filter: blur(100px);
           -webkit-mask-image: linear-gradient(
@@ -528,39 +549,21 @@
         </div>
         <div
           class="mobile-tab"
-          :class="{ active: activeTab === 'palette' }"
-          @click="setActiveTab('palette')"
-          x-ref="tab_palette"
-          data-text="palette"
+          :class="{ active: activeTab === 'settings' }"
+          @click="setActiveTab('settings')"
+          x-ref="tab_settings"
+          data-text="settings"
         >
-          palette
+          settings
         </div>
         <div
           class="mobile-tab"
-          :class="{ active: activeTab === 'fill' }"
-          @click="setActiveTab('fill')"
-          x-ref="tab_fill"
-          data-text="fill"
+          :class="{ active: activeTab === 'data' }"
+          @click="setActiveTab('data')"
+          x-ref="tab_data"
+          data-text="data"
         >
-          fill
-        </div>
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'typography' }"
-          @click="setActiveTab('typography')"
-          x-ref="tab_typography"
-          data-text="typography"
-        >
-          typography
-        </div>
-        <div
-          class="mobile-tab"
-          :class="{ active: activeTab === 'dimensions' }"
-          @click="setActiveTab('dimensions')"
-          x-ref="tab_dimensions"
-          data-text="canvas"
-        >
-          canvas
+          data
         </div>
       </div>
       <!-- Mobile content area -->
@@ -582,9 +585,11 @@
           <button @click="generateRandomData()">generate random data</button>
           <br />
           <button @click="updateChart()" x-text="'redraw chart'"></button>
-          <span class="button-message" x-show="!isValidData"
-            >please enter valid JSON array</span
-          >
+          <span
+            class="button-message"
+            x-show="!isValidData"
+            x-text="dataValidationMessage || 'please enter valid data'"
+          ></span>
           <br />
           <button @click="exportConfig()">export config</button>
           <span
@@ -809,374 +814,320 @@
         </div>
       </div>
 
-      <!-- Palette & Colors Section -->
+      <!-- Settings Section -->
       <div class="collapsible-section">
-        <div class="collapsible-header" @click="toggleSection('palette')">
-          <span>palette & colors</span>
-          <span class="arrow" :class="{ open: openSections.palette }">►</span>
+        <div class="collapsible-header" @click="toggleSection('settings')">
+          <span>settings</span>
+          <span class="arrow" :class="{ open: openSections.settings }">►</span>
         </div>
         <div
-          x-show="!isMobile() ? openSections.palette : activeTab === 'palette'"
+          x-show="!isMobile() ? openSections.settings : activeTab === 'settings'"
           x-collapse.duration.280ms
           class="collapsible"
-          :class="{ 'is-open': !isMobile() ? openSections.palette : activeTab === 'palette' }"
+          :class="{ 'is-open': !isMobile() ? openSections.settings : activeTab === 'settings' }"
         >
           <div
             class="collapsible-content collapsible-inner collapse-fix"
-            :class="{ 'mobile-active': activeTab === 'palette' }"
+            :class="{ 'mobile-active': activeTab === 'settings' }"
           >
-            <label>
-              palette preset:
-              <select
-                class="dropdown"
-                x-model="palettePreset"
-                @change="onPalettePresetChange()"
-              >
-                <template
-                  x-for="presetName in palettePresetNames"
-                  :key="presetName"
+            <div class="settings-group">
+              <div class="settings-group-title">palette & colors</div>
+              <label>
+                palette preset:
+                <select
+                  class="dropdown"
+                  x-model="palettePreset"
+                  @change="onPalettePresetChange()"
                 >
-                  <option :value="presetName" x-text="presetName"></option>
-                </template>
-                <option value="custom">custom</option>
-              </select>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                x-model="randomColors"
-                @change="updateChart()"
-                style="width: auto; margin-left: 0; float: none"
-              />
-              random colors from palette
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                x-model="shuffleColors"
-                @change="onShuffleColorsChange()"
-                style="width: auto; margin-left: 0; float: none"
-              />
-              shuffle color order
-            </label>
-            <div x-show="!randomColors">
-              <!-- Histogram: 1 color -->
-              <template x-if="chartType === 'histogram'">
-                <div>
-                  <label
-                    >color 1:
-                    <input
-                      type="color"
-                      x-model="color1"
-                      @input="handleColorInput()"
-                      @change="onColorChange()"
-                  /></label>
-                </div>
-              </template>
-
-              <!-- Scatter plot: dynamic based on data -->
-              <template x-if="chartType === 'scatter'">
-                <div>
-                  <template x-for="i in getScatterColorCount()" :key="i">
-                    <label>
-                      <span
-                        x-text="'color ' + i + ':'"
-                        style="display: inline-block; width: 60px"
-                      ></span>
-                      <input
-                        type="color"
-                        :value="getColorValue(i)"
-                        @input="setColorValue(i, $event.target.value)"
-                        @change="onColorChange()"
-                      />
-                    </label>
+                  <template
+                    x-for="presetName in palettePresetNames"
+                    :key="presetName"
+                  >
+                    <option :value="presetName" x-text="presetName"></option>
                   </template>
-                </div>
-              </template>
-
-              <!-- Box plot: dynamic based on data -->
-              <template x-if="chartType === 'boxplot'">
-                <div>
-                  <template x-for="i in getBoxPlotColorCount()" :key="i">
-                    <label>
-                      <span
-                        x-text="'color ' + i + ':'"
-                        style="display: inline-block; width: 60px"
-                      ></span>
-                      <input
-                        type="color"
-                        :value="getColorValue(i)"
-                        @input="setColorValue(i, $event.target.value)"
-                        @change="onColorChange()"
-                      />
-                    </label>
-                  </template>
-                </div>
-              </template>
-
-              <!-- Line plot: dynamic based on data -->
-              <template x-if="chartType === 'line'">
-                <div>
-                  <template x-for="i in getLineColorCount()" :key="i">
-                    <label>
-                      <span
-                        x-text="'color ' + i + ':'"
-                        style="display: inline-block; width: 60px"
-                      ></span>
-                      <input
-                        type="color"
-                        :value="getColorValue(i)"
-                        @input="setColorValue(i, $event.target.value)"
-                        @change="onColorChange()"
-                      />
-                    </label>
-                  </template>
-                </div>
-              </template>
-
-              <!-- Bar plot: dynamic based on data -->
-              <template x-if="chartType === 'barplot'">
-                <div>
-                  <template x-for="i in getBarPlotColorCount()" :key="i">
-                    <label>
-                      <span
-                        x-text="'color ' + i + ':'"
-                        style="display: inline-block; width: 60px"
-                      ></span>
-                      <input
-                        type="color"
-                        :value="getColorValue(i)"
-                        @input="setColorValue(i, $event.target.value)"
-                        @change="onColorChange()"
-                      />
-                    </label>
-                  </template>
-                </div>
-              </template>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fill Section -->
-      <div class="collapsible-section">
-        <div class="collapsible-header" @click="toggleSection('fill')">
-          <span>fill</span>
-          <span class="arrow" :class="{ open: openSections.fill }">►</span>
-        </div>
-        <div
-          x-show="!isMobile() ? openSections.fill : activeTab === 'fill'"
-          x-collapse.duration.280ms
-          class="collapsible"
-          :class="{ 'is-open': !isMobile() ? openSections.fill : activeTab === 'fill' }"
-        >
-          <div
-            class="collapsible-content collapsible-inner collapse-fix"
-            :class="{ 'mobile-active': activeTab === 'fill' }"
-          >
-            <label>
-              fill type:
-              <select
-                class="dropdown"
-                x-model="fillType"
-                @change="useHatching = (fillType === 'hatch'); updateChart()"
-              >
-                <option value="watercolor">watercolor</option>
-                <option value="hatch">hatch</option>
-                <option value="none">no fill</option>
-              </select>
-            </label>
-
-            <!-- Watercolor -->
-            <div x-show="fillType === 'watercolor'">
-              <label
-                >bleed min:
-                <input
-                  type="number"
-                  x-model="bleedMin"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  @change="updateChart()"
-              /></label>
-              <label
-                >bleed max:
-                <input
-                  type="number"
-                  x-model="bleedMax"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  @change="updateChart()"
-              /></label>
-            </div>
-
-            <!-- Hatching -->
-            <div x-show="fillType === 'hatch'">
-              <label
-                >hatch distance:
-                <input
-                  type="number"
-                  x-model="hatchDistance"
-                  min="1"
-                  max="20"
-                  step="1"
-                  @change="updateChart()"
-              /></label>
-              <label
-                >hatch angle:
-                <input
-                  type="number"
-                  x-model="hatchAngle"
-                  min="0"
-                  max="180"
-                  step="5"
-                  @change="updateChart()"
-              /></label>
-              <label
-                >hatch randomness:
-                <input
-                  type="number"
-                  x-model="hatchRand"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  @change="updateChart()"
-              /></label>
-              <label
-                >hatch gradient:
-                <input
-                  type="number"
-                  x-model="hatchGradient"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  @change="updateChart()"
-              /></label>
+                  <option value="custom">custom</option>
+                </select>
+              </label>
               <label>
                 <input
                   type="checkbox"
-                  x-model="hatchContinuous"
+                  x-model="randomColors"
                   @change="updateChart()"
                   style="width: auto; margin-left: 0; float: none"
                 />
-                continuous hatching
+                random colors from palette
               </label>
               <label>
-                hatch brush type:
+                <input
+                  type="checkbox"
+                  x-model="shuffleColors"
+                  @change="onShuffleColorsChange()"
+                  style="width: auto; margin-left: 0; float: none"
+                />
+                shuffle color order
+              </label>
+              <div x-show="!randomColors">
+                <template x-if="chartType === 'histogram'">
+                  <div>
+                    <label
+                      >color 1:
+                      <input
+                        type="color"
+                        x-model="color1"
+                        @input="handleColorInput()"
+                        @change="onColorChange()"
+                    /></label>
+                  </div>
+                </template>
+
+                <template x-if="chartType === 'scatter'">
+                  <div>
+                    <template x-for="i in getScatterColorCount()" :key="i">
+                      <label>
+                        <span
+                          x-text="'color ' + i + ':'"
+                          style="display: inline-block; width: 60px"
+                        ></span>
+                        <input
+                          type="color"
+                          :value="getColorValue(i)"
+                          @input="setColorValue(i, $event.target.value)"
+                          @change="onColorChange()"
+                        />
+                      </label>
+                    </template>
+                  </div>
+                </template>
+
+                <template x-if="chartType === 'boxplot'">
+                  <div>
+                    <template x-for="i in getBoxPlotColorCount()" :key="i">
+                      <label>
+                        <span
+                          x-text="'color ' + i + ':'"
+                          style="display: inline-block; width: 60px"
+                        ></span>
+                        <input
+                          type="color"
+                          :value="getColorValue(i)"
+                          @input="setColorValue(i, $event.target.value)"
+                          @change="onColorChange()"
+                        />
+                      </label>
+                    </template>
+                  </div>
+                </template>
+
+                <template x-if="chartType === 'line'">
+                  <div>
+                    <template x-for="i in getLineColorCount()" :key="i">
+                      <label>
+                        <span
+                          x-text="'color ' + i + ':'"
+                          style="display: inline-block; width: 60px"
+                        ></span>
+                        <input
+                          type="color"
+                          :value="getColorValue(i)"
+                          @input="setColorValue(i, $event.target.value)"
+                          @change="onColorChange()"
+                        />
+                      </label>
+                    </template>
+                  </div>
+                </template>
+
+                <template x-if="chartType === 'barplot'">
+                  <div>
+                    <template x-for="i in getBarPlotColorCount()" :key="i">
+                      <label>
+                        <span
+                          x-text="'color ' + i + ':'"
+                          style="display: inline-block; width: 60px"
+                        ></span>
+                        <input
+                          type="color"
+                          :value="getColorValue(i)"
+                          @input="setColorValue(i, $event.target.value)"
+                          @change="onColorChange()"
+                        />
+                      </label>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-group-title">fill</div>
+              <label>
+                fill type:
                 <select
                   class="dropdown"
-                  x-model="hatchBrushType"
-                  @change="updateChart()"
+                  x-model="fillType"
+                  @change="useHatching = (fillType === 'hatch'); updateChart()"
                 >
-                  <option value="pen">pen</option>
-                  <option value="rotring">rotring</option>
-                  <option value="2B">2b pencil</option>
-                  <option value="HB">hb pencil</option>
-                  <option value="2H">2h pencil</option>
-                  <option value="cpencil">color pencil</option>
-                  <option value="charcoal">charcoal</option>
-                  <option value="hatch_brush">hatch brush</option>
-                  <option value="marker">marker</option>
-                  <option value="marker2">marker 2</option>
+                  <option value="watercolor">watercolor</option>
+                  <option value="hatch">hatch</option>
+                  <option value="none">no fill</option>
                 </select>
               </label>
+
+              <!-- Watercolor -->
+              <div x-show="fillType === 'watercolor'">
+                <label
+                  >bleed min:
+                  <input
+                    type="number"
+                    x-model="bleedMin"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    @change="updateChart()"
+                /></label>
+                <label
+                  >bleed max:
+                  <input
+                    type="number"
+                    x-model="bleedMax"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    @change="updateChart()"
+                /></label>
+              </div>
+
+              <!-- Hatching -->
+              <div x-show="fillType === 'hatch'">
+                <label
+                  >hatch distance:
+                  <input
+                    type="number"
+                    x-model="hatchDistance"
+                    min="1"
+                    max="20"
+                    step="1"
+                    @change="updateChart()"
+                /></label>
+                <label
+                  >hatch angle:
+                  <input
+                    type="number"
+                    x-model="hatchAngle"
+                    min="0"
+                    max="180"
+                    step="5"
+                    @change="updateChart()"
+                /></label>
+                <label
+                  >hatch randomness:
+                  <input
+                    type="number"
+                    x-model="hatchRand"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    @change="updateChart()"
+                /></label>
+                <label
+                  >hatch gradient:
+                  <input
+                    type="number"
+                    x-model="hatchGradient"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    @change="updateChart()"
+                /></label>
+                <label>
+                  <input
+                    type="checkbox"
+                    x-model="hatchContinuous"
+                    @change="updateChart()"
+                    style="width: auto; margin-left: 0; float: none"
+                  />
+                  continuous hatching
+                </label>
+                <label>
+                  hatch brush type:
+                  <select
+                    class="dropdown"
+                    x-model="hatchBrushType"
+                    @change="updateChart()"
+                  >
+                    <option value="pen">pen</option>
+                    <option value="rotring">rotring</option>
+                    <option value="2B">2b pencil</option>
+                    <option value="HB">hb pencil</option>
+                    <option value="2H">2h pencil</option>
+                    <option value="cpencil">color pencil</option>
+                    <option value="charcoal">charcoal</option>
+                    <option value="hatch_brush">hatch brush</option>
+                    <option value="marker">marker</option>
+                    <option value="marker2">marker 2</option>
+                  </select>
+                </label>
+                <label
+                  >hatch line width:
+                  <input
+                    type="number"
+                    x-model="hatchLineWidth"
+                    min="0.5"
+                    max="10"
+                    step="0.5"
+                    @change="updateChart()"
+                /></label>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-group-title">typography</div>
               <label
-                >hatch line width:
+                >label font size:
                 <input
                   type="number"
-                  x-model="hatchLineWidth"
-                  min="0.5"
-                  max="10"
-                  step="0.5"
+                  x-model="fontSize"
+                  min="8"
+                  max="64"
                   @change="updateChart()"
+              /></label>
+              <label
+                >title font size:
+                <input
+                  type="number"
+                  x-model="titleFontSize"
+                  min="12"
+                  max="72"
+                  @change="updateChart()"
+              /></label>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-group-title">canvas</div>
+              <label
+                >canvas width:
+                <input
+                  type="number"
+                  x-model="canvasWidth"
+                  @change="updateChart()"
+              /></label>
+              <label
+                >canvas height:
+                <input
+                  type="number"
+                  x-model="canvasHeight"
+                  @change="updateChart()"
+              /></label>
+              <label
+                >padding:
+                <input type="number" x-model="padding" @change="updateChart()"
               /></label>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Typography Section -->
-      <div class="collapsible-section">
-        <div class="collapsible-header" @click="toggleSection('typography')">
-          <span>typography</span>
-          <span class="arrow" :class="{ open: openSections.typography }"
-            >►</span
-          >
-        </div>
-        <div
-          x-show="!isMobile() ? openSections.typography : activeTab === 'typography'"
-          x-collapse.duration.280ms
-          class="collapsible"
-          :class="{ 'is-open': !isMobile() ? openSections.typography : activeTab === 'typography' }"
-        >
-          <div
-            class="collapsible-content collapsible-inner collapse-fix"
-            :class="{ 'mobile-active': activeTab === 'typography' }"
-          >
-            <label
-              >label font size:
-              <input
-                type="number"
-                x-model="fontSize"
-                min="8"
-                max="64"
-                @change="updateChart()"
-            /></label>
-            <label
-              >title font size:
-              <input
-                type="number"
-                x-model="titleFontSize"
-                min="12"
-                max="72"
-                @change="updateChart()"
-            /></label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Canvas Dimensions Section -->
-      <div class="collapsible-section">
-        <div class="collapsible-header" @click="toggleSection('dimensions')">
-          <span>canvas</span>
-          <span class="arrow" :class="{ open: openSections.dimensions }"
-            >►</span
-          >
-        </div>
-        <div
-          x-show="!isMobile() ? openSections.dimensions : activeTab === 'dimensions'"
-          x-collapse.duration.280ms
-          class="collapsible"
-          :class="{ 'is-open': !isMobile() ? openSections.dimensions : activeTab === 'dimensions' }"
-        >
-          <div
-            class="collapsible-content collapsible-inner collapse-fix"
-            :class="{ 'mobile-active': activeTab === 'dimensions' }"
-          >
-            <label
-              >canvas width:
-              <input
-                type="number"
-                x-model="canvasWidth"
-                @change="updateChart()"
-            /></label>
-            <label
-              >canvas height:
-              <input
-                type="number"
-                x-model="canvasHeight"
-                @change="updateChart()"
-            /></label>
-            <label
-              >padding:
-              <input type="number" x-model="padding" @change="updateChart()"
-            /></label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Data Input Section -->
+      <!-- Data Section -->
       <div class="collapsible-section">
         <div class="collapsible-header" @click="toggleSection('data')">
           <span>data</span>
@@ -1192,12 +1143,18 @@
             class="collapsible-content collapsible-inner collapse-fix"
             :class="{ 'mobile-active': activeTab === 'data' }"
           >
+            <p
+              class="validation-message"
+              x-show="!isValidData && dataValidationMessage"
+              x-text="dataValidationMessage"
+            ></p>
             <div x-show="chartType === 'histogram'">
               <p>
                 enter your data as a JSON array (e.g., [85, 92, 78, 105, 88]):
               </p>
               <textarea
                 x-model="dataInput"
+                @input="validateDataInput()"
                 class="data-input"
                 placeholder="Enter data as JSON array..."
               ></textarea>
@@ -1210,8 +1167,9 @@
               </p>
               <textarea
                 x-model="dataInput"
+                @input="validateDataInput()"
                 class="data-input"
-                placeholder="[{x: 1, y: 2}, {x: 3, y: 4}] or [[{x: 1, y: 2}], [{x: 3, y: 4}]]"
+                placeholder="[{\"x\": 1, \"y\": 2}, {\"x\": 3, \"y\": 4}] or [[{\"x\": 1, \"y\": 2}], [{\"x\": 3, \"y\": 4}]]"
               ></textarea>
             </div>
             <div x-show="chartType === 'boxplot'">
@@ -1222,6 +1180,7 @@
               </p>
               <textarea
                 x-model="dataInput"
+                @input="validateDataInput()"
                 class="data-input"
                 placeholder="[[1, 2, 3, 4, 5], [2, 3, 4, 5, 6], [3, 4, 5, 6, 7]]"
               ></textarea>
@@ -1229,11 +1188,11 @@
             <div x-show="chartType === 'line'">
               <h3>line plot data input</h3>
               <p>
-                enter Y values as an array or array of arrays. X values are
-                optional:
+                enter Y values as an array or array of arrays:
               </p>
               <textarea
                 x-model="dataInput"
+                @input="validateDataInput()"
                 class="data-input"
                 placeholder="[1, 2, 3, 4, 5] or [[1, 2, 3], [4, 5, 6]]"
               ></textarea>
@@ -1246,8 +1205,9 @@
               </p>
               <textarea
                 x-model="dataInput"
+                @input="validateDataInput()"
                 class="data-input"
-                placeholder="[10, 20, 30, 40] or [{label: 'A', value: 10}, {label: 'B', value: 20}]"
+                placeholder="[10, 20, 30, 40] or [{\"label\": \"A\", \"value\": 10}, {\"label\": \"B\", \"value\": 20}]"
               ></textarea>
             </div>
           </div>
@@ -1275,9 +1235,11 @@
         ></span>
         <br />
         <button @click="updateChart()" x-text="'redraw chart'"></button>
-        <span class="button-message" x-show="!isValidData"
-          >please enter valid JSON array</span
-        >
+        <span
+          class="button-message"
+          x-show="!isValidData"
+          x-text="dataValidationMessage || 'please enter valid data'"
+        ></span>
       </div>
 
       <div class="footer">
@@ -1289,6 +1251,7 @@
       </div>
     </div>
     <script src="C.js"></script>
+    <script src="data-validation.js"></script>
     <script>
       function chartData() {
         return {
@@ -1300,6 +1263,7 @@
             89, 94, 106, 82,
           ],
           isValidData: true,
+          dataValidationMessage: "",
           copyStatus: "",
           exportStatus: "",
           copyConfigStatus: "",
@@ -1352,12 +1316,9 @@
           hatchLineWidth: C.config.hatchLineWidth,
           // Collapsible sections state
           openSections: {
-            dimensions: false,
             chartOptions: false,
             style: false,
-            typography: false,
-            palette: false,
-            fill: false,
+            settings: false,
             data: false,
           },
           // Active tab for mobile
@@ -1371,6 +1332,9 @@
               }
 
               this.isValidData = !!event.data.payload?.ok;
+              this.dataValidationMessage = event.data.payload?.ok
+                ? ""
+                : event.data.payload?.error || this.dataValidationMessage;
               if (!event.data.payload?.ok && event.data.payload?.error) {
                 console.error(
                   "new renderer error:",
@@ -1383,6 +1347,8 @@
             if (this.stylePreset === "watercolor") {
               this.onStylePresetChange();
             }
+
+            this.validateDataInput();
           },
 
           getStyleRenderer(stylePreset) {
@@ -1507,60 +1473,10 @@
           },
 
           isValidRendererData(parsed) {
-            switch (this.chartType) {
-              case "histogram":
-                return (
-                  Array.isArray(parsed) &&
-                  parsed.every((value) => typeof value === "number")
-                );
-              case "scatter":
-                return (
-                  Array.isArray(parsed) &&
-                  ((parsed.length > 0 &&
-                    parsed[0] &&
-                    parsed[0].hasOwnProperty("x") &&
-                    parsed[0].hasOwnProperty("y")) ||
-                    (Array.isArray(parsed[0]) &&
-                      parsed[0].length > 0 &&
-                      parsed[0][0] &&
-                      parsed[0][0].hasOwnProperty("x")))
-                );
-              case "boxplot":
-                return (
-                  Array.isArray(parsed) &&
-                  parsed.length > 0 &&
-                  Array.isArray(parsed[0]) &&
-                  parsed.every(
-                    (arr) =>
-                      Array.isArray(arr) &&
-                      arr.every((value) => typeof value === "number")
-                  )
-                );
-              case "line":
-                return (
-                  Array.isArray(parsed) &&
-                  (parsed.every((value) => typeof value === "number") ||
-                    (Array.isArray(parsed[0]) &&
-                      parsed.every(
-                        (arr) =>
-                          Array.isArray(arr) &&
-                          arr.every((value) => typeof value === "number")
-                      )))
-                );
-              case "barplot":
-                return (
-                  Array.isArray(parsed) &&
-                  (parsed.every((value) => typeof value === "number") ||
-                    (parsed.length > 0 &&
-                      typeof parsed[0] === "object" &&
-                      parsed[0].hasOwnProperty("value") &&
-                      parsed.every(
-                        (value) => typeof value.value === "number"
-                      )))
-                );
-              default:
-                return false;
-            }
+            return window.p5DataValidation.validateParsedChartData(
+              this.chartType,
+              parsed
+            ).ok;
           },
 
           // Check if on mobile device
@@ -1618,6 +1534,16 @@
             const colorKey = "color" + index;
             this[colorKey] = value;
             this.handleColorInput();
+          },
+
+          validateDataInput() {
+            const result = window.p5DataValidation.validateChartData(
+              this.chartType,
+              this.dataInput
+            );
+            this.isValidData = result.ok;
+            this.dataValidationMessage = result.ok ? "" : result.error;
+            return result;
           },
 
           getScatterColorCount() {
@@ -2314,24 +2240,23 @@
           },
 
           renderChart() {
-            try {
-              const parsed = JSON.parse(this.dataInput);
+            const validation = this.validateDataInput();
+            if (!validation.ok) {
+              return;
+            }
 
-              if (this.usesV2Renderer()) {
-                if (!this.isValidRendererData(parsed)) {
-                  this.isValidData = false;
-                  return;
-                }
+            const parsed = validation.parsed;
 
-                this.isValidData = true;
-                this.setLegacyCanvasVisibility(false);
-                this.ensureV2RendererFrame();
-                this.postV2RendererState();
+            if (this.usesV2Renderer()) {
+              if (!this.isValidRendererData(parsed)) {
+                this.isValidData = false;
                 return;
               }
-            } catch (e) {
-              this.isValidData = false;
-              console.error("Chart rendering error:", e);
+
+              this.isValidData = true;
+              this.setLegacyCanvasVisibility(false);
+              this.ensureV2RendererFrame();
+              this.postV2RendererState();
               return;
             }
 
@@ -2347,109 +2272,31 @@
             setupRest();
 
             try {
-              const parsed = JSON.parse(this.dataInput);
-
               switch (this.chartType) {
                 case "histogram":
-                  if (
-                    Array.isArray(parsed) &&
-                    parsed.every((x) => typeof x === "number")
-                  ) {
-                    drawHistogram(parsed, Number(this.numBins));
-                  } else {
-                    this.isValidData = false;
-                    pop();
-                    return;
-                  }
+                  drawHistogram(parsed, Number(this.numBins));
                   break;
 
                 case "scatter":
-                  // Validate scatter plot data
-                  const isValidScatter =
-                    Array.isArray(parsed) &&
-                    // Single array of points
-                    ((parsed.length > 0 &&
-                      parsed[0].hasOwnProperty("x") &&
-                      parsed[0].hasOwnProperty("y")) ||
-                      // Array of arrays of points
-                      (Array.isArray(parsed[0]) &&
-                        parsed[0].length > 0 &&
-                        parsed[0][0].hasOwnProperty("x")));
-
-                  if (isValidScatter) {
-                    drawGrid(Array.isArray(parsed[0]) ? parsed[0] : parsed);
-                    drawScatterPlot(parsed);
-                  } else {
-                    this.isValidData = false;
-                    pop();
-                    return;
-                  }
+                  drawGrid(Array.isArray(parsed[0]) ? parsed[0] : parsed);
+                  drawScatterPlot(parsed);
                   break;
 
                 case "boxplot":
-                  // Validate box plot data (array of arrays)
-                  const isValidBoxplot =
-                    Array.isArray(parsed) &&
-                    parsed.length > 0 &&
-                    Array.isArray(parsed[0]) &&
-                    parsed.every(
-                      (arr) =>
-                        Array.isArray(arr) &&
-                        arr.every((x) => typeof x === "number")
-                    );
-
-                  if (isValidBoxplot) {
-                    drawBoxPlot(parsed);
-                  } else {
-                    this.isValidData = false;
-                    pop();
-                    return;
-                  }
+                  drawBoxPlot(parsed);
                   break;
 
                 case "line":
-                  // Validate line plot data (array or array of arrays)
-                  const isValidLine =
-                    Array.isArray(parsed) &&
-                    (parsed.every((x) => typeof x === "number") ||
-                      (Array.isArray(parsed[0]) &&
-                        parsed.every(
-                          (arr) =>
-                            Array.isArray(arr) &&
-                            arr.every((x) => typeof x === "number")
-                        )));
-
-                  if (isValidLine) {
-                    drawGrid(
-                      Array.isArray(parsed[0])
-                        ? parsed[0].map((val, idx) => ({ x: idx + 1, y: val }))
-                        : parsed.map((val, idx) => ({ x: idx + 1, y: val }))
-                    );
-                    drawLinePlot(parsed, null, this.showDots);
-                  } else {
-                    this.isValidData = false;
-                    pop();
-                    return;
-                  }
+                  drawGrid(
+                    Array.isArray(parsed[0])
+                      ? parsed[0].map((val, idx) => ({ x: idx + 1, y: val }))
+                      : parsed.map((val, idx) => ({ x: idx + 1, y: val }))
+                  );
+                  drawLinePlot(parsed, null, this.showDots);
                   break;
 
                 case "barplot":
-                  // Validate bar plot data (array of numbers or array of {label, value} objects)
-                  const isValidBarplot =
-                    Array.isArray(parsed) &&
-                    (parsed.every((x) => typeof x === "number") ||
-                      (parsed.length > 0 &&
-                        typeof parsed[0] === "object" &&
-                        parsed[0].hasOwnProperty("value") &&
-                        parsed.every((x) => typeof x.value === "number")));
-
-                  if (isValidBarplot) {
-                    drawBarPlot(parsed);
-                  } else {
-                    this.isValidData = false;
-                    pop();
-                    return;
-                  }
+                  drawBarPlot(parsed);
                   break;
               }
 
