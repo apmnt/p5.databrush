@@ -211,6 +211,18 @@
         animation: fadeIn 0.6s ease-out;
       }
 
+      #chartContainer iframe {
+        max-width: 100%;
+        max-height: 95vh;
+        padding: 0;
+        width: auto !important;
+        height: auto !important;
+        border: 0;
+        display: block;
+        background: transparent;
+        animation: fadeIn 0.6s ease-out;
+      }
+
       /* Responsive layout for smaller screens */
       @media (max-width: 800px) {
         /* Disable collapse animation on mobile */
@@ -249,6 +261,10 @@
         }
 
         #chartContainer canvas {
+          max-height: 100vh;
+        }
+
+        #chartContainer iframe {
           max-height: 100vh;
         }
 
@@ -1294,6 +1310,7 @@
           palettePresetNames: Object.keys(C.palettePresets),
           stylePresetNames: Object.keys(C.stylePresets),
           stylePreset: "watercolor",
+          rendererMode: C.stylePresets.watercolor?.renderer || "v1",
           // Load all config values from C.config
           canvasWidth: C.config.canvasWidth,
           canvasHeight: C.config.canvasHeight,
@@ -1350,9 +1367,201 @@
 
           // Initialize component
           init() {
+            window.addEventListener("message", (event) => {
+              if (event.data?.type !== "p5.databrush.v2.result") {
+                return;
+              }
+
+              this.isValidData = !!event.data.payload?.ok;
+              if (!event.data.payload?.ok && event.data.payload?.error) {
+                console.error(
+                  "new renderer error:",
+                  event.data.payload.error
+                );
+              }
+            });
+
             // Apply watercolor preset on load
             if (this.stylePreset === "watercolor") {
               this.onStylePresetChange();
+            }
+          },
+
+          getStyleRenderer(stylePreset) {
+            return C.stylePresets[stylePreset]?.renderer || "v1";
+          },
+
+          usesV2Renderer() {
+            return this.rendererMode === "v2";
+          },
+
+          getRenderableState() {
+            return {
+              chartType: this.chartType,
+              dataInput: this.dataInput,
+              numBins: Number(this.numBins),
+              showDots: this.showDots,
+              canvasWidth: Number(this.canvasWidth),
+              canvasHeight: Number(this.canvasHeight),
+              padding: Number(this.padding),
+              backgroundColor: this.backgroundColor,
+              lineWidth: Number(this.lineWidth),
+              lineColor: this.lineColor,
+              fontSize: Number(this.fontSize),
+              titleFontSize: Number(this.titleFontSize),
+              axisLabelColor: this.axisLabelColor,
+              bleedMin: Number(this.bleedMin),
+              bleedMax: Number(this.bleedMax),
+              brushType: this.brushType,
+              gridBrushType: this.gridBrushType,
+              gridLineColor: this.gridLineColor,
+              gridLineWidth: Number(this.gridLineWidth),
+              palettePreset: this.palettePreset,
+              randomColors: this.randomColors,
+              shuffleColors: this.shuffleColors,
+              shuffledPalette: this.shuffledPalette,
+              color1: this.color1,
+              color2: this.color2,
+              color3: this.color3,
+              color4: this.color4,
+              color5: this.color5,
+              color6: this.color6,
+              fillType: this.fillType,
+              useHatching: this.useHatching,
+              hatchDistance: Number(this.hatchDistance),
+              hatchAngle: Number(this.hatchAngle),
+              hatchRand: Number(this.hatchRand),
+              hatchContinuous: this.hatchContinuous,
+              hatchGradient: Number(this.hatchGradient),
+              hatchBrushType: this.hatchBrushType,
+              hatchLineWidth: Number(this.hatchLineWidth),
+            };
+          },
+
+          getActiveCanvas() {
+            if (this.usesV2Renderer()) {
+              const rendererFrame = document.getElementById("rendererV2Frame");
+              return (
+                rendererFrame?.contentDocument?.getElementById("mainCanvas") ||
+                rendererFrame?.contentDocument?.querySelector("canvas")
+              );
+            }
+
+            return document.getElementById("mainCanvas");
+          },
+
+          setLegacyCanvasVisibility(isVisible) {
+            const canvas = document.getElementById("mainCanvas");
+            if (canvas) {
+              canvas.style.display = isVisible ? "block" : "none";
+            }
+          },
+
+          teardownV2Renderer() {
+            const rendererFrame = document.getElementById("rendererV2Frame");
+            if (rendererFrame) {
+              rendererFrame.remove();
+            }
+          },
+
+          postV2RendererState() {
+            const rendererFrame = document.getElementById("rendererV2Frame");
+            if (!rendererFrame?.contentWindow) {
+              return;
+            }
+
+            const payload = JSON.parse(
+              JSON.stringify(this.getRenderableState())
+            );
+
+            rendererFrame.contentWindow.postMessage(
+              {
+                type: "p5.databrush.v2.render",
+                payload,
+              },
+              "*"
+            );
+          },
+
+          ensureV2RendererFrame() {
+            const chartContainer = document.getElementById("chartContainer");
+            let rendererFrame = document.getElementById("rendererV2Frame");
+
+            if (!chartContainer) {
+              return null;
+            }
+
+            if (!rendererFrame) {
+              rendererFrame = document.createElement("iframe");
+              rendererFrame.id = "rendererV2Frame";
+              rendererFrame.title = "p5.databrush new renderer";
+              rendererFrame.src = "renderer-v2.html";
+              rendererFrame.scrolling = "no";
+              rendererFrame.addEventListener("load", () => {
+                this.postV2RendererState();
+              });
+              chartContainer.appendChild(rendererFrame);
+            }
+
+            rendererFrame.width = String(Number(this.canvasWidth));
+            rendererFrame.height = String(Number(this.canvasHeight));
+            return rendererFrame;
+          },
+
+          isValidRendererData(parsed) {
+            switch (this.chartType) {
+              case "histogram":
+                return (
+                  Array.isArray(parsed) &&
+                  parsed.every((value) => typeof value === "number")
+                );
+              case "scatter":
+                return (
+                  Array.isArray(parsed) &&
+                  ((parsed.length > 0 &&
+                    parsed[0] &&
+                    parsed[0].hasOwnProperty("x") &&
+                    parsed[0].hasOwnProperty("y")) ||
+                    (Array.isArray(parsed[0]) &&
+                      parsed[0].length > 0 &&
+                      parsed[0][0] &&
+                      parsed[0][0].hasOwnProperty("x")))
+                );
+              case "boxplot":
+                return (
+                  Array.isArray(parsed) &&
+                  parsed.length > 0 &&
+                  Array.isArray(parsed[0]) &&
+                  parsed.every(
+                    (arr) =>
+                      Array.isArray(arr) &&
+                      arr.every((value) => typeof value === "number")
+                  )
+                );
+              case "line":
+                return (
+                  Array.isArray(parsed) &&
+                  (parsed.every((value) => typeof value === "number") ||
+                    (Array.isArray(parsed[0]) &&
+                      parsed.every(
+                        (arr) =>
+                          Array.isArray(arr) &&
+                          arr.every((value) => typeof value === "number")
+                      )))
+                );
+              case "barplot":
+                return (
+                  Array.isArray(parsed) &&
+                  (parsed.every((value) => typeof value === "number") ||
+                    (parsed.length > 0 &&
+                      typeof parsed[0] === "object" &&
+                      parsed[0].hasOwnProperty("value") &&
+                      parsed.every(
+                        (value) => typeof value.value === "number"
+                      )))
+                );
+              default:
+                return false;
             }
           },
 
@@ -1476,6 +1685,7 @@
               C.stylePresets[this.stylePreset]
             ) {
               const style = C.stylePresets[this.stylePreset];
+              this.rendererMode = this.getStyleRenderer(this.stylePreset);
 
               // Apply all style settings
               this.backgroundColor = style.backgroundColor;
@@ -2106,10 +2316,35 @@
           },
 
           renderChart() {
+            try {
+              const parsed = JSON.parse(this.dataInput);
+
+              if (this.usesV2Renderer()) {
+                if (!this.isValidRendererData(parsed)) {
+                  this.isValidData = false;
+                  return;
+                }
+
+                this.isValidData = true;
+                this.setLegacyCanvasVisibility(false);
+                this.ensureV2RendererFrame();
+                this.postV2RendererState();
+                return;
+              }
+            } catch (e) {
+              this.isValidData = false;
+              console.error("Chart rendering error:", e);
+              return;
+            }
+
+            this.teardownV2Renderer();
+            this.setLegacyCanvasVisibility(true);
+
             if (typeof push === "undefined" || !isSetupComplete) {
               setTimeout(() => this.renderChart(), 50);
               return;
             }
+
             push();
             setupRest();
 
@@ -2248,39 +2483,9 @@
             if (sizeChanged) {
               this.previousCanvasWidth = newW;
               this.previousCanvasHeight = newH;
-
-              C.setConfig({
-                canvasWidth: newW,
-                canvasHeight: newH,
-                padding: newPad,
-                previousCanvasWidth: this.previousCanvasWidth,
-                previousCanvasHeight: this.previousCanvasHeight,
-                backgroundColor: this.backgroundColor,
-                lineWidth: Number(this.lineWidth),
-                lineColor: this.lineColor,
-                fontSize: Number(this.fontSize),
-                titleFontSize: Number(this.titleFontSize),
-                axisLabelColor: this.axisLabelColor,
-                bleedMin: Number(this.bleedMin),
-                bleedMax: Number(this.bleedMax),
-                brushType: this.brushType,
-                gridBrushType: this.gridBrushType,
-                gridLineColor: this.gridLineColor,
-                gridLineWidth: Number(this.gridLineWidth),
-                useHatching: this.useHatching,
-                hatchDistance: Number(this.hatchDistance),
-                hatchAngle: Number(this.hatchAngle),
-                hatchRand: Number(this.hatchRand),
-                hatchContinuous: this.hatchContinuous,
-                hatchGradient: Number(this.hatchGradient),
-                hatchBrushType: this.hatchBrushType,
-                hatchLineWidth: Number(this.hatchLineWidth),
-              });
-
-              return;
             }
 
-            C.setConfig({
+            const nextConfig = {
               canvasWidth: newW,
               canvasHeight: newH,
               padding: newPad,
@@ -2327,14 +2532,26 @@
               hatchGradient: Number(this.hatchGradient),
               hatchBrushType: this.hatchBrushType,
               hatchLineWidth: Number(this.hatchLineWidth),
-            });
+            };
+
+            if (this.usesV2Renderer()) {
+              this.renderChart();
+              return;
+            }
+
+            C.setConfig(nextConfig);
+
+            if (sizeChanged) {
+              return;
+            }
+
             this.renderChart();
           },
 
           async saveChart(forceDownload = false) {
             try {
               this.copyStatus = forceDownload ? "downloading..." : "copying...";
-              const canvas = document.getElementById("mainCanvas");
+              const canvas = this.getActiveCanvas();
               if (!canvas) {
                 this.copyStatus = "canvas not found";
                 setTimeout(() => (this.copyStatus = ""), 2000);
@@ -2416,6 +2633,7 @@
 
                 // Style preset
                 stylePreset: this.stylePreset,
+                rendererMode: this.rendererMode,
 
                 // Style settings
                 backgroundColor: this.backgroundColor,
@@ -2497,6 +2715,7 @@
 
                 // Style preset
                 stylePreset: this.stylePreset,
+                rendererMode: this.rendererMode,
 
                 // Style settings
                 backgroundColor: this.backgroundColor,
@@ -2600,6 +2819,11 @@
 
               if (loadedConfig.stylePreset !== undefined)
                 this.stylePreset = loadedConfig.stylePreset;
+              if (loadedConfig.rendererMode !== undefined) {
+                this.rendererMode = loadedConfig.rendererMode;
+              } else if (loadedConfig.stylePreset !== undefined) {
+                this.rendererMode = this.getStyleRenderer(this.stylePreset);
+              }
 
               if (loadedConfig.backgroundColor !== undefined)
                 this.backgroundColor = loadedConfig.backgroundColor;
@@ -2700,6 +2924,11 @@
                 this.canvasHeight = loadedConfig.canvasHeight;
               if (loadedConfig.stylePreset !== undefined)
                 this.stylePreset = loadedConfig.stylePreset;
+              if (loadedConfig.rendererMode !== undefined) {
+                this.rendererMode = loadedConfig.rendererMode;
+              } else if (loadedConfig.stylePreset !== undefined) {
+                this.rendererMode = this.getStyleRenderer(this.stylePreset);
+              }
               if (loadedConfig.padding !== undefined)
                 this.padding = loadedConfig.padding;
 

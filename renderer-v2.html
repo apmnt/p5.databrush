@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>p5.databrush renderer v2</title>
+    <script src="p5.v2.js"></script>
+    <script src="spectral.min.js"></script>
+    <script src="p5.brush.v2.js"></script>
+    <script src="C2.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        overflow: hidden;
+      }
+
+      #chartContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      #chartContainer canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chartContainer"></div>
+    <script>
+      let isSetupComplete = false;
+      let pendingRenderState = null;
+
+      function postRendererEvent(type, payload = {}) {
+        if (window.parent !== window) {
+          window.parent.postMessage({ type, payload }, "*");
+        }
+      }
+
+      function renderPendingState() {
+        if (!isSetupComplete || !pendingRenderState) {
+          return;
+        }
+
+        const result = renderChartWithC2(pendingRenderState);
+        postRendererEvent("p5.databrush.v2.result", result);
+      }
+
+      window.addEventListener("message", (event) => {
+        if (event.data?.type !== "p5.databrush.v2.render") {
+          return;
+        }
+
+        pendingRenderState = event.data.payload;
+        renderPendingState();
+      });
+
+      async function setup() {
+        await commonSetup();
+        isSetupComplete = true;
+        postRendererEvent("p5.databrush.v2.ready");
+        renderPendingState();
+      }
+
+      function draw() {}
+    </script>
+  </body>
+</html>

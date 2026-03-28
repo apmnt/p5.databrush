@@ -1,5 +1,6 @@
 let fontBold;
 let font;
+let fontsReadyPromise;
 let initialSize = 1000;
 const config = {
   canvasWidth: initialSize,
@@ -220,112 +221,34 @@ const stylePresets = {
     palettePreset: "matplotlib_dark",
     randomColors: false,
   },
-  watercolor_v2: {
-    backgroundColor: "#fffceb",
-    lineWidth: 3,
-    lineColor: "#000000ff",
-    fontSize: 20,
-    titleFontSize: 36,
-    axisLabelColor: "#4b4b4bff",
-    brushType: "pen",
-    gridBrushType: "pen",
-    gridLineColor: "#000000ff",
-    gridLineWidth: 3,
-    fillType: "watercolor",
-    useHatching: false,
-    bleedMin: 0.01,
-    bleedMax: 0.03,
-    palettePreset: "matplotlib",
-    randomColors: true,
-    renderer: "v2",
-  },
-  marker_v2: {
-    backgroundColor: "#faf0e6",
-    lineWidth: 5,
-    lineColor: "#1a1a1aff",
-    fontSize: 22,
-    titleFontSize: 40,
-    axisLabelColor: "#2b2b2bff",
-    brushType: "marker",
-    gridBrushType: "marker",
-    gridLineColor: "#1a1a1aff",
-    gridLineWidth: 4,
-    fillType: "watercolor",
-    useHatching: false,
-    bleedMin: 0.02,
-    bleedMax: 0.05,
-    palettePreset: "viridis",
-    randomColors: true,
-    renderer: "v2",
-  },
-  charcoal_hatch_v2: {
-    backgroundColor: "#f5f5dc",
-    lineWidth: 3,
-    lineColor: "#000000ff",
-    fontSize: 20,
-    titleFontSize: 36,
-    axisLabelColor: "#4b4b4bff",
-    brushType: "charcoal",
-    gridBrushType: "charcoal",
-    gridLineColor: "#000000ff",
-    gridLineWidth: 2,
-    fillType: "hatch",
-    useHatching: true,
-    hatchDistance: 8,
-    hatchAngle: 45,
-    hatchRand: 0.15,
-    hatchContinuous: false,
-    hatchGradient: 0,
-    hatchBrushType: "cpencil",
-    hatchLineWidth: 4,
-    palettePreset: "bone",
-    randomColors: false,
-    renderer: "v2",
-  },
-  rotring_minimal_v2: {
-    backgroundColor: "#ffffff",
-    lineWidth: 1,
-    lineColor: "#000000ff",
-    fontSize: 16,
-    titleFontSize: 28,
-    axisLabelColor: "#000000ff",
-    brushType: "rotring",
-    gridBrushType: "rotring",
-    gridLineColor: "#000000ff",
-    gridLineWidth: 1,
-    fillType: "hatch",
-    useHatching: true,
-    hatchDistance: 5,
-    hatchAngle: 0,
-    hatchRand: 0.05,
-    hatchContinuous: true,
-    hatchGradient: 0,
-    hatchBrushType: "rotring",
-    hatchLineWidth: 1,
-    palettePreset: "matplotlib_dark",
-    randomColors: false,
-    renderer: "v2",
-  },
 };
 
-// Check for pending config from page reload
-if (sessionStorage.getItem("pendingCanvasConfig")) {
-  try {
-    const pendingConfig = JSON.parse(
-      sessionStorage.getItem("pendingCanvasConfig")
-    );
-    Object.assign(config, pendingConfig);
-    config.plotWidth = config.canvasWidth - 2 * config.padding;
-    config.plotHeight = config.canvasHeight - 2 * config.padding;
-    sessionStorage.removeItem("pendingCanvasConfig");
-  } catch (e) {
-    console.error("Failed to load pending config:", e);
+async function ensureFontsLoaded() {
+  if (!fontsReadyPromise) {
+    fontsReadyPromise = loadFont("Helvetica-bold.ttf").then((loadedFont) => {
+      fontBold = loadedFont;
+      font = loadedFont;
+      return loadedFont;
+    });
   }
+
+  return fontsReadyPromise;
 }
 
-function preload() {
-  fontBold = loadFont("/Helvetica-bold.ttf");
-  font = loadFont("/Helvetica-bold.ttf");
+function installBrushCompatibility() {
+  if (
+    typeof brush.setHatch !== "function" &&
+    typeof brush.hatchStyle === "function"
+  ) {
+    brush.setHatch = (...args) => brush.hatchStyle(...args);
+  }
+
+  if (
+    typeof brush.bleed !== "function" &&
+    typeof brush.fillBleed === "function"
+  ) {
+    brush.bleed = (...args) => brush.fillBleed(...args);
+  }
 }
 
 const C = {
@@ -343,9 +266,11 @@ const C = {
     (this.width = w), (this.height = h), (this.pD = p), (this.css = css);
   },
   setConfig(newConfig) {
-    let dimensionsChanged =
-      newConfig.canvasWidth !== config.canvasWidth ||
-      newConfig.canvasHeight !== config.canvasHeight;
+    const nextCanvasWidth = newConfig.canvasWidth ?? config.canvasWidth;
+    const nextCanvasHeight = newConfig.canvasHeight ?? config.canvasHeight;
+    const dimensionsChanged =
+      nextCanvasWidth !== config.canvasWidth ||
+      nextCanvasHeight !== config.canvasHeight;
     Object.assign(config, newConfig);
 
     // Sync fillType with useHatching if provided
@@ -387,8 +312,8 @@ const C = {
 
     config.plotWidth = config.canvasWidth - 2 * config.padding;
     config.plotHeight = config.canvasHeight - 2 * config.padding;
-    if (dimensionsChanged) {
-      reloadWithNewDimensions(config.canvasWidth, config.canvasHeight);
+    if (dimensionsChanged && this.main) {
+      this.createCanvas();
     }
   },
   createCanvas() {
@@ -400,13 +325,23 @@ const C = {
         return;
       }
 
+      const chartContainer = document.getElementById("chartContainer");
+      if (this.main) {
+        this.main.remove();
+        this.main = null;
+      }
+      if (chartContainer) {
+        chartContainer.innerHTML = "";
+      }
+
       this.main = createCanvas(config.canvasWidth, config.canvasHeight, WEBGL);
       pixelDensity(this.pD);
       this.main.id(this.css);
-      const chartContainer = document.getElementById("chartContainer");
       if (chartContainer) {
         this.main.parent("chartContainer");
       }
+      brush.load();
+      installBrushCompatibility();
       console.log("WebGL canvas created successfully");
     } catch (e) {
       console.error("Failed to create WebGL canvas:", e);
@@ -419,19 +354,8 @@ C.setSize(config.canvasWidth, config.canvasHeight, 1, "mainCanvas");
 
 function windowResized() {}
 
-function reloadWithNewDimensions(newWidth, newHeight) {
-  sessionStorage.setItem(
-    "pendingCanvasConfig",
-    JSON.stringify({
-      canvasWidth: newWidth,
-      canvasHeight: newHeight,
-      padding: config.padding,
-    })
-  );
-  location.reload();
-}
-
-function commonSetup() {
+async function commonSetup() {
+  await ensureFontsLoaded();
   C.createCanvas();
 }
 
@@ -1381,3 +1305,171 @@ function getNiceBounds(values) {
 
   return { niceMinX, niceMaxX, niceTickX, niceMinY, niceMaxY, niceTickY };
 }
+
+function renderChartWithC2(state) {
+  C.setConfig({
+    canvasWidth: Number(state.canvasWidth),
+    canvasHeight: Number(state.canvasHeight),
+    padding: Number(state.padding),
+    previousCanvasWidth: Number(state.canvasWidth),
+    previousCanvasHeight: Number(state.canvasHeight),
+    backgroundColor: state.backgroundColor,
+    lineWidth: Number(state.lineWidth),
+    lineColor: state.lineColor,
+    fontSize: Number(state.fontSize),
+    titleFontSize: Number(state.titleFontSize),
+    axisLabelColor: state.axisLabelColor,
+    bleedMin: Number(state.bleedMin),
+    bleedMax: Number(state.bleedMax),
+    brushType: state.brushType,
+    gridBrushType: state.gridBrushType,
+    gridLineColor: state.gridLineColor,
+    gridLineWidth: Number(state.gridLineWidth),
+    palettePreset: state.palettePreset,
+    randomColors: state.randomColors,
+    shuffleColors: state.shuffleColors,
+    shuffledPalette: state.shuffledPalette || [],
+    color1: state.color1,
+    color2: state.color2,
+    color3: state.color3,
+    color4: state.color4,
+    color5: state.color5,
+    color6: state.color6,
+    fillType: state.fillType,
+    useHatching: state.useHatching,
+    hatchDistance: Number(state.hatchDistance),
+    hatchAngle: Number(state.hatchAngle),
+    hatchRand: Number(state.hatchRand),
+    hatchContinuous: state.hatchContinuous,
+    hatchGradient: Number(state.hatchGradient),
+    hatchBrushType: state.hatchBrushType,
+    hatchLineWidth: Number(state.hatchLineWidth),
+  });
+
+  let parsed;
+  try {
+    parsed = JSON.parse(state.dataInput);
+  } catch (error) {
+    return {
+      ok: false,
+      error: "invalid json",
+    };
+  }
+
+  push();
+  setupRest();
+
+  try {
+    switch (state.chartType) {
+      case "histogram":
+        if (
+          Array.isArray(parsed) &&
+          parsed.every((value) => typeof value === "number")
+        ) {
+          drawHistogram(parsed, Number(state.numBins));
+        } else {
+          pop();
+          return { ok: false, error: "invalid histogram data" };
+        }
+        break;
+
+      case "scatter": {
+        const isValidScatter =
+          Array.isArray(parsed) &&
+          ((parsed.length > 0 &&
+            parsed[0].hasOwnProperty("x") &&
+            parsed[0].hasOwnProperty("y")) ||
+            (Array.isArray(parsed[0]) &&
+              parsed[0].length > 0 &&
+              parsed[0][0].hasOwnProperty("x")));
+
+        if (isValidScatter) {
+          drawGrid(Array.isArray(parsed[0]) ? parsed[0] : parsed);
+          drawScatterPlot(parsed);
+        } else {
+          pop();
+          return { ok: false, error: "invalid scatter data" };
+        }
+        break;
+      }
+
+      case "boxplot":
+        if (
+          Array.isArray(parsed) &&
+          parsed.length > 0 &&
+          Array.isArray(parsed[0]) &&
+          parsed.every(
+            (arr) =>
+              Array.isArray(arr) &&
+              arr.every((value) => typeof value === "number")
+          )
+        ) {
+          drawBoxPlot(parsed);
+        } else {
+          pop();
+          return { ok: false, error: "invalid boxplot data" };
+        }
+        break;
+
+      case "line":
+        if (
+          Array.isArray(parsed) &&
+          (parsed.every((value) => typeof value === "number") ||
+            (Array.isArray(parsed[0]) &&
+              parsed.every(
+                (arr) =>
+                  Array.isArray(arr) &&
+                  arr.every((value) => typeof value === "number")
+              )))
+        ) {
+          drawGrid(
+            Array.isArray(parsed[0])
+              ? parsed[0].map((value, index) => ({ x: index + 1, y: value }))
+              : parsed.map((value, index) => ({ x: index + 1, y: value }))
+          );
+          drawLinePlot(parsed, null, state.showDots);
+        } else {
+          pop();
+          return { ok: false, error: "invalid line data" };
+        }
+        break;
+
+      case "barplot":
+        if (
+          Array.isArray(parsed) &&
+          (parsed.every((value) => typeof value === "number") ||
+            (parsed.length > 0 &&
+              typeof parsed[0] === "object" &&
+              parsed[0].hasOwnProperty("value") &&
+              parsed.every((value) => typeof value.value === "number")))
+        ) {
+          drawBarPlot(parsed);
+        } else {
+          pop();
+          return { ok: false, error: "invalid barplot data" };
+        }
+        break;
+
+      default:
+        pop();
+        return { ok: false, error: `unknown chart type: ${state.chartType}` };
+    }
+  } catch (error) {
+    console.error("C2 render error:", error);
+    pop();
+    return {
+      ok: false,
+      error: error.message,
+    };
+  }
+
+  pop();
+  return {
+    ok: true,
+  };
+}
+
+window.C2 = C;
+window.ensureFontsLoaded = ensureFontsLoaded;
+window.commonSetup = commonSetup;
+window.renderChartWithC2 = renderChartWithC2;
